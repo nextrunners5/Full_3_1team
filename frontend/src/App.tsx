@@ -1,12 +1,12 @@
 import './App.css'
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
-import MainPage from './pages/MainPage';
-import TestPage from './pages/TestPage';
-import Login from './pages/Login';
-import ProductCreate from './pages/ProductCreate';
-import Cart from './pages/Cart';
-import Order from './pages/Order';
-import Payment from './pages/Payment';
+import MainPage from './pages/home/MainPage';
+import TestPage from './pages/home/TestPage';
+import Login from './pages/login/Login';
+import ProductCreate from './pages/product/ProductCreate';
+import Cart from './pages/cart/Cart';
+import Order from './pages/order/Order';
+import Payment from './pages/payments/Payments';
 
 function App() {
 
