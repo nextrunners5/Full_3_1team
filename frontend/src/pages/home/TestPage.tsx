@@ -1,5 +1,5 @@
 import { Link} from "react-router-dom";
-import "./css/TestPage.css"
+import "./TestPage.css"
 
 const TestPage: React.FC = () => {
   return (
@@ -21,8 +21,12 @@ const TestPage: React.FC = () => {
       <Link to={'/payment'}>결제 페이지</Link>
       </button>
       <button>
-      <Link to={'/product'}>상품 페이지</Link>
+      <Link to={'/ProductCreate'}>상품 등록 페이지</Link>
       </button>
+      <button>
+      <Link to={'/ProductDetail'}>상품 상세 페이지</Link>
+      </button>
+      
     </div>
 
   )
