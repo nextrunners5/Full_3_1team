@@ -113,7 +113,7 @@ const ProductCreate: React.FC = () => {
           <h2>새 상품 등록</h2>
           <button
             className="back-btn"
-            onClick={() => navigate("/admin/products")}
+            onClick={() => navigate("/")}
           >
             ← 돌아가기
           </button>
@@ -123,7 +123,7 @@ const ProductCreate: React.FC = () => {
           <label>상품코드</label>
           <input
             type="text"
-            name="code"
+            name="product_code"
             value={product.product_code}
             onChange={handleChange}
             required
@@ -133,7 +133,7 @@ const ProductCreate: React.FC = () => {
           <label>상품명</label>
           <input
             type="text"
-            name="name"
+            name="product_name"
             value={product.product_name}
             onChange={handleChange}
             required
@@ -142,7 +142,7 @@ const ProductCreate: React.FC = () => {
         <div className="form-group">
           <label>카테고리</label>
           <select
-            name="category"
+            name="category_id"
             value={product.category_id}
             onChange={handleChange}
             required
@@ -161,7 +161,7 @@ const ProductCreate: React.FC = () => {
               <label>상품 원가</label>
               <input
                 type="text"
-                name="originPrice"
+                name="origin_price"
                 placeholder="₩"
                 value={product.origin_price ? `₩${product.origin_price}` : ""}
                 onChange={handleChange}
@@ -172,7 +172,7 @@ const ProductCreate: React.FC = () => {
               <label>할인 가격</label>
               <input
                 type="text"
-                name="discountPrice"
+                name="discount_price"
                 placeholder="₩"
                 value={
                   product.discount_price ? `₩${product.discount_price}` : ""
@@ -185,7 +185,7 @@ const ProductCreate: React.FC = () => {
               <label>상품 판매가</label>
               <input
                 type="text"
-                name="finalPrice"
+                name="final_price"
                 placeholder="₩"
                 value={product.final_price ? `₩${product.final_price}` : ""}
                 readOnly
@@ -199,7 +199,7 @@ const ProductCreate: React.FC = () => {
               <label>재고 수량</label>
               <input
                 type="text"
-                name="stockQuantity"
+                name="stock_quantity"
                 placeholder="1 개"
                 value={product.stock_quantity}
                 onChange={handleChange}
@@ -232,7 +232,7 @@ const ProductCreate: React.FC = () => {
               <label key={status}>
                 <input
                   type="radio"
-                  name="status"
+                  name="product_status"
                   value={status}
                   checked={product.product_status === status}
                   onChange={handleChange}
@@ -311,7 +311,7 @@ const ProductCreate: React.FC = () => {
           <button
             type="button"
             className="cancel-btn"
-            onClick={() => navigate("/admin/products")}
+            onClick={() => navigate("/")}
           >
             취소
           </button>
