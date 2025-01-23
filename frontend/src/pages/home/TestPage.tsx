@@ -1,5 +1,5 @@
 import { Link} from "react-router-dom";
-import "./css/TestPage.css"
+import "../home/TestPage.css"
 
 const TestPage: React.FC = () => {
   return (

@@ -7,6 +7,7 @@ import ProductCreate from "../pages/product/ProductCreate";
 import Cart from "../pages/cart/Cart";
 import Order from "../pages/order/Order";
 import Payment from "../pages/payments/Payments";
+import FindAccount from '../pages/login/FindAccount';
 
 function App() {
   return (
@@ -19,6 +20,7 @@ function App() {
         <Route path="/order" element={<Order />} />
         <Route path="/payment" element={<Payment />} />
         <Route path="/product" element={<ProductCreate />} />
+        <Route path="/find-account" element={<FindAccount />} />
       </Routes>
     </Router>
   );
