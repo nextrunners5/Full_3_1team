@@ -12,12 +12,12 @@ const options: swaggerJsdoc.Options = {
     },
     servers: [
       {
-        url: 'http://localhost:5000/api',
+        url: 'http://localhost:3000',  // ✅ 백엔드 포트와 일치하도록 변경!
         description: '로컬 개발 서버',
       },
     ],
   },
-  apis: ['./routes/*.ts', './feature/**/controller/*.ts'], // Swagger가 API 정보를 가져올 경로
+  apis: ['./routes/*.ts', './feature/**/controller/*.ts'], // ✅ API 문서 경로 확인
 };
 
 const swaggerSpec = swaggerJsdoc(options);
