@@ -1,28 +1,39 @@
-import React from 'react';
+import React from "react";
 import "../../shared/style/FailModal.css";
 
-interface LoginModalProps {
-  error: string | null;
-  onClose: () => void;
+interface FailModalProps {
+  title?: string; // 모달 제목 (선택적)
+  message: string; // 모달에 표시될 메시지
+  icon?: string; // 아이콘 이미지 경로 (선택적)
+  onClose: () => void; // 모달 닫기 핸들러
 }
 
-const LoginModal: React.FC<LoginModalProps> = ({ error, onClose }) => {
+const FailModal: React.FC<FailModalProps> = ({
+  title = "실패", // 기본 제목
+  message,
+  icon = "src/assets/Fail.png", // 기본 아이콘
+  onClose,
+}) => {
   return (
     <div className="l_modal_overlay">
       <div className="l_modal">
         <div className="l_modal_header">
-          <img src="src/assets/Fail.png" alt="로그인 실패 아이콘" className="l_modal_icon" />
+          <img src={icon} alt="모달 아이콘" className="l_modal_icon" />
         </div>
         <div className="l_modal_body">
-          <h3 className="l_modal_title">로그인 실패</h3>
-          <p className="l_modal_message">{error}</p>
+          <h3 className="l_modal_title">{title}</h3>
+          <p className="l_modal_message">{message}</p>
         </div>
         <div className="l_modal_footer">
-          <button onClick={onClose} className="l_modal_button">확인</button>
+          <button onClick={onClose} className="l_modal_button">
+            확인
+          </button>
         </div>
       </div>
     </div>
   );
 };
 
-export default LoginModal;
+export default FailModal;
+
+

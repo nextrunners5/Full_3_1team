@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import LoginModal from '../../shared/ui/FailModal'
+import FailModal from '../../shared/ui/FailModal';
 import "../login/Login.css";
 
 // Define types for the form inputs
@@ -20,8 +20,8 @@ const Login: React.FC = () => {
 
   // State for API call status
   const [loading, setLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
-  const [showModal, setShowModal] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null); // 에러 메시지 저장
+  const [showModal, setShowModal] = useState<boolean>(false); // 모달 상태
 
   // Handle form input changes
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -63,7 +63,12 @@ const Login: React.FC = () => {
       <h2 className="l_subtitle">로그인</h2>
       <div className="l_box">
         {showModal && (
-          <LoginModal error={error} onClose={() => setShowModal(false)} />
+          <FailModal
+            title="로그인 실패"
+            message={error || "아이디와 비밀번호를 확인해주세요."} // error 상태 전달
+            icon="src/assets/Fail.png"
+            onClose={() => setShowModal(false)} // 모달 닫기
+          />
         )}
         <form className="l_form" onSubmit={handleSubmit}>
           <input

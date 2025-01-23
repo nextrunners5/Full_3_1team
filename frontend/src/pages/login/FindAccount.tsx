@@ -1,19 +1,19 @@
 import React, { useState } from "react";
 import "./FindAccount.css";
+import FailModal from "../../shared/ui/FailModal"; // FailModal 컴포넌트 추가
 
 const FindAccount: React.FC = () => {
   const [activeTab, setActiveTab] = useState<"id" | "pw">("id");
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [showFailModal, setShowFailModal] = useState(false); // FailModal 상태
 
-  // 탭 클릭 시 활성화 상태 변경 및 오류 초기화
   const handleTabClick = (tab: "id" | "pw") => {
     setActiveTab(tab);
     setError(null);
-    setSuccessMessage(null); // 성공 메시지도 초기화
+    setSuccessMessage(null);
   };
 
-  // 폼 유효성 검사 함수
   const validateForm = (formData: { email?: string; name?: string; phone?: string }) => {
     if (formData.email && !formData.email.includes("@")) {
       setError("유효한 이메일 주소를 입력하세요.");
@@ -31,7 +31,6 @@ const FindAccount: React.FC = () => {
     return true;
   };
 
-  // 폼 제출 핸들러
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
@@ -76,6 +75,7 @@ const FindAccount: React.FC = () => {
       setSuccessMessage(data.message || "요청이 성공적으로 처리되었습니다.");
     } catch (err: any) {
       setError(err.message || "요청 처리 중 문제가 발생했습니다.");
+      setShowFailModal(true); // 요청 실패 시 FailModal 표시
     }
   };
 
@@ -136,6 +136,14 @@ const FindAccount: React.FC = () => {
         <span className="find-divider">|</span>
         <a href="/signup" className="find-link">회원가입</a>
       </div>
+      {showFailModal && ( 
+    <FailModal
+    title="요청 실패" // 동적 제목
+    message="요청 처리 중 문제가 발생했습니다. 다시 시도해주세요." // 동적 메시지
+    icon="src/assets/Fail.png" // 동적 아이콘 경로
+    onClose={() => setShowFailModal(false)} // 닫기 동작
+  />
+)}
     </div>
   );
 };
