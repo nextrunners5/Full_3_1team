@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import LoginModal from '../../shared/ui/FailModal'
 import "../login/Login.css";
 
 // Define types for the form inputs
@@ -62,20 +63,7 @@ const Login: React.FC = () => {
       <h2 className="l_subtitle">로그인</h2>
       <div className="l_box">
         {showModal && (
-          <div className="l_modal_overlay">
-            <div className="l_modal">
-              <div className="l_modal_header">
-                <img src="src/assets/Fail.png" alt="로그인 실패 아이콘" className="l_modal_icon" />
-              </div>
-              <div className="l_modal_body">
-                <h3 className="l_modal_title">로그인 실패</h3>
-                <p className="l_modal_message">{error}</p>
-              </div>
-              <div className="l_modal_footer">
-                <button onClick={() => setShowModal(false)} className="l_modal_button">확인</button>
-              </div>
-            </div>
-          </div>
+          <LoginModal error={error} onClose={() => setShowModal(false)} />
         )}
         <form className="l_form" onSubmit={handleSubmit}>
           <input
