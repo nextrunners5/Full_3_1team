@@ -1,0 +1,79 @@
+.orderDeliveryContainer{
+  display: flex;
+  flex-direction: column;
+  padding: 24px;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  border-radius: 8px;
+  opacity: 1;
+  background: linear-gradient(0deg, rgba(0, 0, 0, 0.001), rgba(0, 0, 0, 0.001)), #FFFFFF;
+  box-shadow: 0px 1px 2px -1px rgba(0, 0, 0, 0.1),0px 1px 3px 0px rgba(0, 0, 0, 0.1);
+}
+.orderDeliveryTitle{
+  font-family: Roboto;
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 28px;
+  letter-spacing: 0px;
+  color: #000000;
+}
+.orderDeliveryBody{
+  width: 100%;
+  display: flex;
+}
+.orderDeliveryLeft{
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+.recipient{
+  font-family: Roboto;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 24px;
+  letter-spacing: 0px;
+  color: #000000;
+}
+
+.addressBody{
+  display: flex;
+
+}
+.address, .phoneNumber{
+  font-family: Roboto;
+  font-size: 16px;
+  font-weight: normal;
+  line-height: 24px;
+  letter-spacing: 0px;
+  color: #6B7280;
+}
+.orderDeliveryRight{
+
+}
+.deliveryChange{
+  font-family: Roboto;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 24px;
+  text-align: center;
+  letter-spacing: 0px;
+  color: #000000;
+}
+.deliveryRequest{
+
+}
+.requestTitle{
+  font-family: Roboto;
+font-size: 14px;
+font-weight: 500;
+line-height: 20px;
+letter-spacing: 0px;
+color: #374151;
+}
+.requestToggle{
+
+}
+.requestMessage{
+
+}

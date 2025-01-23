@@ -1,0 +1,8 @@
+body{
+  background: #F9FAFB;
+}
+.orderLeft{
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
