@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import "./CSS/ProductCreate.css";
 import { useEffect } from "react";
 
-
 const ProductCreate: React.FC = () => {
   const navigate = useNavigate();
   const [colorInput, setColorInput] = useState("");
