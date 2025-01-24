@@ -26,6 +26,9 @@ const TestPage: React.FC = () => {
       <button>
       <Link to={'/ProductDetail'}>상품 상세 페이지</Link>
       </button>
+      <button>
+      <Link to={'/ProductList'}>상품 전체 페이지</Link>
+      </button>
       
     </div>
 
