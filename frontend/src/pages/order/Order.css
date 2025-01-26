@@ -4,6 +4,7 @@ body{
 .bodyContainer{
   display: flex;
   gap: 30px;
+  justify-content: center;
 }
 .orderLeft{
   display: flex;

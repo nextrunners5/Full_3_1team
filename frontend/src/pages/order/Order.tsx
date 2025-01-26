@@ -1,6 +1,7 @@
 import OrderInfo from "../../features/order/ui/Order";
 import OrderDeliveryInfo from "../../features/order/ui/OrderDeliveryInfo";
 import OrderPay from "../../features/order/ui/OrderPay";
+import Footer from "../../widgets/footer/Footer";
 import "./Order.css"
 
 const Order: React.FC = () => {
@@ -21,7 +22,7 @@ const Order: React.FC = () => {
 
 
       </body>
-      <footer></footer>
+      <footer><Footer/></footer>
     </div>
 
   )
