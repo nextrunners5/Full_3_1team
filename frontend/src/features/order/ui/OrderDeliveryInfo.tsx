@@ -7,7 +7,7 @@ const OrderDeliveryInfo: React.FC = () => {
         배송 정보
       </div>
       <div className="orderDeliveryBody">
-        <div className="orderDeliveryLeft">
+        <div className="deliveryInfo">
           <div className="recipient">홍길동</div>
           <div className="addressBody">
             <div className="address">서울특별시 강남구 테헤란로 123</div>
@@ -15,10 +15,6 @@ const OrderDeliveryInfo: React.FC = () => {
             <div className="deliveryChange">배송지 변경</div>
           </div>
           <div className="phoneNumber">010-1234-5678</div>
-        </div>
-        <div className="orderDeliveryRight">
-          {/* <div className="deliveryChange" onClick={handleAddressChange}>배송지 변경</div> */}
-          {/* <div className="deliveryChange">배송지 변경</div> */}
         </div>
         <div className="deliveryRequest">
           <div className="requestTitle">배송 요청사항</div>
@@ -31,7 +27,7 @@ const OrderDeliveryInfo: React.FC = () => {
               ))}
             </select> */}
             <select name="requestMessage" className="requestMessage">
-              <option value="1">부재시 경비실에 맡겨주세요</option>
+              <option value="1" className="optionText">부재시 경비실에 맡겨주세요</option>
             </select>
           </div>
         </div>

@@ -1,6 +1,10 @@
 body{
   background: #F9FAFB;
 }
+.bodyContainer{
+  display: flex;
+  gap: 30px;
+}
 .orderLeft{
   display: flex;
   flex-direction: column;

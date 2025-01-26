@@ -1,5 +1,6 @@
 import OrderInfo from "../../features/order/ui/Order";
 import OrderDeliveryInfo from "../../features/order/ui/OrderDeliveryInfo";
+import OrderPay from "../../features/order/ui/OrderPay";
 import "./Order.css"
 
 const Order: React.FC = () => {
@@ -14,7 +15,7 @@ const Order: React.FC = () => {
         </div>
         <div className="orderRight">
           <div className="OcouponeSelect"></div>
-          <div className="orderprice"></div>
+          <div className="orderPrice"><OrderPay/></div>
           
         </div>
 
