@@ -95,7 +95,7 @@ const Login: React.FC = () => {
         <button className="l_alternative-button">다른 방법으로 로그인 / 가입</button>
         <div className="l_links">
           <a className="l_link" href="#" onClick={() => navigate('/find-account')}>아이디/비밀번호 찾기</a>
-          <a className="l_link" href="#">회원가입</a>
+          <a className="l_link" href="#" onClick={() => navigate('/signup')}>회원가입</a>
         </div>
       </div>
     </div>

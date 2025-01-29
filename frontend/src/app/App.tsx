@@ -8,6 +8,7 @@ import Cart from "../pages/cart/Cart";
 import Order from "../pages/order/Order";
 import Payment from "../pages/payments/Payments";
 import FindAccount from '../pages/login/FindAccount';
+import Signup from "../pages/login/Signup";
 
 function App() {
   return (
@@ -16,11 +17,13 @@ function App() {
         <Route path="/main" element={<MainPage />} />
         <Route path="/" element={<TestPage />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/Signup" element={<Signup />} />
         <Route path="/cart" element={<Cart />} />
         <Route path="/order" element={<Order />} />
         <Route path="/payment" element={<Payment />} />
         <Route path="/ProductCreate" element={<ProductCreate />} />
         <Route path="/find-account" element={<FindAccount />} />
+
       </Routes>
     </Router>
   );
