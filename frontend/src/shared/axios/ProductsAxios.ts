@@ -1,14 +1,14 @@
 import axiosInstance from "./axios";
 
 interface Product {
-  product_code: string;
+  // product_code: string;
   category_id: number;
   product_name: string;
   description: string;
   origin_price: number;
-  discount_price: number;
+  // discount_price: number;
   final_price: number;
-  stock_quantity: number;
+  // stock_quantity: number;
   product_status: string;
   sizes: string[];
   colors: string[];
@@ -35,4 +35,16 @@ export const fetchProducts = async () => {
     throw error;
   }
 };
+
+// 상품 상세 조회 API 요청
+export const getProductById = async (product_id: number) => {
+  try {
+    const response = await axiosInstance.get(`/api/products/${product_id}`);
+    return response.data;
+  } catch (error) {
+    console.error(`상품 상세 조회 실패 (ID: ${product_id}):`, error);
+    throw error;
+  }
+};
+
 export default axiosInstance;

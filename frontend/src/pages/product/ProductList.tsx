@@ -1,10 +1,10 @@
-import React, { useEffect, useState } from "react";
-import { fetchProducts } from "../../shared/axios/ProductsAxios";
+import { useEffect, useState } from "react";
+import axios from "axios";
+import "./CSS/ProductList.css";
+import { Link } from "react-router-dom";
 
 interface Product {
   product_id: number;
-  product_code: string;
-  category_id: number;
   product_name: string;
   description: string;
   origin_price: number;
@@ -12,63 +12,60 @@ interface Product {
   final_price: number;
   stock_quantity: number;
   product_status: string;
-  sizes: string[];
-  colors: string[];
+  created_at: string;
+  updated_at: string;
+  // image_url?: string; // 추후 추가 예정
 }
 
-const ProductList: React.FC = () => {
+const ProductList = () => {
   const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
+  const [sortOption, setSortOption] = useState<string>("lowPrice");
 
-  // 상품 목록 가져오기
   useEffect(() => {
-    const loadProducts = async () => {
-      try {
-        const data = await fetchProducts();
-        setProducts(data);
-      } catch (error) {
-        console.error("상품 목록 불러오기 오류:", error); // 오류 출력
-        setError("상품 목록을 불러오는 중 오류가 발생했습니다.");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadProducts();
+    axios
+      .get<Product[]>("/api/products")
+      .then((res) => setProducts(res.data))
+      .catch((err) => console.error(err));
   }, []);
 
-  if (loading) return <p>상품을 불러오는 중...</p>;
-  if (error) return <p>{error}</p>;
+  // 상품 정렬 로직
+  const sortedProducts = [...products].sort((a, b) => {
+    if (sortOption === "lowPrice") return a.final_price - b.final_price;
+    if (sortOption === "highPrice") return b.final_price - a.final_price;
+    return 0;
+  });
 
   return (
-    <div>
-      <h2>상품 목록</h2>
+    <div className="product-page">
+      {/* 상단 배너 */}
+      <div className="banner-container">
+        <h1>배너</h1>
+      </div>
 
-      <thead>
-        <tr>
-          <th>상품 ID</th>
-          <th>상품 코드</th>
-          <th>카테고리 ID</th>
-          <th>상품명</th>
-          <th>가격</th>
-          <th>재고 수량</th>
-          <th>상태</th>
-        </tr>
-      </thead>
-      <tbody>
-        {products.map((product) => (
-          <tr key={product.product_id}>
-            <td>{product.product_id}</td>
-            <td>{product.product_code}</td>
-            <td>{product.category_id}</td>
-            <td>{product.product_name}</td>
-            <td>{product.final_price.toLocaleString()}원</td>
-            <td>{product.stock_quantity}</td>
-            <td>{product.product_status}</td>
-          </tr>
+      {/* 정렬 및 컨트롤 영역 */}
+      <div className="controls-container">
+        <h2>상품 목록</h2>
+        <select value={sortOption} onChange={(e) => setSortOption(e.target.value)}>
+          <option value="lowPrice">낮은 가격순</option>
+          <option value="highPrice">높은 가격순</option>
+        </select>
+      </div>
+
+      {/* 상품 목록 */}
+      <div className="products">
+        {sortedProducts.map((product) => (
+          <Link to={`/products/${product.product_id}`} key={product.product_id} className="product-card">
+            <img src="https://placehold.co/250x250" alt="임시" />
+            <div className="product-info">
+            <h3>{product.product_name}</h3>
+            <p>별점 자리(추후)</p>
+            <p className="price">{Math.floor(product.origin_price).toLocaleString()}원</p>
+            {product.discount_price > 0 && <p className="discount">판매가: {Math.floor(product.final_price).toLocaleString()}원</p>}
+            {/* <p className="status">{product.product_status}</p> */}
+          </div>
+          </Link>
         ))}
-      </tbody>
+      </div>
     </div>
   );
 };

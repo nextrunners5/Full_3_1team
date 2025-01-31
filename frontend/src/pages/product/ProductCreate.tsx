@@ -89,7 +89,7 @@ const ProductCreate: React.FC = () => {
       setProduct((prev) => {
         let updatedValue: string | number = value;
     
-        // 숫자만 입력 가능한 필드 처리
+        // 숫자만 입력만 가능
         if (["origin_price", "discount_price", "stock_quantity"].includes(name)) {
           updatedValue = value.replace(/[^0-9]/g, "");
         }
@@ -101,7 +101,7 @@ const ProductCreate: React.FC = () => {
     
         // product_status 변환 (한글 → status_code)
         if (name === "product_status") {
-          updatedValue = statusMap[value] || value; // 한글 상태명을 status_code로 변환
+          updatedValue = statusMap[value] || value;
         }
     
         const updatedProduct = {

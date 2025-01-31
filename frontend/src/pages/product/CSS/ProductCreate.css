@@ -1,4 +1,5 @@
-html {
+html, body {
+  margin: 0;
   background-color: aliceblue;
 }
 .product-create {
@@ -67,8 +68,12 @@ html {
 .price-stock-container label {
   margin-bottom: 5px;
 }
-.stock-form-group input {
-  margin-top: 5px;
+
+.stock-form-group {
+  width: 100%;
+  margin-bottom: 15px;
+  display: flex;
+  flex-direction: column;
 }
 
 .form-group label {
@@ -76,12 +81,12 @@ html {
   margin-bottom: 5px;
 }
 
-input,
+.product-create input,
 select {
   padding: 10px;
   border: 1px solid #ddd;
   border-radius: 5px;
-  width: 90%;
+  /* width: 90%; */
 }
 
 .price-stock-container {
@@ -95,7 +100,7 @@ select {
   width: 48%;
 }
 
-h2 {
+.page-header h2 {
   font-weight: bold;
   margin-bottom: 30px;
 }

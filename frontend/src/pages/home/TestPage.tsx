@@ -24,7 +24,7 @@ const TestPage: React.FC = () => {
       <Link to={'/ProductCreate'}>상품 등록 페이지</Link>
       </button>
       <button>
-      <Link to={'/ProductDetail'}>상품 상세 페이지</Link>
+      <Link to={'/ProductDetail'}>상품 상세 페이지(상품전체페이지에서 클릭해서 들어가야함)</Link>
       </button>
       <button>
       <Link to={'/ProductList'}>상품 전체 페이지</Link>

@@ -3,7 +3,7 @@ config();
 import express from 'express';
 import cors from 'cors';
 import { Request, Response, NextFunction } from 'express'
-import ProductRoutes from "./routes/ProductRoutes";
+import ProductController from "../backend/feature/product/controller/ProductController";
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -23,7 +23,7 @@ app.get('/', (req, res) => {
 }); 
 
 // 상품 라우터
-app.use("/api", ProductRoutes);
+app.use("/api", ProductController);
 // app.use("/api/products", ProductRoutes);
 
 // 오류 처리 미들웨어
