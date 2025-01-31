@@ -9,7 +9,10 @@ const dbConfig = {
   database: process.env.DB_NAME,
 };
 
-const pool = createPool(dbConfig);
+const pool = mysql.createPool(dbConfig);
+
+
+console.log(` 연결된 데이터베이스: ${dbConfig.database}`);
 
 pool.getConnection((err, connection) => {
   if(err) {

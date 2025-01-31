@@ -1,0 +1,13 @@
+body{
+  background: #F9FAFB;
+}
+.bodyContainer{
+  display: flex;
+  gap: 30px;
+  justify-content: center;
+}
+.orderLeft{
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
