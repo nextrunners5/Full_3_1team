@@ -1,13 +1,12 @@
-import { config } from 'dotenv';
-config();
 import axios from "axios";
-
-// API 기본 URL 설정
-const API_URL = process.env.VITE_API_BASE_URL;
 
 // Axios 인스턴스 생성
 const axiosInstance = axios.create({
-  baseURL: API_URL,
+  baseURL: import.meta.env.VITE_API_URL, // Vite 환경 변수 사용
+  withCredentials: true,
+  headers: {
+    "Content-Type": "application/json",
+  }
 });
 
 // 요청 인터셉터: 인증 토큰 추가
@@ -27,5 +26,6 @@ axiosInstance.interceptors.request.use(
 export default axiosInstance;
 
 
+
 // 파일에서 axios 사용하실 때 아래 import문 넣으시고 사용하시면 됩니다.
-// import axiosInstance from './axios/ProjectAxios';
+// import axiosInstance from './axios/ProjectAxios'; //수정필요...
