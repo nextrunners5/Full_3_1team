@@ -23,6 +23,8 @@ interface Product {
 const ProductDetail: React.FC = () => {
   const params = useParams<{ product_id: string }>();
   const product_id = params.product_id;
+  // const { productId } = useParams<{ productId?: string }>();
+  // const parsedProductId = productId ? parseInt(productId, 10) : null;
   const [product, setProduct] = useState<Product | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [quantity, setQuantity] = useState<number>(1);
@@ -30,6 +32,7 @@ const ProductDetail: React.FC = () => {
   const [selectedColor, setSelectedColor] = useState<string>("");
   const [activeTab, setActiveTab] = useState("detail");
   const [isModalOpen, setIsModalOpen] = useState(false);
+  
 
   console.log("🔍 요청된 product_id:", product_id);
 
@@ -200,7 +203,10 @@ const ProductDetail: React.FC = () => {
           {activeTab === "qna" && (
             <div>
             <button className="inquiry-button" onClick={() => setIsModalOpen(true)}>문의하기</button>
-            {isModalOpen && <QnaModal onClose={() => setIsModalOpen(false)} />}
+            {isModalOpen && <QnaModal onClose={() => setIsModalOpen(false)}
+            userId={null}
+            productId={product.product_id}
+            />}
           </div>
           )}
         </div>

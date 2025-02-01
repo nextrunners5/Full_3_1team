@@ -4,6 +4,7 @@ import express from 'express';
 import cors from 'cors';
 import { Request, Response, NextFunction } from 'express'
 import ProductRoutes from "../backend/routes/ProductRoutes";
+import QnARoutes from "../backend/routes/QnARoutes";
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -23,8 +24,12 @@ app.get('/', (req, res) => {
 }); 
 
 // 상품 라우터
-app.use("/api", ProductRoutes);
+app.use("/api/products", ProductRoutes);
 // app.use("/api/products", ProductRoutes);
+
+// QnA 라우터
+app.use("/api/qna", QnARoutes);
+
 
 // 오류 처리 미들웨어
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => { 

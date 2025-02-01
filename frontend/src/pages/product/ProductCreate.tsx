@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "./CSS/ProductCreate.css";
-import axios from 'axios';
+import axios from "axios";
 import { createProduct } from "../../shared/axios/ProductsAxios";
 
 const ProductCreate: React.FC = () => {
   const navigate = useNavigate();
   const [colorInput, setColorInput] = useState("");
-  const [categories, setCategories] = useState<{ category_id: number; category_name: string }[]>([]);
+  const [categories, setCategories] = useState<
+    { category_id: number; category_name: string }[]
+  >([]);
   const [product, setProduct] = useState<{
     product_id: string;
     category_id: number;
@@ -53,79 +55,82 @@ const ProductCreate: React.FC = () => {
   }, [product.origin_price, product.discount_price]);
 
   // 카테고리 목록을 백엔드에서 가져오기
-    const fetchCategories = async () => {
-      try {
-        const response = await axios.get("http://localhost:3000/api/categories");
-    
-        console.log("카테고리 응답:", response);
-    
-        if (Array.isArray(response.data)) {
-          setCategories(response.data);
-        } else {
-          console.error("잘못된 데이터 형식:", response.data);
-          setCategories([]);
-        }
-      } catch (error) {
-        console.error("카테고리 목록 불러오기 실패:", error);
+  const fetchCategories = async () => {
+    try {
+      const response = await axios.get("/api/categories");
+
+      console.log("카테고리 응답:", response);
+
+      if (Array.isArray(response.data)) {
+        setCategories(response.data);
+      } else {
+        console.error("잘못된 데이터 형식:", response.data);
         setCategories([]);
       }
-    };
-    
-    useEffect(() => {
-      fetchCategories();
-    }, []);
-    
-    const statusMap: { [key: string]: string } = {
-      "판매중": "PRS001",
-      "품절": "PRS002",
-      "숨김": "PRS003",
-    };
-    
-    const handleChange = (
-      e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
-    ) => {
-      const { name, value } = e.target;
-    
-      setProduct((prev) => {
-        let updatedValue: string | number = value;
-    
-        // 숫자만 입력만 가능
-        if (["origin_price", "discount_price", "stock_quantity"].includes(name)) {
-          updatedValue = value.replace(/[^0-9]/g, "");
-        }
-    
-        // category_id는 숫자로 변환
-        if (name === "category_id") {
-          updatedValue = parseInt(value, 10) || 0;
-        }
-    
-        // product_status 변환 (한글 → status_code)
-        if (name === "product_status") {
-          updatedValue = statusMap[value] || value;
-        }
-    
-        const updatedProduct = {
-          ...prev,
-          [name]: updatedValue,
-        };
-    
-        // 가격 계산
-        if (name === "origin_price" || name === "discount_price") {
-          updatedProduct.final_price = (
-            (parseInt(updatedProduct.origin_price) || 0) - (parseInt(updatedProduct.discount_price) || 0)
-          ).toString();
-        }
-    
-        return updatedProduct;
-      });
-    };
-    
-    
+    } catch (error) {
+      console.error("카테고리 목록 불러오기 실패:", error);
+      setCategories([]);
+    }
+  };
+
+  useEffect(() => {
+    fetchCategories();
+  }, []);
+
+  const statusMap: { [key: string]: string } = {
+    판매중: "PRS001",
+    품절: "PRS002",
+    숨김: "PRS003",
+  };
+
+  const handleChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+    >
+  ) => {
+    const { name, value } = e.target;
+
+    setProduct((prev) => {
+      let updatedValue: string | number = value;
+
+      // 숫자만 입력만 가능
+      if (["origin_price", "discount_price", "stock_quantity"].includes(name)) {
+        updatedValue = value.replace(/[^0-9]/g, "");
+      }
+
+      // category_id는 숫자로 변환
+      if (name === "category_id") {
+        updatedValue = parseInt(value, 10) || 0;
+      }
+
+      // product_status 변환 (한글 → status_code)
+      if (name === "product_status") {
+        updatedValue = statusMap[value] || value;
+      }
+
+      const updatedProduct = {
+        ...prev,
+        [name]: updatedValue,
+      };
+
+      // 가격 계산
+      if (name === "origin_price" || name === "discount_price") {
+        updatedProduct.final_price = (
+          (parseInt(updatedProduct.origin_price) || 0) -
+          (parseInt(updatedProduct.discount_price) || 0)
+        ).toString();
+      }
+
+      return updatedProduct;
+    });
+  };
 
   const handleSizeChange = (size: string) => {
     setProduct((prev) => ({
       ...prev,
-      sizes: prev.sizes.includes(size) ? prev.sizes.filter((s) => s !== size) : [...prev.sizes, size],
+      sizes: prev.sizes.includes(size)
+        ? prev.sizes.filter((s) => s !== size)
+        : [...prev.sizes, size],
     }));
   };
 
@@ -148,25 +153,26 @@ const ProductCreate: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-  
+
     const formattedProduct = {
       ...product,
       origin_price: parseFloat(product.origin_price) || 0,
       discount_price: parseFloat(product.discount_price) || 0,
       final_price: parseFloat(product.final_price) || 0,
-      stock_quantity: parseInt(product.stock_quantity, 10) || 0,  
+      stock_quantity: parseInt(product.stock_quantity, 10) || 0,
     };
-  
+
     try {
       const response = await createProduct(formattedProduct);
       console.log("상품 등록 성공", response.data);
 
-      // navigate("/products"); // 상품 목록 페이지 완성 후 복구
+      alert("상품이 성공적으로 등록되었습니다.");
+      navigate("/productList");
     } catch (error) {
       console.error("상품 등록 실패", error);
+      alert("상품 등록에 실패했습니다.");
     }
   };
-  
 
   return (
     <div className="product-create-container">
@@ -201,7 +207,12 @@ const ProductCreate: React.FC = () => {
           </div>
           <div className="form-group">
             <label>카테고리</label>
-            <select name="category_id" value={product.category_id} onChange={handleChange} required>
+            <select
+              name="category_id"
+              value={product.category_id}
+              onChange={handleChange}
+              required
+            >
               <option value="">카테고리 선택</option>
               {categories?.map((category) => (
                 <option key={category.category_id} value={category.category_id}>
@@ -338,12 +349,12 @@ const ProductCreate: React.FC = () => {
             <h2>상품 이미지</h2>
             <label htmlFor="image-upload" className="image-upload-box">
               <div className="image-preview">
-                  <>
-                    <span className="material-symbols-outlined">image</span>
-                    <p>이미지 업로드</p>
-                    <span>또는 드래그 앤 드롭</span>
-                    <small>PNG, JPG 최대 10MB</small>
-                  </>
+                <>
+                  <span className="material-symbols-outlined">image</span>
+                  <p>이미지 업로드</p>
+                  <span>또는 드래그 앤 드롭</span>
+                  <small>PNG, JPG 최대 10MB</small>
+                </>
               </div>
               <input
                 id="image-upload"
@@ -367,9 +378,9 @@ const ProductCreate: React.FC = () => {
           </div>
 
           <div className="debug-section">
-          <h3>(임시) 입력된 데이터 확인</h3>
-          <pre>{JSON.stringify(product, null, 2)}</pre>
-        </div>
+            <h3>(임시) 입력된 데이터 확인</h3>
+            <pre>{JSON.stringify(product, null, 2)}</pre>
+          </div>
 
           {/* 버튼 그룹 */}
           <div className="button-group">
@@ -380,7 +391,7 @@ const ProductCreate: React.FC = () => {
             >
               취소
             </button>
-            <button type="submit" className="submit-btn">
+            <button type="submit" className="submit-btn" >
               저장하기
             </button>
           </div>

@@ -22,7 +22,7 @@ router.get("/categories", async (req: Request, res: Response) => {
 });
 
 // 상품 등록 API
-router.post("/products", async (req: Request, res: Response) => {
+router.post("/", async (req: Request, res: Response) => {
   try {
     const newProduct = await ProductService.createProduct(req.body);
     res.status(201).json({ message: "상품 등록 성공", product: newProduct });
@@ -33,7 +33,7 @@ router.post("/products", async (req: Request, res: Response) => {
 });
 
 // 상품 목록 조회 API
-router.get("/products", async (req: Request, res: Response) => {
+router.get("/", async (req: Request, res: Response) => {
   try {
     const [rows] = await pool.promise().query<RowDataPacket[]>("SELECT * FROM Products");
     res.json(rows);
@@ -45,7 +45,7 @@ router.get("/products", async (req: Request, res: Response) => {
 
 // 상품 상세 조회 API
 router.get(
-  "/products/:product_id",
+  "/:product_id",
   async (req: Request<{ product_id: string }>, res: Response): Promise<void> => {
     try {
       const { product_id } = req.params;

@@ -1,10 +1,38 @@
-//컨트롤러는 사용자로부터의 요청을 받아서 처리하고, 적절한 응답을 반환하는 역할을 합니다. 
-//비즈니스 로직을 서비스 계층에 위임하고, 서비스로부터 받은 결과를 클라이언트에 반환합니다.
+import { Request, Response } from "express";
+import dbConfig from "../../../config/dbConfig";
 
-import express, { Router, Request, Response } from "express";
-import pool from "../../../config/dbConfig";
+export const createQuestion = async (req: Request, res: Response): Promise<void> => {
+  try {
+    console.log(" 요청 데이터:", req.body);
 
+    let { user_id, product_id, question_detail, question_date, question_private } = req.body;
 
-const router = Router();
+    if (!product_id || !question_detail || !question_date) {
+      console.error(" 필수 입력값 누락:", { product_id, question_detail, question_date });
+      res.status(400).json({ message: "필수 입력값이 누락되었습니다." });
+      return;
+    }
 
-export default router;
+    // user_id가 없으면 자동으로 "guest"로 설정
+    if (!user_id) {
+      user_id = "guest";
+    }
+
+    const sql = `
+      INSERT INTO Question (user_id, product_id, question_detail, question_date, question_private)
+      VALUES (?, ?, ?, ?, ?);
+    `;
+    const values = [user_id, product_id, question_detail, question_date, question_private];
+
+    console.log(" SQL 실행 값:", values);
+
+    const result: any = await dbConfig.promise().query(sql, values);
+    
+    console.log(" DB Insert 결과:", result);
+
+    res.status(201).json({ message: "Question created successfully", question_id: result.insertId });
+  } catch (error) {
+    console.error(" QnA 질문 등록 오류:", error);
+    res.status(500).json({ message: "서버 오류 발생", error});
+  }
+};
