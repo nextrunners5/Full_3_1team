@@ -24,9 +24,10 @@ const QnaModal: React.FC<QnaModalProps> = ({ onClose }) => {
   return (
     <div className="modal-overlay">
       <div className="modal-content">
+        <div className="title-name">
         <h2>상품 문의하기</h2>
         <button className="close-button" onClick={onClose}>✖</button>
-
+        </div>
         <label>문의 유형</label>
         <select value={inquiryType} onChange={(e) => setInquiryType(e.target.value)}>
           <option value="">문의 유형을 선택해주세요</option>
