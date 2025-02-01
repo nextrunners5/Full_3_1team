@@ -16,3 +16,17 @@ export const postQuestion = async (data: {
     throw error;
   }
 };
+
+// 특정 상품의 QnA 리스트 가져오기
+export const fetchQnAList = async (productId: string) => {
+  try {
+    console.log(` QnA 요청: /api/qna/questions/${productId}`);
+    
+    const response = await axiosInstance.get(`/api/qna/questions/${productId}`);
+    
+    return response.data.questions;
+  } catch (error) {
+    console.error("QnA 목록 불러오기 오류:", error);
+    return [];
+  }
+};

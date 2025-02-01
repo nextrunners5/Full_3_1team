@@ -17,6 +17,10 @@ const QnaModal: React.FC<QnaModalProps> = ({ onClose, userId, productId }) => {
 
   // API 요청 함수
   const handleSubmit = async () => {
+    const now = new Date();
+    const localDate = new Date(now.getTime() + 9 * 60 * 60 * 1000);
+    const formattedDate = localDate.toISOString().slice(0, 16).replace("T", " ");
+
     if (!title.trim() || !content.trim()) {
       alert("제목과 문의 내용을 입력해주세요.");
       return;
@@ -27,9 +31,12 @@ const QnaModal: React.FC<QnaModalProps> = ({ onClose, userId, productId }) => {
     try {
       const response = await axiosInstance.post("api/qna/questions ", {
         user_id: userId || "guest", // userId가 없으면 게스트 처리
-        product_id: typeof productId === "string" ? parseInt(productId, 10) : productId,
-        question_detail: `${inquiryType ? `[${inquiryType}] ` : ""}${title} - ${content}`,
-        question_date: new Date().toISOString().split("T")[0],
+        product_id:
+          typeof productId === "string" ? parseInt(productId, 10) : productId,
+        question_detail: `${
+          inquiryType ? `[${inquiryType}] ` : ""
+        }${title} - ${content}`,
+        question_date: formattedDate,
         question_private: isPrivate ? "Y" : "N",
       });
 
@@ -63,16 +70,21 @@ const QnaModal: React.FC<QnaModalProps> = ({ onClose, userId, productId }) => {
       <div className="modal-content">
         <div className="title-name">
           <h2>상품 문의하기</h2>
-          <button className="close-button" onClick={onClose} disabled={loading}>✖</button>
+          <button className="close-button" onClick={onClose} disabled={loading}>
+            ✖
+          </button>
         </div>
-        
+
         <label>문의 유형</label>
-        <select value={inquiryType} onChange={(e) => setInquiryType(e.target.value)}>
+        <select
+          value={inquiryType}
+          onChange={(e) => setInquiryType(e.target.value)}
+        >
           <option value="">문의 유형을 선택해주세요</option>
           <option value="상품 문의">상품 문의</option>
           <option value="배송 문의">배송 문의</option>
         </select>
-        
+
         <label>제목</label>
         <input
           className="qna-input"
@@ -93,13 +105,28 @@ const QnaModal: React.FC<QnaModalProps> = ({ onClose, userId, productId }) => {
         />
 
         <div className="checkbox-group">
-          <input type="checkbox" checked={isPrivate} onChange={() => setIsPrivate(!isPrivate)} disabled={loading} />
+          <input
+            type="checkbox"
+            checked={isPrivate}
+            onChange={() => setIsPrivate(!isPrivate)}
+            disabled={loading}
+          />
           <label className="checkbox-title">관리자에게만 보여주기</label>
         </div>
 
         <div className="modal-buttons">
-          <button className="cancel-button" onClick={onClose} disabled={loading}>취소</button>
-          <button className="submit-button" onClick={handleSubmit} disabled={loading}>
+          <button
+            className="cancel-button"
+            onClick={onClose}
+            disabled={loading}
+          >
+            취소
+          </button>
+          <button
+            className="submit-button"
+            onClick={handleSubmit}
+            disabled={loading}
+          >
             {loading ? "등록 중..." : "등록하기"}
           </button>
         </div>
