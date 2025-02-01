@@ -1,14 +1,14 @@
 import axiosInstance from "./axios";
 
 interface Product {
-  // product_code: string;
+  product_code: string;
   category_id: number;
   product_name: string;
   description: string;
   origin_price: number;
-  // discount_price: number;
+  discount_price: number;
   final_price: number;
-  // stock_quantity: number;
+  stock_quantity: number;
   product_status: string;
   sizes: string[];
   colors: string[];

@@ -4,6 +4,7 @@ import axios from "axios";
 import "./CSS/ProductDetail.css";
 import Footer from "../../widgets/footer/Footer";
 import QnaModal from "../qna/QnaModal";
+import QnaList from "../qna/QnaList";
 
 interface Product {
   product_id: number;
@@ -21,8 +22,7 @@ interface Product {
 }
 
 const ProductDetail: React.FC = () => {
-  const params = useParams<{ product_id: string }>();
-  const product_id = params.product_id;
+  const { product_id } = useParams<{ product_id: string }>();
   const [product, setProduct] = useState<Product | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [quantity, setQuantity] = useState<number>(1);
@@ -30,8 +30,10 @@ const ProductDetail: React.FC = () => {
   const [selectedColor, setSelectedColor] = useState<string>("");
   const [activeTab, setActiveTab] = useState("detail");
   const [isModalOpen, setIsModalOpen] = useState(false);
+  // const { productId } = useParams<{ productId: string }>()
 
   console.log("🔍 요청된 product_id:", product_id);
+  // console.log(" ProductDetail에서 가져온 productId:", productId);
 
   useEffect(() => {
     if (!product_id) {
@@ -198,9 +200,21 @@ const ProductDetail: React.FC = () => {
             <div className="review-content">리뷰 항목 만들어야함</div>
           )}
           {activeTab === "qna" && (
-            <div>
-            <button className="inquiry-button" onClick={() => setIsModalOpen(true)}>문의하기</button>
-            {isModalOpen && <QnaModal onClose={() => setIsModalOpen(false)} />}
+            <div className="qna-section">
+            <div className="qna-header">
+              <h2>상품 Q&A</h2>
+              <button className="inquiry-button" onClick={() => setIsModalOpen(true)}>
+                문의하기
+              </button>
+            </div>
+            <QnaList productId={product_id ?? ""} />
+            {isModalOpen && (
+              <QnaModal
+                onClose={() => setIsModalOpen(false)}
+                userId={null}
+                productId={product.product_id}
+              />
+            )}
           </div>
           )}
         </div>
