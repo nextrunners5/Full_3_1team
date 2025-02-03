@@ -20,7 +20,8 @@
 }
 .pointBody{
   display: flex;
-  align-items: center;
+  flex-direction: column;
+  align-items: start;
   gap: 15px;
 }
 .pointBody input{
@@ -34,6 +35,12 @@
   box-sizing: border-box;
   border: 1px solid #D1D5DB;
   box-shadow: 0px 1px 2px 0px rgba(0, 0, 0, 0.05);
+}
+.pointBody .pointBodyTop{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
 }
 
 /* text */
@@ -57,4 +64,7 @@
 }
 .remainPoint{
   color: #6B7280;
+}
+.errorMessage{
+  color: red;
 }

@@ -15,6 +15,10 @@
   display: flex;
   justify-content: space-between;
 }
+.orderPointPriceContainer{
+  display: flex;
+  justify-content: space-between;
+}
 .orderDeliveryPriceContainer{
   display: flex;
   justify-content: space-between;
@@ -42,11 +46,11 @@
   font-weight: 500;
   color: #000000;
 }
-.orderCouponPriceTitle{
+.orderCouponPriceTitle, .orderCouponPrice{
   color: #16A34A;
 }
-.orderCouponPrice{
-  color: #16A34A;
+.orderPointPriceTitle, .orderPointPrice{
+  color: red
 }
 .orderDeliveryPriceTitle
 {

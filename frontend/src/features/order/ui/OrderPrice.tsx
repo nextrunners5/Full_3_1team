@@ -1,6 +1,7 @@
+import { OrderPriceProps } from "../model/OrderModel";
 import "./OrderPrice.css"
 
-const OrderPrice: React.FC = () => {
+const OrderPrice: React.FC<OrderPriceProps> = ({points}) => {
   return (
     <div>
       <div className="orderPriceContainer">
@@ -11,6 +12,11 @@ const OrderPrice: React.FC = () => {
         <div className="orderCouponPriceContainer">
           <div className="orderCouponPriceTitle">쿠폰 할인</div>
           <div className="orderCouponPrice">-8,900원</div>
+        </div>
+        <div className="orderPointPriceContainer">
+          <div className="orderPointPriceTitle">포인트</div>
+          {/* <div className="orderPointPrice">-8,900원</div> */}
+          <div className="orderPointPrice">-{points}원</div>
         </div>
         <div className="orderDeliveryPriceContainer">
           <div className="orderDeliveryPriceTitle">배송비</div>
