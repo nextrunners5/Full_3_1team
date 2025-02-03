@@ -73,6 +73,19 @@ export const getUserAddress = async(userId: string) => {
   }
 }
 
-export const getOrderProducts = async() => {
-  const query = "select "
+export const getOrderProducts = async(userId: string) => {
+  const query = "select cd.quantity, p.product_name, p.final_price from CartDetail cd join Products p on cd.product_id = p.product_id join Cart c on cd.cart_id = c.cart_id where c.user_id = ?";
+  try{
+    const res = await pool.promise().query(query,[userId]);
+    if(res){
+      console.log('orderProducts: ', res);
+      return res;
+    }
+  }catch(err){
+    console.error('주문하려는 제품의 정보를 가져오지 못했습니다.', err);
+  }
+}
+
+export const getShippingFee = async (userId: string) => {
+  
 }

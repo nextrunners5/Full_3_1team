@@ -40,7 +40,7 @@ export const fetchUserAddress = async(userId: string) => {
 
 export const fetchOrderProducts = async() => {
   try{
-    const orderProductsInfo = await getOrderProducts();
+    const orderProductsInfo = await getOrderProducts('user123');
     return orderProductsInfo;
   } catch(err){
     console.error('제품 정보를 가져오지 못했습니다.', err);
