@@ -85,7 +85,7 @@ export const getQuestionsByProduct = async (
     const [rows]: any = await dbConfig.promise().query(sql, [productId]);
 
     if (!rows || rows.length === 0) {
-      console.log(`🚨 해당 productId(${productId})에 대한 QnA 데이터 없음`);
+      console.log(` 해당 productId(${productId})에 대한 QnA 데이터 없음`);
       res.status(404).json({ message: "해당 상품에 대한 QnA가 없습니다." });
       return;
     }

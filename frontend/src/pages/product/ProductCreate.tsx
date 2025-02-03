@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "./CSS/ProductCreate.css";
-import axios from "axios";
+import axiosInstance from "axios";
 import { createProduct } from "../../shared/axios/ProductsAxios";
 
 const ProductCreate: React.FC = () => {
@@ -10,6 +10,7 @@ const ProductCreate: React.FC = () => {
   const [categories, setCategories] = useState<
     { category_id: number; category_name: string }[]
   >([]);
+
   const [product, setProduct] = useState<{
     product_id: string;
     category_id: number;
@@ -54,27 +55,22 @@ const ProductCreate: React.FC = () => {
     }));
   }, [product.origin_price, product.discount_price]);
 
-  // 카테고리 목록을 백엔드에서 가져오기
-  const fetchCategories = async () => {
-    try {
-      const response = await axios.get("/api/categories");
-
-      console.log("카테고리 응답:", response);
-
-      if (Array.isArray(response.data)) {
-        setCategories(response.data);
-      } else {
-        console.error("잘못된 데이터 형식:", response.data);
-        setCategories([]);
-      }
-    } catch (error) {
-      console.error("카테고리 목록 불러오기 실패:", error);
-      setCategories([]);
-    }
-  };
-
   useEffect(() => {
-    fetchCategories();
+    axiosInstance
+      .get("/api/categories")
+      .then((res) => {
+        if (Array.isArray(res.data.categories)) {
+          setCategories(res.data.categories);
+        } else {
+          console.error("예상치 못한 데이터 형식:", res.data);
+          setCategories([]);
+        }
+        console.log(" API 응답 데이터:", res.data.categories);
+      })
+      .catch((err) => {
+        console.error("카테고리 목록 불러오기 실패:", err);
+        setCategories([]);
+      });
   }, []);
 
   const statusMap: { [key: string]: string } = {
@@ -113,7 +109,7 @@ const ProductCreate: React.FC = () => {
         [name]: updatedValue,
       };
 
-      // 가격 계산
+      // 판매 계산
       if (name === "origin_price" || name === "discount_price") {
         updatedProduct.final_price = (
           (parseInt(updatedProduct.origin_price) || 0) -
@@ -214,7 +210,7 @@ const ProductCreate: React.FC = () => {
               required
             >
               <option value="">카테고리 선택</option>
-              {categories?.map((category) => (
+              {categories.map((category) => (
                 <option key={category.category_id} value={category.category_id}>
                   {category.category_name}
                 </option>
@@ -222,7 +218,6 @@ const ProductCreate: React.FC = () => {
             </select>
           </div>
 
-          {/* 가격 정보 & 상품 수량 */}
           <div className="price-stock-container">
             <div className="price-info">
               <h2>가격 정보</h2>
@@ -278,7 +273,6 @@ const ProductCreate: React.FC = () => {
             </div>
           </div>
 
-          {/* 상품 옵션 */}
           <h2>상품 옵션</h2>
           <label>사이즈</label>
           <div className="size-form-group">
@@ -313,7 +307,6 @@ const ProductCreate: React.FC = () => {
           </div>
         </div>
 
-        {/* 색상 추가 */}
         <div className="color-form-group">
           <h2>색상</h2>
           <div className="color-input">
@@ -343,7 +336,6 @@ const ProductCreate: React.FC = () => {
           </div>
         </div>
 
-        {/* 상품 이미지 업로드 */}
         <div className="img-container">
           <div className="image-upload-section">
             <h2>상품 이미지</h2>
@@ -366,7 +358,6 @@ const ProductCreate: React.FC = () => {
             </label>
           </div>
 
-          {/* 상품 설명 입력 */}
           <div className="description-section">
             <h2>상품 설명</h2>
             <textarea
@@ -382,7 +373,6 @@ const ProductCreate: React.FC = () => {
             <pre>{JSON.stringify(product, null, 2)}</pre>
           </div>
 
-          {/* 버튼 그룹 */}
           <div className="button-group">
             <button
               type="button"
@@ -391,7 +381,7 @@ const ProductCreate: React.FC = () => {
             >
               취소
             </button>
-            <button type="submit" className="submit-btn" >
+            <button type="submit" className="submit-btn">
               저장하기
             </button>
           </div>
