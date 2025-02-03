@@ -5,7 +5,8 @@ import cors from 'cors';
 import { Request, Response, NextFunction } from 'express'
 import ProductRoutes from "../backend/routes/ProductRoutes";
 import QnARoutes from "../backend/routes/QnARoutes";
-import WishlistRoutes from "../backend/routes/wishlistRoutes";
+import OrderRoutes from "../backend/routes/OrderRoutes";
+import WishlistRoutes from "../backend/routes/WishlistRoutes";
 import CategoryRoutes from "../backend/routes/CategoryRoutes";
 
 const app = express();
@@ -30,6 +31,9 @@ app.use("/api/products", ProductRoutes);
 app.use("/api/qna", QnARoutes);
 app.use("/api/wishlist", WishlistRoutes);
 app.use("/api/categories", CategoryRoutes);
+
+// 주문 라우터
+app.use("/api/orders", OrderRoutes);
 
 // 오류 처리 미들웨어
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => { 
