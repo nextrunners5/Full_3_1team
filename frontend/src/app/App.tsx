@@ -10,6 +10,8 @@ import FindAccount from '../pages/login/FindAccount';
 import Signup from "../pages/login/Signup";
 import ProductCreate from "../pages/product/ProductCreate";
 import ProductList from "../pages/product/ProductList";
+import MyPage from "../pages/profile/MyPage";
+
 
 function App() {
   return (
@@ -24,7 +26,8 @@ function App() {
         <Route path="/payment" element={<Payment />} />
         <Route path="/ProductCreate" element={<ProductCreate />} />
         <Route path="/find-account" element={<FindAccount />} />
-        <Route path="/ProductList" element={<ProductList />} />
+        <Route path="/ProductList" element={<ProductList />} />        
+        <Route path="/MyPage" element={<MyPage/>} />    
       </Routes>
     </Router>
   );

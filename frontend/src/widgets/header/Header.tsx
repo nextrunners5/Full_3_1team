@@ -6,9 +6,10 @@ import BellIcon from '../../assets/Bell.png';
 import MyIcon from '../../assets/My.png';
 
 const Header: React.FC = () => {
-  const [notificationCount, setNotificationCount] = useState(0); // 알림 개수 상태
-  const [searchQuery, setSearchQuery] = useState(''); // 검색어 상태
-  const [searchResults, setSearchResults] = useState<string[]>([]); // 검색 결과 상태
+  const [notificationCount, setNotificationCount] = useState(0);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState<string[]>([]);
+  const [isSearchVisible, setIsSearchVisible] = useState(false);
 
   // 알림 개수 가져오기
   useEffect(() => {
@@ -50,9 +51,13 @@ const Header: React.FC = () => {
     }
   };
 
+  const handleSearchIconClick = () => {
+    setIsSearchVisible((prev) => !prev);
+  };
+
   return (
     <header className="Header-header">
-      <div className="Header-logo">PETOPIA"</div>
+      <div className="Header-logo">PETOPIA</div>
       <nav className="Header-nav">
         <a href="/about" className="Header-nav-link">ABOUT</a>
         <div className="Header-nav-dropdown">
@@ -75,36 +80,34 @@ const Header: React.FC = () => {
             <a href="/cat/clothes">CLOTHES</a>
           </div>
         </div>
-        <div className="Header-nav-dropdown">
-          <button className="Header-nav-link">SUPPORT</button>
-          <div className="Header-dropdown-content">
-            <a href="/support/faqs">FAQs</a>
-            <a href="/support/contact">CONTACT</a>
-            <a href="/support/policies">POLICIES</a>
-          </div>
-        </div>
+        {/* SUPPORT 추가 */}
+        <a href="/support" className="Header-nav-link">SUPPORT</a>
       </nav>
       <div className="Header-search-cart-profile">
-        <div className="Header-search-container">
-          <img src={SearchIcon} alt="검색" className="Header-search-icon" />
-          <input
-            type="text"
-            placeholder="찾으시는 상품을 검색해보세요"
-            className="Header-search-input"
-            value={searchQuery}
-            onChange={handleSearchChange}
-          />
-          {searchResults.length > 0 && (
-            <div className="Header-search-results">
-              {searchResults.map((result, index) => (
-                <div key={index} className="Header-search-result-item">
-                  {result}
+        <div className="Header-icons">
+          <button className="Header-icon-button" onClick={handleSearchIconClick}>
+            <img src={SearchIcon} alt="검색" className="Header-icon-image" />
+          </button>
+          {isSearchVisible && (
+            <div className="Header-search-container">
+              <input
+                type="text"
+                placeholder="찾으시는 상품을 검색해보세요"
+                className="Header-search-input"
+                value={searchQuery}
+                onChange={handleSearchChange}
+              />
+              {searchResults.length > 0 && (
+                <div className="Header-search-results">
+                  {searchResults.map((result, index) => (
+                    <div key={index} className="Header-search-result-item">
+                      {result}
+                    </div>
+                  ))}
                 </div>
-              ))}
+              )}
             </div>
           )}
-        </div>
-        <div className="Header-icons">
           <button className="Header-icon-button">
             <img src={CartIcon} alt="장바구니" className="Header-icon-image" />
           </button>
