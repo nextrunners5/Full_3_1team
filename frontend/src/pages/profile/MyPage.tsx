@@ -13,10 +13,6 @@ const MyPage: React.FC = () => {
 
 
   const [showOtherAddresses, setShowOtherAddresses] = useState(false);
-
-  // =============================
-  //  (추가) 위시리스트 하트 토글 상태
-  // =============================
   const [isLiked, setIsLiked] = useState(true);
 
   return (
@@ -98,8 +94,6 @@ const MyPage: React.FC = () => {
                 </div>
               </div>
             )}
-
-            {/* ▼ 버튼을 목록 아래로 이동 */}
             <button
               className="MP-view-other-addresses"
               onClick={() => setShowOtherAddresses(!showOtherAddresses)}
@@ -249,9 +243,6 @@ const MyPage: React.FC = () => {
                     alt="Placeholder Wishlist Item"
                     className="MP-wishlist-image"
                   />
-                  {/* ======================= */}
-                  {/* 하트 아이콘 토글 버튼 */}
-                  {/* ======================= */}
                   <button
                     className="MP-wishlist-heart-btn"
                     onClick={() => setIsLiked(!isLiked)}
