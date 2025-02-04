@@ -1,22 +1,17 @@
 import React, { useState } from "react";
 import { AiFillSetting } from "react-icons/ai"; 
-// ▼ 하트 아이콘 추가
 import { FaHeart, FaRegHeart } from "react-icons/fa";
-
 import './MyPage.css';
 import Header from "../../widgets/header/Header"; 
 import Footer from "../../widgets/footer/Footer";
-
-// ⬇ 로컬 이미지 임포트 (경로와 파일명은 실제 프로젝트 구조에 맞게 변경)
 import pc60 from '../../assets/pc60.jpg';
 import pc200 from '../../assets/pc200.jpg';
 
 const MyPage: React.FC = () => {
-  // 드롭다운 필터 상태(기간, 주문상태)
   const [period, setPeriod] = useState("1month");
   const [orderType, setOrderType] = useState("all");
 
-  // "다른 배송지 보기" 토글 상태
+
   const [showOtherAddresses, setShowOtherAddresses] = useState(false);
 
   // =============================
