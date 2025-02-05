@@ -8,6 +8,7 @@ import QnARoutes from "../backend/routes/QnARoutes";
 import OrderRoutes from "../backend/routes/OrderRoutes";
 import WishlistRoutes from "../backend/routes/WishlistRoutes";
 import CategoryRoutes from "../backend/routes/CategoryRoutes";
+import CartRoutes from "../backend/routes/CartRoutes";
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -36,6 +37,9 @@ app.use("/api", WishlistRoutes);
 
 // 주문 라우터
 app.use("/api/orders", OrderRoutes);
+
+// 장바구니 라우터
+app.use("/api/carts", CartRoutes);
 
 // 오류 처리 미들웨어
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {

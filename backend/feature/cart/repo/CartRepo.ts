@@ -1,30 +1,47 @@
-//db 연산 
+import { RowDataPacket } from "mysql2";
+import pool from "../../../config/dbConfig";
 
-//crud
-// import { getRepository } from 'typeorm';
-// import { Product } from './entities/Product';
+// 장바구니 조회
+export const getCart = async () => {
+  const [rows] = await pool
+    .promise()
+    .query<RowDataPacket[]>("SELECT * FROM Cart");
+  return rows;
+};
 
-// async function main() {
-//   const productRepository = getRepository(Product);
+// 장바구니에 상품 추가
+export const addToCart = async (
+  userId: number,
+  productId: number,
+  quantity: number
+) => {
+  await pool.query(
+    "INSERT INTO Cart (user_id, product_id, quantity) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE quantity = quantity + ?",
+    [userId, productId, quantity, quantity]
+  );
+};
 
-//   // Create a new product
-//   const newProduct = productRepository.create({
-//     name: 'Product 1',
-//     price: 19.99,
-//     quantity: 10,
-//   });
+// 상품 수량 증가
+export const increaseQuantity = async (id: number) => {
+  await pool.query("UPDATE Cart SET quantity = quantity + 1 WHERE id = ?", [
+    id
+  ]);
+};
 
-//   // Save the product
-//   await productRepository.save(newProduct);
+// 상품 수량 감소
+export const decreaseQuantity = async (id: number) => {
+  await pool.query(
+    "UPDATE Cart SET quantity = quantity - 1 WHERE id = ? AND quantity > 1",
+    [id]
+  );
+};
 
-//   // Update the product
-//   newProduct.price = 29.99;
-//   await productRepository.save(newProduct);
+// 개별 상품 삭제
+export const removeItem = async (id: number) => {
+  await pool.query("DELETE FROM Cart WHERE id = ?", [id]);
+};
 
-//   // Find all products
-//   const products = await productRepository.find();
-//   console.log('All products:', products);
-
-//   // Delete the product
-//   await productRepository.delete(newProduct.id);
-// }
+// 선택된 상품 삭제
+export const removeSelectedItems = async (ids: number[]) => {
+  await pool.query("DELETE FROM Cart WHERE id IN (?)", [ids]);
+};
