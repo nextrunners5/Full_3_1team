@@ -9,6 +9,7 @@ import Payment from "../pages/payments/Payments";
 import ProductCreate from "../pages/product/ProductCreate";
 import ProductList from "../pages/product/ProductList";
 import ProductDetail from "../pages/product/ProductDetail";
+import Wishlist from "../pages/wishlist/WishList";
 
 function App() {
   return (
@@ -23,6 +24,7 @@ function App() {
         <Route path="/ProductCreate" element={<ProductCreate />} />
         <Route path="/ProductList" element={<ProductList />} />
         <Route path="/products/:product_id" element={<ProductDetail />} />
+        <Route path="/wishlist" element={<Wishlist />} />
       </Routes>
     </Router>
   );

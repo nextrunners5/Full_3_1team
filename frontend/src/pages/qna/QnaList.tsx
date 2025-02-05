@@ -24,7 +24,7 @@ const QnaList: React.FC<{ productId: string }> = ({ productId }) => {
 
   useEffect(() => {
     const userRole = localStorage.getItem("userRole");
-    const userId = localStorage.getItem("userId"); // 로그인된 사용자 ID 저장
+    const userId = localStorage.getItem("userId");
     setIsAdmin(userRole === "admin");
     setCurrentUser(userId);
   }, []);

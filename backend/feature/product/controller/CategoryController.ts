@@ -2,7 +2,6 @@ import { Request, Response } from "express";
 import { RowDataPacket } from "mysql2";
 import pool from "../../../config/dbConfig"; // DB 연결 확인
 
-/** 🔹 카테고리 목록 가져오기 */
 export const getCategories = async (req: Request, res: Response): Promise<void> => {
   try {
     const [categories] = await pool.promise().query<RowDataPacket[]>(

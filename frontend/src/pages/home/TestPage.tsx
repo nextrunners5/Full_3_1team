@@ -3,7 +3,7 @@ import "./TestPage.css"
 
 const TestPage: React.FC = () => {
   return (
-    <div>
+    <div className="home-btn">
       테스트 페이지 입니다.
       <button>
       <Link to={'/main'}>메인 페이지</Link>
@@ -28,6 +28,9 @@ const TestPage: React.FC = () => {
       </button>
       <button>
       <Link to={'/ProductList'}>상품 전체 페이지</Link>
+      </button>
+      <button>
+      <Link to={'/WishList'}>위시리스트</Link>
       </button>
       
     </div>

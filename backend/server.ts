@@ -1,8 +1,8 @@
-import { config } from 'dotenv';
+import { config } from "dotenv";
 config();
-import express from 'express';
-import cors from 'cors';
-import { Request, Response, NextFunction } from 'express'
+import express from "express";
+import cors from "cors";
+import { Request, Response, NextFunction } from "express";
 import ProductRoutes from "../backend/routes/ProductRoutes";
 import QnARoutes from "../backend/routes/QnARoutes";
 import OrderRoutes from "../backend/routes/OrderRoutes";
@@ -13,32 +13,36 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // 미들웨어 설정
-app.use(cors({
-  origin: "*",
-  methods: ['GET', 'PUT', 'POST', 'DELETE'],  // 허용할 메서드
-  allowedHeaders: ['Content-Type', 'Authorization']  // 허용할 헤더
-}));
+app.use(
+  cors({
+    origin: "*",
+    methods: ["GET", "PUT", "POST", "DELETE"], // 허용할 메서드
+    allowedHeaders: ["Content-Type", "Authorization"], // 허용할 헤더
+  })
+);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 //기본 라우트
-app.get('/', (req, res) => { 
-  res.send('Hello, TypeScript with Express!'); 
-}); 
+app.get("/", (req, res) => {
+  res.send("Hello, TypeScript with Express!");
+});
 
 // product 라우트
-app.use("/api/products", ProductRoutes);
+app.use("/api", ProductRoutes);
 app.use("/api/qna", QnARoutes);
-app.use("/api/wishlist", WishlistRoutes);
 app.use("/api/categories", CategoryRoutes);
+app.use("/api", WishlistRoutes);
 
 // 주문 라우터
 app.use("/api/orders", OrderRoutes);
 
 // 오류 처리 미들웨어
-app.use((err: Error, req: Request, res: Response, next: NextFunction) => { 
-  console.error(err.stack); 
-  res.status(500).json({ success: false, message: '서버 오류 발생', error: err.message }); 
+app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
+  console.error(err.stack);
+  res
+    .status(500)
+    .json({ success: false, message: "서버 오류 발생", error: err.message });
 });
 
 // 서버 시작

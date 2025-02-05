@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "./CSS/ProductCreate.css";
 import axiosInstance from "axios";
-import { createProduct } from "../../shared/axios/ProductsAxios";
+import { createProduct } from "../../features/product/api/Product";
 
 const ProductCreate: React.FC = () => {
   const navigate = useNavigate();
@@ -59,6 +59,7 @@ const ProductCreate: React.FC = () => {
     axiosInstance
       .get("/api/categories")
       .then((res) => {
+        console.log("전체 API 응답 데이터:", res.data);
         if (Array.isArray(res.data.categories)) {
           setCategories(res.data.categories);
         } else {

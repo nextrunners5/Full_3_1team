@@ -1,84 +1,76 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+import axiosInstance from "../../shared/axios/axios";
+import ProductCard from "../product/ProductCard";
 import "./CSS/ProductList.css";
-import { Link } from "react-router-dom";
-import { Heart } from "lucide-react";
 
 interface Product {
   product_id: number;
   product_name: string;
-  description: string;
   origin_price: number;
   discount_price: number;
   final_price: number;
-  stock_quantity: number;
-  product_status: string;
-  created_at: string;
-  updated_at: string;
-  // image_url?: string; // 이미지 추후 추가 예정
 }
 
-const ProductList = () => {
+const ProductList: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [sortOption, setSortOption] = useState<string>("lowPrice");
   const [wishlist, setWishlist] = useState<number[]>([]);
   const userId = localStorage.getItem("userId") || "guest";
 
   useEffect(() => {
-    axios
-      .get<Product[]>("/api/products")
+    axiosInstance
+      .get("/api/products")
       .then((res) => setProducts(res.data))
-      .catch((err) => console.error(err));
+      .catch((err) => console.error("상품 불러오기 실패:", err));
 
     if (userId === "guest") {
-      // 비회원
       const storedWishlist = JSON.parse(
         localStorage.getItem("wishlist") || "[]"
       );
       setWishlist(storedWishlist);
     } else {
-      // 회원
-      axios
+      axiosInstance
         .get(`/api/wishlist?userId=${userId}`)
         .then((res) => setWishlist(res.data.wishlist))
-        .catch((err) => console.error("위시리스트 가져오기 실패", err));
+        .catch((err) => console.error("위시리스트 불러오기 실패:", err));
     }
   }, [userId]);
 
-  // 상품 정렬
-  const sortedProducts = [...products].sort((a, b) => {
-    if (sortOption === "lowPrice") return a.final_price - b.final_price;
-    if (sortOption === "highPrice") return b.final_price - a.final_price;
-    return 0;
-  });
-
-  // 위시리스트 추가/삭제
-  const toggleWishlist = async (productId: number) => {
-    if (userId === "guest") {
-      let updatedWishlist = [...wishlist];
-      if (wishlist.includes(productId)) {
-        updatedWishlist = wishlist.filter((id) => id !== productId);
-      } else {
-        updatedWishlist.push(productId);
-      }
-      localStorage.setItem("wishlist", JSON.stringify(updatedWishlist));
-      setWishlist(updatedWishlist);
-    } else {
-      try {
-        if (wishlist.includes(productId)) {
-          await axios.delete(`/api/wishlist/${productId}`, {
-            data: { userId },
-          });
-          setWishlist(wishlist.filter((id) => id !== productId));
+  const toggleWishlist = async (productId: number, productName: string) => {
+    try {
+      let updatedWishlist: number[];
+  
+      if (userId === "guest") {
+        const storedWishlist = JSON.parse(localStorage.getItem("wishlist") || "[]");
+  
+        if (storedWishlist.includes(productId)) {
+          updatedWishlist = storedWishlist.filter((id: number) => id !== productId);
+          alert(`${productName}이(가) 위시리스트에서 삭제되었습니다.`);
         } else {
-          await axios.post("/api/wishlist", { userId, productId });
-          setWishlist([...wishlist, productId]);
+          updatedWishlist = [...storedWishlist, productId];
+          alert(`${productName}이(가) 위시리스트에 추가되었습니다!`);
         }
-      } catch (error) {
-        console.error("위시리스트 업데이트 실패", error);
+  
+        localStorage.setItem("wishlist", JSON.stringify(updatedWishlist));
+      } else {
+        if (wishlist.includes(productId)) {
+          await axiosInstance.delete(`/wishlist/${productId}`);
+          updatedWishlist = wishlist.filter((id) => id !== productId);
+          alert(`${productName}이(가) 위시리스트에서 삭제되었습니다.`);
+        } else {
+          await axiosInstance.post("/wishlist", { userId, productId });
+          updatedWishlist = [...wishlist, productId];
+          alert(`${productName}이(가) 위시리스트에 추가되었습니다!`);
+        }
       }
+  
+      setWishlist(updatedWishlist);
+    } catch (error) {
+      console.error("위시리스트 업데이트 실패:", error);
+      alert("위시리스트 업데이트 중 오류가 발생했습니다.");
     }
   };
+  
 
   return (
     <div className="product-page">
@@ -97,67 +89,15 @@ const ProductList = () => {
         </select>
       </div>
 
-      {/* 상품 목록 */}
       <div className="products">
-        {sortedProducts.map((product) => {
-          const isWishlisted = wishlist.includes(product.product_id);
-          // 할인율 추후 필요시
-          // const discountPercentage = product.discount_price > 0
-          //   ? Math.round(((product.origin_price - product.final_price) / product.origin_price) * 100)
-          //   : 0;
-
-          return (
-            <div key={product.product_id} className="product-card">
-              <button
-                className={`wishlist-btn ${isWishlisted ? "active" : ""}`}
-                onClick={(e) => {
-                  e.preventDefault();
-                  toggleWishlist(product.product_id);
-                }}
-              >
-                <Heart
-                  className="heart-icon"
-                  fill={isWishlisted ? "red" : "none"}
-                />
-              </button>
-
-              <Link
-                to={`/products/${product.product_id}`}
-                className="product-link"
-              >
-                <img
-                  src="https://placehold.co/250x250"
-                  alt={product.product_name}
-                />
-                <div className="product-info">
-                  <div className="product-title" >
-                  <h3>{product.product_name}</h3>
-                  
-
-                  {/* 할인율 표시
-                  {product.discount_price > 0 && (
-                  <p className="discount-label">-{discountPercentage}%</p>
-                )} */}
-                <div className="price-container">
-                  <p className="price">
-                    {Math.floor(product.origin_price).toLocaleString()}원
-                  </p>
-
-                  {product.discount_price > 0 && (
-                    <p className="discount">
-                    ₩{Math.floor(product.final_price).toLocaleString()}
-                      원
-                    </p>
-                  )}
-                  </div>
-                  </div>
-                  {/* 추후 추가 */}
-                  <p className="rating">별점4.2</p>
-                </div>
-              </Link>
-            </div>
-          );
-        })}
+        {products.map((product) => (
+          <ProductCard
+            key={product.product_id}
+            product={product}
+            isWishlisted={wishlist.includes(product.product_id)}
+            toggleWishlist={toggleWishlist}
+          />
+        ))}
       </div>
     </div>
   );

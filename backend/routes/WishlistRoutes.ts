@@ -1,10 +1,14 @@
 import express from "express";
-import { addToWishlist, removeFromWishlist, getWishlist } from "../feature/product/controller/WishlistController";
+import {
+  addToWishlist,
+  getWishlist,
+  removeFromWishlist,
+} from "../feature/wishlist/controller/WishlistController";
 
 const router = express.Router();
 
-router.post("/", addToWishlist);
-router.delete("/:productId", removeFromWishlist);
-router.get("/", getWishlist);
+router.get("/wishlist", getWishlist);
+router.post("/wishlist", addToWishlist);
+router.delete("/wishlist/:productId", removeFromWishlist);
 
 export default router;

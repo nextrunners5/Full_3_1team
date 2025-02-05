@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import axios from "axios";
 import "./CSS/ProductDetail.css";
 import Footer from "../../widgets/footer/Footer";
 import QnaModal from "../qna/QnaModal";
 import QnaList from "../qna/QnaList";
+import axiosInstance from "../../shared/axios/axios";
+import { createOrder } from "../../features/product/api/Product";
+// import Review from "../review/Review";
 
 interface Product {
   product_id: number;
@@ -30,10 +32,10 @@ const ProductDetail: React.FC = () => {
   const [selectedColor, setSelectedColor] = useState<string>("");
   const [activeTab, setActiveTab] = useState("detail");
   const [isModalOpen, setIsModalOpen] = useState(false);
-  // const { productId } = useParams<{ productId: string }>()
+  const [loading, setLoading] = useState(false);
+  const userId = localStorage.getItem("userId") || "guest";
 
-  console.log("🔍 요청된 product_id:", product_id);
-  // console.log(" ProductDetail에서 가져온 productId:", productId);
+  console.log("요청된 product_id:", product_id);
 
   useEffect(() => {
     if (!product_id) {
@@ -42,9 +44,10 @@ const ProductDetail: React.FC = () => {
       return;
     }
 
-    // console.log(" API 요청:", `/api/products/${product_id}`);
+    console.log(" API 요청:", `/api/products/${product_id}`);
+    console.log(" 요청 URL:", `/products/${product_id}`);
 
-    axios
+    axiosInstance
       .get<Product>(`/api/products/${product_id}`)
       .then((res) => {
         console.log(" 상품 정보 불러오기 성공:", res.data);
@@ -58,15 +61,49 @@ const ProductDetail: React.FC = () => {
       });
   }, [product_id]);
 
+  const handleOrder = async () => {
+    if (!product) {
+      alert("상품 정보를 불러오는 중입니다.");
+      return;
+    }
+
+    try {
+      setLoading(true);
+
+      const orderData = {
+        userId,
+        productId: product.product_id,
+        quantity,
+        totalAmount: product.origin_price * quantity,
+        discountAmount: (product.origin_price - product.final_price) * quantity,
+        finalAmount: product.final_price * quantity,
+        shippingFee: 3000,
+        selectedSize,
+        selectedColor,
+        statusId: "PENDING",
+      };
+
+      console.log("주문 요청 데이터:", orderData);
+
+      const data = await createOrder(orderData);
+      
+      console.log("주문 완료:", data);
+      alert(`주문이 성공적으로 완료되었습니다! 주문번호: ${data.orderId}`);
+
+    } catch (error) {
+      alert(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   if (error) return <p>{error}</p>;
   if (!product) return <p>상품 정보를 불러오는 중...</p>;
 
   return (
     <div className="product-html">
       <div className="product-page">
-        {/* 상단 상품 정보 */}
         <div className="product-header">
-          {/* 상품 이미지 */}
           <div className="product-image">
             <img
               src={product.image_url || "https://placehold.co/500x500"}
@@ -74,13 +111,13 @@ const ProductDetail: React.FC = () => {
             />
           </div>
 
-          {/* 상품 정보 */}
           <div className="product-info2">
             <h2>{product.product_name}</h2>
             <p className="rating">
-              {"★".repeat(Math.floor(product.rating))}
+              {/* {"★".repeat(Math.floor(product.rating))}
               {"☆".repeat(5 - Math.floor(product.rating))}
-              <span> ({product.review_count}개 리뷰)</span>
+              <span> ({product.review_count}개 리뷰)</span> */}
+              <span>??개 리뷰</span>
             </p>
             <p className="price">
               <strong>
@@ -90,14 +127,18 @@ const ProductDetail: React.FC = () => {
                 {Math.floor(product.origin_price).toLocaleString()}원
               </span>
               <span className="discount-rate">
-                {Math.floor(
-                  (1 - product.final_price / product.origin_price) * 100
+                약{" "}
+                {Math.round(
+                  (1 -
+                    Number(
+                      (product.final_price / product.origin_price).toFixed(2)
+                    )) *
+                    100
                 )}
                 % 할인
               </span>
             </p>
 
-            {/* 사이즈 선택 */}
             {product.sizes.length > 0 && (
               <div className="select-group">
                 <label>사이즈</label>
@@ -131,7 +172,6 @@ const ProductDetail: React.FC = () => {
               </div>
             )}
 
-            {/* 수량 선택 */}
             <div className="quantity-group">
               <label>수량</label>
               <button
@@ -146,15 +186,17 @@ const ProductDetail: React.FC = () => {
             {/* 배송 정보 추가해야 함 */}
             {/* {product.free_shipping && <p className="free-shipping">무료배송</p>} */}
 
-            {/* 버튼 */}
             <div className="button-group">
-              <button className="buy-button">구매하기</button>
+              <button className="buy-button"
+              onClick={handleOrder} disabled={loading}>
+              {loading ? "주문 처리 중..." : "구매하기"}
+              </button>
+              
               <button className="cart-button">장바구니</button>
             </div>
           </div>
         </div>
 
-        {/* 탭 버튼 */}
         <div className="product-tabs">
           <button
             className={activeTab === "detail" ? "active" : ""}
@@ -176,11 +218,9 @@ const ProductDetail: React.FC = () => {
           </button>
         </div>
 
-        {/* 탭에 따른 콘텐츠 */}
         <div className="tab-content">
           {activeTab === "detail" && (
             <div className="detail-content">
-              {/* 상품 설명 */}
               <div className="product-description">
                 <h3>상품 설명</h3>
                 <p>{product.description}</p>
@@ -197,25 +237,31 @@ const ProductDetail: React.FC = () => {
             </div>
           )}
           {activeTab === "review" && (
-            <div className="review-content">리뷰 항목 만들어야함</div>
+            <div className="review-content">
+              리뷰 항목 만들어야함
+              {/* <Review productId={product_id ?? ""} /> */}
+            </div>
           )}
           {activeTab === "qna" && (
             <div className="qna-section">
-            <div className="qna-header">
-              <h2>상품 Q&A</h2>
-              <button className="inquiry-button" onClick={() => setIsModalOpen(true)}>
-                문의하기
-              </button>
+              <div className="qna-header">
+                <h2>상품 Q&A</h2>
+                <button
+                  className="inquiry-button"
+                  onClick={() => setIsModalOpen(true)}
+                >
+                  문의하기
+                </button>
+              </div>
+              <QnaList productId={product_id ?? ""} />
+              {isModalOpen && (
+                <QnaModal
+                  onClose={() => setIsModalOpen(false)}
+                  userId={null}
+                  productId={product.product_id}
+                />
+              )}
             </div>
-            <QnaList productId={product_id ?? ""} />
-            {isModalOpen && (
-              <QnaModal
-                onClose={() => setIsModalOpen(false)}
-                userId={null}
-                productId={product.product_id}
-              />
-            )}
-          </div>
           )}
         </div>
 
