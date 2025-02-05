@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import "./CSS/ProductDetail.css";
 import Footer from "../../widgets/footer/Footer";
 import QnaModal from "../qna/QnaModal";
 import QnaList from "../qna/QnaList";
 import axiosInstance from "../../shared/axios/axios";
-import { createOrder } from "../../features/product/api/Product";
+import { createOrder, createCart } from "../../features/product/api/Product";
 // import Review from "../review/Review";
 
 interface Product {
@@ -34,6 +34,7 @@ const ProductDetail: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const userId = localStorage.getItem("userId") || "guest";
+  const navigate = useNavigate();
 
   console.log("요청된 product_id:", product_id);
 
@@ -66,10 +67,10 @@ const ProductDetail: React.FC = () => {
       alert("상품 정보를 불러오는 중입니다.");
       return;
     }
-
+  
     try {
       setLoading(true);
-
+  
       const orderData = {
         userId,
         productId: product.product_id,
@@ -84,18 +85,54 @@ const ProductDetail: React.FC = () => {
       };
 
       console.log("주문 요청 데이터:", orderData);
-
+  
       const data = await createOrder(orderData);
-      
-      console.log("주문 완료:", data);
+  
       alert(`주문이 성공적으로 완료되었습니다! 주문번호: ${data.orderId}`);
-
+  
+      navigate("/order", { state: { orderData } });
+  
     } catch (error) {
-      alert(error);
+      console.error("주문 실패:", error);
+      alert("주문 중 오류가 발생했습니다. 다시 시도해주세요.");
     } finally {
       setLoading(false);
     }
   };
+
+  const handleAddToCart = async () => {
+    if (!product) {
+      alert("상품 정보를 불러오는 중입니다.");
+      return;
+    }
+  
+    try {
+      setLoading(true);
+  
+      const cartData = {
+        userId,
+        productId: product.product_id,
+        quantity,
+        selectedSize,
+        selectedColor,
+      };
+  
+      console.log("장바구니 추가 요청 데이터:", cartData);
+  
+      const data = await createCart(cartData);
+  
+      console.log("장바구니 추가 완료:", data);
+      alert("장바구니에 상품이 추가되었습니다.");
+  
+      navigate("/cart", { state: { cartData: data } });
+  
+    } catch (error) {
+      console.error("장바구니 추가 실패:", error);
+      alert("장바구니 추가에 실패했습니다. 다시 시도해주세요.");
+    } finally {
+      setLoading(false);
+    }
+  };  
 
   if (error) return <p>{error}</p>;
   if (!product) return <p>상품 정보를 불러오는 중...</p>;
@@ -192,7 +229,10 @@ const ProductDetail: React.FC = () => {
               {loading ? "주문 처리 중..." : "구매하기"}
               </button>
               
-              <button className="cart-button">장바구니</button>
+              <button className="cart-button"
+              onClick={handleAddToCart} disabled={loading}>
+              {loading ? "처리 중..." : "장바구니"}
+              </button>
             </div>
           </div>
         </div>

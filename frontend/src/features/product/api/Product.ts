@@ -1,5 +1,5 @@
 import axiosInstance from "axios";
-import { Product, OrderProduct } from "../model/ProductModel"
+import { Product, OrderProduct, CartProduct } from "../model/ProductModel"
 
 // 상품 등록 API 요청
 export const createProduct = async (productData: Product) => {
@@ -41,6 +41,17 @@ export const createOrder = async (orderData: OrderProduct) => {
     return response.data;
   } catch (error) {
     console.error(`주문 생성 실패 (상품 ID: ${orderData.productId}):`, error);
+    throw error;
+  }
+};
+
+// 상품 장바구니 API 요청
+export const createCart = async (cartData: CartProduct) => {
+  try {
+    const response = await axiosInstance.post("/api/cart", cartData);
+    return response.data;
+  } catch (error) {
+    console.error(`장바구니 추가 실패 (상품 ID: ${cartData.productId}):`, error);
     throw error;
   }
 };

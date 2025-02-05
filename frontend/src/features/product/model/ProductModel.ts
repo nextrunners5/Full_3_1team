@@ -24,3 +24,10 @@ export interface OrderProduct {
   selectedColor: string;
   statusId: string;
 }
+export interface CartProduct {
+  userId: string;
+  productId: number;
+  quantity: number;
+  selectedSize: string;
+  selectedColor: string;
+}
