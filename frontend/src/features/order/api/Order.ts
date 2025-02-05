@@ -1,5 +1,5 @@
 import axiosInstance from "../../../shared/axios/axios";
-import { OrderProducts, UserAddressInfo } from "../model/OrderModel";
+import { OrderProducts, OrderShippingFee, UserAddressInfo } from "../model/OrderModel";
 
 //사용자 포인트 가져오기
 export const fetchUserPoints = async() => {
@@ -33,6 +33,17 @@ export const fetchAddress = async() => {
   }
 };
 
+//배송지 상세 리스트 정보 가져오기
+export const fetchDetailsAddress = async() => {
+  try{
+    const response = await axiosInstance.get<UserAddressInfo[]>('/api/orders/UserDetailsAddress');
+    console.log("DetailsAddress response: ", response.data);
+    return response.data;
+  } catch(err){
+    console.error('배송지 상세 리스트 정보를 가져오지 못했습니다.', err);
+  }
+};
+
 //주문 제품 정보 가져오기
 export const fetchOrderProducts = async() => {
   try{
@@ -41,5 +52,15 @@ export const fetchOrderProducts = async() => {
     return response.data;
   } catch(err){
     console.error('주문 제품 정보를 가져오지 못했습니다.', err);
+  }
+};
+
+export const fetchShippingFee = async() => {
+  try{
+    const response = await axiosInstance.get<OrderShippingFee[]>('/api/orders/OrderShippingFee');
+    console.log('APIshippingFee: ',response.data);
+    return response.data;
+  } catch(err){
+    console.error('배송비 정보를 가져오지 못했습니다.', err);
   }
 };

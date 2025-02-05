@@ -1,37 +1,59 @@
 import { useEffect, useState } from "react";
 import "./OrderDeliveryInfo.css"
 import OrderDeliveryModal from "./OrderDeliveryModal";
-import { FaPlus } from "react-icons/fa6";
-import { BsPencilSquare } from "react-icons/bs";
 import axiosInstance from "../../../shared/axios/axios";
 import {Common, DeliveryForm, UserAddressInfo} from "../model/OrderModel";
-import { fetchAddress, fetchDeliveryMessage } from "../api/Order";
-import OrderDeliveryAddModal from "./OrderDeliveryAddModal";
-import OrderDeliveryUpdateModal from "./OrderDeliveryUpdateModal";
+import { fetchDeliveryMessage, fetchDetailsAddress } from "../api/Order";
+// import OrderDeliveryAddModal from "./OrderDeliveryAddModal";
+// import OrderDeliveryUpdateModal from "./OrderDeliveryUpdateModal";
 
 
 const OrderDeliveryInfo: React.FC = () => {
 
   const [deliveryMessage, setDeliveryMessage] = useState<Common[]>([]);
   const [messageForm, setMessageForm] = useState<DeliveryForm>({delivery_message_id: 0, description: '배송 메시지를 선택해 주세요.'});
-  const [userAddress, setUserAddress] = useState<UserAddressInfo[]>([]);
+  // const [userAddress, setUserAddress] = useState<UserAddressInfo[]>([]);
+  const [userAddressDetails, setUserAddressDetails] = useState<UserAddressInfo[]>([]);
+  const [selectedAddress, setSelectedAddress] = useState<UserAddressInfo|null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState<boolean>(false);
-  const [addModalOpen, setAddModalOpen] = useState<boolean>(false);
-  const [updateModalOpen, setUpdateModalOpen] = useState<boolean>(false);
+
+  // useEffect(() => {
+  //   const getUserAddress = async() => {
+  //     try{
+  //       const address = await fetchDetailsAddress();
+  //       console.log('주소 데이터 가져오기 성공:', address);
+  //       if(address && address.length > 0){
+  //         setUserAddressDetails(address);
+  //       }
+  //       setIsLoading(false);
+  //       console.log('주소:', address);
+  //     } catch(err){
+  //       console.log('사용자의 주소정보를 가져오지 못했습니다.', err);
+  //       setIsLoading(false);
+  //     }
+  //   };
+  //   getUserAddress();
+  // },[])
 
   useEffect(() => {
     const getUserAddress = async() => {
       try{
-        const address = await fetchAddress();
-        console.log('주소 데이터 가져오기 성공:', address);
-        if(address && address.length > 0){
-          setUserAddress(address);
+        const addressDetails = await fetchDetailsAddress();
+        console.log('주소 상세 데이터 가져오기 성공:', addressDetails);
+        if(addressDetails && addressDetails.length > 0){
+          // const sortedAddress = addressDetails.sort((a,b) => b.is_default - a.is_default);
+          setUserAddressDetails(addressDetails);
+
+          const defaultAddress = addressDetails.find(addr => addr.is_default === 1)
+          if(defaultAddress){
+            setSelectedAddress(defaultAddress);
+          }
         }
         setIsLoading(false);
-        console.log('주소:', address);
+        console.log('상세 주소:', addressDetails);
       } catch(err){
-        console.log('사용자의 주소정보를 가져오지 못했습니다.', err);
+        console.log('사용자의 주소 상세 정보를 가져오지 못했습니다.', err);
         setIsLoading(false);
       }
     };
@@ -75,20 +97,12 @@ const OrderDeliveryInfo: React.FC = () => {
     }))
   };
 
-  // const [selectRadio, setSelectRadio] = useState<string | null>(null)
-
-  // const handleRadioChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-  //   setSelectRadio(e.target.value);
-  // };
-
-
-  
   const openModal = () => { setModalOpen(true); };
   const closeModal = () => { setModalOpen(false); };
-  const openAddModal = () => {setAddModalOpen(true); };
-  const closeAddModal = () => {setAddModalOpen(false); };
-  const openUpdateModal = () => {setUpdateModalOpen(true); };
-  const closeUpdateModal = () => {setUpdateModalOpen(false); };
+
+  const handleAddressChange = (address: UserAddressInfo) => {
+    setSelectedAddress(address);
+  };
 
   return (
     <div className="orderDeliveryContainer">
@@ -99,56 +113,18 @@ const OrderDeliveryInfo: React.FC = () => {
         <div className="deliveryInfo">
           {isLoading ? (
             <div>로딩 중...</div>
-          ) : userAddress.length > 0 ? (
+          ) : selectedAddress ? (
           <div>
-            <div className="recipient">{userAddress[0].recipient_name}</div>
+            {/* <div className="recipient">{userAddress[0].recipient_name}</div> */}
+            <div className="recipient">{selectedAddress.recipient_name}</div>
             <div className="addressBody">
-              {/* <div className="address">서울특별시 강남구 테헤란로 123</div> */}
-              <div className="address">{userAddress[0].address}</div>
+              {/* <div className="address">{userAddress[0].address}</div> */}
+              <div className="address">{selectedAddress.address}</div>
               <button className="deliveryChange" onClick={openModal}>배송지 변경</button>
-              <OrderDeliveryModal open={modalOpen} close={closeModal} header="배송지 선택">
-                <div className="orderDeliveryBody">
-                  <form className="orderDeliveryBody">
-                    <label className="orderDeliverySelectForm">
-                      <div className="formContainer">
-                        {/* <input className='selectRadio' type="radio" name="radioOption" value="1" checked onChange={handleRadioChange}/> */}
-                        <span>집</span>
-                        <div className="selectDeliveryInfo">
-                          <div className="deliveryName">김민수</div>
-                          <div className="deliveryDetail">서울특별시 강남구 테헤란로 123 우리빌딩 456호</div>
-                          <div className="deliveryPhone">010-1234-5678</div>
-                        </div>
-                      </div>
-                    </label>
-                    <label className="orderDeliverySelectForm">
-                      <div className="formContainer">
-                        <input className='selectRadio' type="radio" name="radioOption" value="1"/><span>집</span>
-                        <div className="selectDeliveryInfo">
-                          <div className="deliveryName">홍길동</div>
-                          <div className="deliveryDetail">서울특별시 강남구 테헤란로 123 우리빌딩 456호</div>
-                          <div className="deliveryPhone">010-1234-5678</div>
-                        </div>
-                      </div>
-                    </label>
-                  </form>
-                  <div className="changeDeliveryContainer">
-                    <div className="addDelivery">
-                      <FaPlus />
-                      <div className="addDeliveryTitle" onClick={openAddModal}>새 배송지 추가</div>
-                      <OrderDeliveryAddModal open={addModalOpen} close={closeAddModal} header="새 배송지 추가">
-                      </OrderDeliveryAddModal>
-                    </div>
-                    <div className="updateDelivery">
-                      <BsPencilSquare />
-                      <div className="updateDeliveryTitle" onClick={openUpdateModal}>선택 배송지 수정</div>
-                      <OrderDeliveryUpdateModal open={updateModalOpen} close={closeUpdateModal} header="배송지 수정">
-                      </OrderDeliveryUpdateModal>
-                    </div>
-                  </div>
-                </div>
-              </OrderDeliveryModal>
+              <OrderDeliveryModal open={modalOpen} close={closeModal} header="배송지 선택" userAddressDetails = {userAddressDetails}  onSelect={handleAddressChange}/>
             </div>
-            <div className="phoneNumber">{userAddress[0].recipient_phone}</div>
+            {/* <div className="phoneNumber">{userAddress[0].recipient_phone}</div> */}
+            <div className="phoneNumber">{selectedAddress.recipient_phone}</div>
           </div>
           ) : (
             <div>주소 정보가 없습니다.</div>

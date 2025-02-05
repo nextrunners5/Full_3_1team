@@ -1,13 +1,32 @@
-import { OrderPriceProps } from "../model/OrderModel";
+import { useEffect, useState } from "react";
+import { OrderPriceProps, OrderShippingFee } from "../model/OrderModel";
 import "./OrderPrice.css"
+import { fetchShippingFee } from "../api/Order";
 
 const OrderPrice: React.FC<OrderPriceProps> = ({points}) => {
+  const [shippingFee, setShippingFee] = useState<OrderShippingFee>({shipping_fee: 0});
+
+  useEffect(()=> {
+    const getShippingFee = async() => {
+      try{
+        const fee = await fetchShippingFee();
+        if(fee && fee.length > 0){
+          setShippingFee( {shipping_fee: fee[0].shipping_fee});
+        }
+        console.log('배송비 가져오기 setShippingFee: ', fee);
+      } catch(err){
+        console.error('배송비를 가져오지 못했습니다.', err);
+      }
+    };
+    getShippingFee();
+  },[])
   return (
     <div>
       <div className="orderPriceContainer">
         <div className="orderProductPriceContainer">
           <div className="orderProductPriceTitle">상품 금액</div>
           <div className="orderProductPrice">89,000원</div>
+          {/* <div className="orderProductPrice">{total_productPrice.toLocaleString()}원</div> */}
         </div>
         <div className="orderCouponPriceContainer">
           <div className="orderCouponPriceTitle">쿠폰 할인</div>
@@ -15,12 +34,11 @@ const OrderPrice: React.FC<OrderPriceProps> = ({points}) => {
         </div>
         <div className="orderPointPriceContainer">
           <div className="orderPointPriceTitle">포인트</div>
-          {/* <div className="orderPointPrice">-8,900원</div> */}
           <div className="orderPointPrice">-{points}원</div>
         </div>
         <div className="orderDeliveryPriceContainer">
           <div className="orderDeliveryPriceTitle">배송비</div>
-          <div className="orderDeliveryPrice">3,000원</div>
+          <div className="orderDeliveryPrice">{shippingFee.shipping_fee}원</div>
         </div>
       </div>
       <div className="orderFinalPriceContainer">

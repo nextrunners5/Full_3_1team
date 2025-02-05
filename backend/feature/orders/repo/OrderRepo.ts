@@ -59,9 +59,13 @@ export const getDeliveryMessage = async() => {
   }
 };
 
-
+//사용자 배송지 가져오기
 export const getUserAddress = async(userId: string) => {
-  const query = "select recipient_name, recipient_phone, address from Users u join UserAddresses ua on u.user_id = ua.user_id where u.user_id = ? order by ua.created_at asc limit 1";
+  const query = ` SELECT recipient_name, recipient_phone, address 
+                  FROM Users u 
+                  JOIN UserAddresses ua ON u.user_id = ua.user_id 
+                  WHERE u.user_id = ? 
+                  ORDER BY ua.created_at ASC LIMIT 1`;
   try{
     const res = await pool.promise().query(query,[userId]);
     if(res){
@@ -73,19 +77,73 @@ export const getUserAddress = async(userId: string) => {
   }
 }
 
-export const getOrderProducts = async(userId: string) => {
-  const query = "select cd.quantity, p.product_name, p.final_price from CartDetail cd join Products p on cd.product_id = p.product_id join Cart c on cd.cart_id = c.cart_id where c.user_id = ?";
+//사용자 배송지 상세 가져오기
+export const getUserDetailsAddress = async(userId: string) => {
+  const query = ` SELECT address_id, address_name, recipient_name, recipient_phone, address, detailed_address, is_default
+                  FROM Users u 
+                  JOIN UserAddresses ua ON u.user_id = ua.user_id 
+                  WHERE u.user_id = ? 
+                  ORDER BY ua.created_at ASC`;
   try{
-    const res = await pool.promise().query(query,[userId]);
-    if(res){
-      console.log('orderProducts: ', res);
-      return res;
+    const [res] = await pool.promise().query(query,[userId]);
+    const rows = res as any[];
+    if(rows.length > 0){
+      console.log('rows: ', rows);
+      return rows;
+    }
+  } catch(err){
+    console.error('배송지 상세 리스트를 가져오지 못했습니다.',err);
+  }
+}
+
+
+//주문하는 제품 정보 가져오기
+export const getOrderProducts = async(userId: string) => {
+  const query = ` SELECT cd.quantity, p.product_name, p.final_price 
+                  FROM CartDetail cd 
+                  JOIN Products p ON cd.product_id = p.product_id 
+                  JOIN Cart c ON cd.cart_id = c.cart_id 
+                  WHERE c.user_id = ?`;
+  try{
+    const [res] = await pool.promise().query(query,[userId]);
+    const rows = res as any[]; 
+    if(rows.length > 0){
+      for(let i = 0; i < rows.length; i++){
+        const finalPrice = rows[i].final_price;
+        const price = parseFloat(finalPrice).toFixed(0);
+        rows[i].final_price = price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+        console.log('orderProducts: ', price);
+      }
+      return rows;
     }
   }catch(err){
     console.error('주문하려는 제품의 정보를 가져오지 못했습니다.', err);
   }
 }
-
-export const getShippingFee = async (userId: string) => {
-  
+interface ShippingFee{
+  shipping_fee:string;
 }
+
+//배송비 get
+export const getShippingFee = async (userId: string): Promise<ShippingFee[]> => {
+  const query = `SELECT shipping_fee FROM Cart WHERE user_id = ?`;
+  return new Promise((resolve, reject) => {
+    pool.query(query, [userId], (err, results) => {
+      if (err) {
+        console.error('배송비 금액을 가져오지 못했습니다.', err);
+        return reject(err);
+      }
+      const rows = results as any[]; 
+      if (rows.length > 0) {
+        const shippingFee = rows[0].shipping_fee;
+        const fee = parseFloat(shippingFee).toFixed(0); 
+        rows[0].final_price = fee.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ','); // '3000.00'을 '3000'으로 변환
+        console.log('ResponseShippingFee: ', [{ shipping_fee: rows[0].final_price }]);
+        return resolve([{ shipping_fee: rows[0].final_price }]);
+      } else {
+        console.log('배송비 금액을 찾지 못했습니다.');
+        return resolve([]);
+      }
+    });
+  });
+};

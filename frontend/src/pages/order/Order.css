@@ -1,13 +1,38 @@
-body{
+/* 기존 CSS */
+body {
   background: #F9FAFB;
 }
-.bodyContainer{
+
+.bodyContainer {
   display: flex;
+  flex-direction: column;
   gap: 30px;
   justify-content: center;
 }
-.orderLeft{
+
+.orderLeft {
   display: flex;
   flex-direction: column;
   gap: 30px;
 }
+
+.orderContainer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.orderRight {
+  flex: 1 1 100%;
+}
+
+@media (min-width: 768px) {
+  .orderContainer {
+    flex-direction: row;
+  }
+
+  .orderRight {
+    flex: 1;
+  }
+}
+

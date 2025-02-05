@@ -19,12 +19,14 @@ export interface UserAddressInfo{
   address: string;
   detailed_address: string;
   recipient_phone: string;
+  is_default: number;
 }
 
 export interface OrderProducts{
   product_id: number;
   category_id: number;
   product_name: string;
+  quantity: number;
   final_price: number;
 }
 
@@ -35,4 +37,14 @@ export interface OrderCouponPointProps{
 
 export interface OrderPriceProps{
   points: number;
+  // total_productPrice: number;
+}
+
+export interface OrderShippingFee{
+  shipping_fee: number;
+}
+
+export interface OrderProductsProps{
+  total_price: number;
+  onTotalPriceChange: (total: number) => void; 
 }

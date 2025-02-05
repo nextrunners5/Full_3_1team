@@ -4,7 +4,7 @@
 
 //controller -> service -> repository -> db
 
-import {getDeliveryMessage, getOrderProducts, getUserAddress, getUserPoints} from "../repo/OrderRepo";
+import {getDeliveryMessage, getOrderProducts, getShippingFee, getUserAddress, getUserDetailsAddress, getUserPoints} from "../repo/OrderRepo";
 
 export const fetchUserPoints = async(userId: string) => {
   try {
@@ -38,12 +38,33 @@ export const fetchUserAddress = async(userId: string) => {
   } 
 };
 
+export const fetchUserDetailsAddress = async(userId: string) => {
+  try{
+    const userAddress = await getUserDetailsAddress('user123');
+    return userAddress;
+  } catch(err){
+    console.error('배송지 상세 리스트 정보를 가져오지 못했습니다.', err);
+    throw err;
+  } 
+};
+
 export const fetchOrderProducts = async() => {
   try{
     const orderProductsInfo = await getOrderProducts('user123');
     return orderProductsInfo;
   } catch(err){
     console.error('제품 정보를 가져오지 못했습니다.', err);
+    throw err;
+  }
+};
+
+export const fetchShippingFee = async(userId: string) => {
+  try{
+    const shippingFee = await getShippingFee('user123');
+    console.log('shipping fee: ', shippingFee);
+    return shippingFee;
+  } catch(err){
+    console.error('배송비 정보를 가져오지 못했습니다.', err);
     throw err;
   }
 };

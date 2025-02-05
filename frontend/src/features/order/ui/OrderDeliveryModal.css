@@ -98,6 +98,23 @@
   /* 팝업이 열릴때 스르륵 열리는 효과 */
   animation: modal-bg-show 0.3s;
 }
+.orderAddressBody{
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  align-items: center;
+  padding: 0 16px;
+}
+.orderAddressFormBody{
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  /* padding: 0px 16px; */
+  width: 100%;
+}
+.orderDeliverySelectForm{
+  width: 100%;
+}
 @keyframes modal-show {
   from {
     opacity: 0;

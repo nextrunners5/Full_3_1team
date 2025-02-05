@@ -49,12 +49,18 @@ const OrderCouponPoint: React.FC<OrderCouponPointProps> = ({points, onPointsChan
     // 입력값이 보유 포인트를 초과하면 최대 포인트로 설정
     if (newPoints > userPoint.point) {
       setError("보유한 포인트보다 많은 값을 입력할 수 없습니다.");
-      setUsedPoint(userPoint.point.toString());
+      setUsedPoint(value);
+      onPointsChange(newPoints);
+
+      setTimeout(() => {
+        setUsedPoint(userPoint.point.toString());
+        onPointsChange(userPoint.point);
+      },500);
     } else {
       setError("");
       setUsedPoint(value);
+      onPointsChange(newPoints);
     }
-    onPointsChange(newPoints);
   };
 
 
