@@ -2,7 +2,8 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "./CSS/ProductCreate.css";
 import axiosInstance from "axios";
-import { createProduct } from "../../features/product/api/Product";
+import { createProduct, uploadImages } from "../../features/product/api/Product";
+import ProductImg from "./ProductImg";
 
 const ProductCreate: React.FC = () => {
   const navigate = useNavigate();
@@ -10,6 +11,8 @@ const ProductCreate: React.FC = () => {
   const [categories, setCategories] = useState<
     { category_id: number; category_name: string }[]
   >([]);
+  const [mainImage, setMainImage] = useState<File | null>(null);
+  const [detailImages, setDetailImages] = useState<File[]>([]);
 
   const [product, setProduct] = useState<{
     product_id: string;
@@ -151,24 +154,42 @@ const ProductCreate: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    const formattedProduct = {
-      ...product,
-      origin_price: parseFloat(product.origin_price) || 0,
-      discount_price: parseFloat(product.discount_price) || 0,
-      final_price: parseFloat(product.final_price) || 0,
-      stock_quantity: parseInt(product.stock_quantity, 10) || 0,
-    };
+    if (!mainImage || detailImages.length === 0) {
+      alert("대표 이미지와 상세 이미지를 모두 업로드하세요.");
+      return;
+    }
 
     try {
+      const imgResult = await uploadImages(mainImage, detailImages);
+      console.log("이미지 업로드 성공:", imgResult);
+
+      const formattedProduct = {
+        ...product,
+        origin_price: parseFloat(product.origin_price) || 0,
+        discount_price: parseFloat(product.discount_price) || 0,
+        final_price: parseFloat(product.final_price) || 0,
+        stock_quantity: parseInt(product.stock_quantity, 10) || 0,
+        main_image_id: imgResult.mainImageId, // MongoDB 대표 이미지 ID
+        detail_image_ids: imgResult.detailImageIds, // MongoDB 상세 이미지 ID 배열
+      };
+
+      // 3️⃣ 상품 등록 요청 (MySQL 저장)
       const response = await createProduct(formattedProduct);
       console.log("상품 등록 성공", response.data);
 
       alert("상품이 성공적으로 등록되었습니다.");
       navigate("/productList");
+
     } catch (error) {
       console.error("상품 등록 실패", error);
       alert("상품 등록에 실패했습니다.");
     }
+  };
+
+  // ProductImg.tsx에서 이미지 데이터를 받아오는 함수
+  const handleImageUpload = (main: File | null, details: File[]) => {
+    setMainImage(main);
+    setDetailImages(details);
   };
 
   return (
@@ -339,24 +360,10 @@ const ProductCreate: React.FC = () => {
 
         <div className="img-container">
           <div className="image-upload-section">
-            <h2>상품 이미지</h2>
-            <label htmlFor="image-upload" className="image-upload-box">
-              <div className="image-preview">
-                <>
-                  <span className="material-symbols-outlined">image</span>
-                  <p>이미지 업로드</p>
-                  <span>또는 드래그 앤 드롭</span>
-                  <small>PNG, JPG 최대 10MB</small>
-                </>
-              </div>
-              <input
-                id="image-upload"
-                // type="file"
-                // accept="image/png, image/jpeg"
-                // onChange={handleImageUpload}
-                hidden
-              />
-            </label>
+            <h2 className="image-upload-section-h2">상품 이미지</h2>
+            <form onSubmit={handleSubmit}>
+            <ProductImg onUpload={handleImageUpload} />
+      </form>
           </div>
 
           <div className="description-section">

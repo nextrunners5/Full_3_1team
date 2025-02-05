@@ -56,4 +56,18 @@ export const createCart = async (cartData: CartProduct) => {
   }
 };
 
+// 이미지 업로드
+export const uploadImages = async (mainImage: File, detailImages: File[]) => {
+  const formData = new FormData();
+  formData.append("mainImage", mainImage);
+  detailImages.forEach((file, index) => {
+    formData.append(`detailImage${index}`, file);
+  });
+
+  const response = await axiosInstance.post("/api/products/upload", formData, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
+
+  return response.data;
+};
 export default axiosInstance;
