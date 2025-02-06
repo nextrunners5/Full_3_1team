@@ -1,7 +1,4 @@
-html, body {
-  margin: 0;
-  background-color: aliceblue;
-}
+
 .product-create {
   width: 900px;
   margin: 30px auto;
@@ -295,7 +292,7 @@ select {
   cursor: pointer;
 }
 .submit-btn {
-  background: #0056b3;
+  background: #3A5372;
   color: white;
   border: none;
   padding: 10px 20px;
