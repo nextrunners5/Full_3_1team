@@ -1,117 +1,241 @@
-/* App.css */
+@import url('https://fonts.googleapis.com/css2?family=Rubik+Bubbles&display=swap');
 
-body {
-  margin: 0;
-  font-family: 'Arial', sans-serif;
-  background-color: #F9FAFB;
-  color: #333;
+/* 전체 폰트 적용 */
+.mainContentMAIN {
+  font-family: sans-serif;
 }
 
-.app-container {
+/* 가장 상단 영역 (배경 + 텍스트/버튼) */
+.heroSectionMAIN {
+  background-size: cover;
+  background-position: center;
+  min-height: 1000px;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: flex-start;
-  min-height: 100vh;
+  align-items: flex-start; /* 왼쪽 정렬 */
+  justify-content: center;
+  color: #fff;
+  text-align: left; /* 텍스트도 왼쪽 정렬 */
+  padding-left: 40px; /* 왼쪽 여백 추가 */
+  margin-top: -100px;
 }
 
-.hero-section {
-  width: 98%;
-  background-color: #89CFF0;
-  color: white;
-  text-align: center;
-  padding: 50px 20px;
-  position: relative;
-}
-
-.hero-section img {
-  width: 80%;
-  max-width: 600px;
-  height: auto;
-  margin-top: 20px;
-}
-
-.hero-title {
-  font-size: 36px;
-  font-weight: bold;
-  margin-bottom: 20px;
-}
-
-.hero-subtitle {
-  font-size: 18px;
-  margin-bottom: 20px;
-}
-
-.shop-now-button {
-  background-color: white;
-  color: #89CFF0;
+/* SHOP NOW 버튼 스타일 */
+.heroButtonMAIN {
+  background-color: #fff;
+  color: #000;
   border: none;
-  border-radius: 8px;
-  padding: 10px 20px;
-  font-size: 16px;
+  padding: 12px 24px;
+  border-radius: 20px;
+  font-size: 2rem;
   cursor: pointer;
-  text-transform: uppercase;
+  font-family: 'Rubik Bubbles';
+  font-weight: lighter;
+  margin-bottom: 50px;
+  margin-top: 300px;
+  margin-left: 80px;
 }
 
-.shop-now-button:hover {
-  background-color: #e6f4fa;
-  color: #005f91;
+/* A BRAND FOR PETS! 텍스트 스타일 */
+.heroTitleMAIN {
+  font-size: 4rem;
+  margin: 10px 0;
+  font-family: 'Rubik Bubbles';
+  font-weight: lighter;
+  margin-left: 80px;
 }
 
-.best-new-products-section {
-  padding: 50px 20px;
+/* BEST PRODUCT / NEW PRODUCT 섹션 */
+.sectionProductsMAIN {
+  padding: 40px 20px;
+}
+
+/* BEST PRODUCT / NEW PRODUCT 버튼 감싸는 영역 */
+.sectionTitleGroupMAIN {
   text-align: center;
+  margin-bottom: 50px;
+  margin-top: 50px;
 }
 
-.section-title {
-  font-size: 24px;
-  font-weight: bold;
-  margin-bottom: 20px;
-  color: #005f91;
+.productButtonMAIN {
+  background-color: transparent;
+  border: 2px solid #6A8BB6;
+  color: #6A8BB6;
+  font-size: 1.5rem;
+  padding: 10px 20px;
+  cursor: pointer;
+  margin-right: 20px;
+  transition: all 0.3s ease;
+  font-family: 'Rubik Bubbles';
+  font-weight: lighter;
+  border-radius: 20px;
+  margin-top: -30px;
 }
 
-.products-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 20px;
-  justify-items: center;
+.productButtonMAIN.activeButtonMAIN {
+  background-color: #6A8BB6;
+  color: #fff;
 }
 
-.product-card {
-  width: 200px;
-  background-color: white;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  padding: 10px;
-  text-align: center;
-  transition: transform 0.3s, box-shadow 0.3s;
+/* 상품 카드 컨테이너 */
+.productCardContainerMAIN {
+  display: flex;
+  justify-content: center;
+  gap: 60px; /* 상품 간 간격 확대 */
 }
 
-.product-card:hover {
-  transform: translateY(-10px);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+/* 각 상품 카드 */
+.productCardMAIN {
+  width: 300px;
+  text-align: left;
 }
 
-.product-image {
+.productImageMAIN {
   width: 100%;
+  height: 250px;
+  background-color: #a7c7e7;
+  margin-bottom: 10px;
+}
+
+.productPriceOldMAIN {
+  color: gray;
+  text-decoration: line-through;
+}
+
+.productPriceNewMAIN {
+  font-weight: bold;
+}
+
+.productSaleMAIN {
+  color: blue;
+}
+
+/* 범퍼 침대 섹션 */
+.newProductsSectionMAIN {
+  padding: 40px 20px;
+}
+
+.newProductsTitleMAIN {
+  text-align: left;
+  margin-bottom: 50px;
+  font-family: 'Rubik Bubbles';
+  font-weight: lighter;
+  margin-top: 0px;
+  font-size: 2rem;
+  color: #6A8BB6;
+}
+
+/* 범퍼 침대 컨텐츠 영역 */
+.newProductsContentMAIN {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 60px;
+  margin-bottom: 100px;
+}
+
+.imageBlockMAIN {
+  width: 300px;
+  text-align: center;
+}
+
+.bumperImageMAIN {
+  width: 400px;
   height: auto;
-  margin-bottom: 10px;
+  border-radius: 10px;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
 }
 
-.product-title {
-  font-size: 16px;
-  font-weight: bold;
-  margin-bottom: 10px;
+.bumperBedContainerMAIN {
+  max-width: 500px;
+  line-height: 1.9;
+  color: #6f6f6f;
+  margin-left: 100px;
 }
 
-.product-price {
-  font-size: 14px;
-  color: #666;
-  margin-bottom: 10px;
+.bumperBedTitleMAIN {
+  margin: 0 0 10px 0;
+  font-size: 30px;
+  color: #6A8BB6;
 }
 
-.product-discount {
-  color: #e63946;
-  font-weight: bold;
-  font-size: 16px;
+/* 하단 브랜드 섹션 */
+.brandSectionMAIN {
+  background-size: cover;
+  background-position: center;
+  min-height: 600px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  text-align: left;
+  padding: 40px 60px;
+  color: #fff;
+}
+
+.brandTitleMAIN {
+  font-size: 4rem;
+  margin-bottom: 20px;
+  font-family: 'Rubik Bubbles';
+  font-weight: lighter;
+  margin-left: 1000px;
+}
+
+.brandDescMAIN {
+  max-width: 600px;
+  font-size: 1.5rem;
+  line-height: 1.8;
+  margin-bottom: 80px;
+  margin-left: 1000px;
+}
+
+.aboutButtonMAIN {
+  background-color: #fff;
+  color: #000;
+  border: none;
+  padding: 15px 30px;
+  border-radius: 30px;
+  font-family: 'Rubik Bubbles';
+  font-size: 1.8rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-left: 1000px;
+}
+
+.aboutButtonMAIN:hover {
+  background-color: #f0f0f0;
+}
+
+@media (max-width: 1200px) {
+  .brandTitleMAIN {
+    font-size: 4rem; /* 제목 크기 확대 */
+    margin-bottom: 20px;
+    font-family: 'Rubik Bubbles';
+    font-weight: lighter;
+    margin-left:  400px;
+  }
+  
+  .brandDescMAIN {
+    max-width: 600px; /* 텍스트 최대 폭 */
+    font-size: 1.5rem; /* 글자 크기 확대 */
+    line-height: 1.8; /* 줄 간격 조정 */
+    margin-bottom: 80px; /* 텍스트 아래 여백 */
+    margin-left: 400px;
+    margin-top: 0;
+  }
+  
+  .aboutButtonMAIN {
+    background-color: #fff;
+    color: #000;
+    border: none;
+    padding: 15px 30px; /* 버튼 크기 확대 */
+    border-radius: 30px; /* 버튼 둥글게 */
+    font-family: 'Rubik Bubbles';
+    font-size: 1.8rem; /* 버튼 글자 크기 */
+    cursor: pointer;
+    transition: all 0.3s ease;
+    align-self: flex-start; /* 버튼을 오른쪽 정렬 */
+    margin-left:  400px;
+  }
+
 }

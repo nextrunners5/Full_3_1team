@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import "./Cart.css";
 import Button from "../../shared/ui/button";
 import ProductCard from "../../widgets/product-card/ProductCard";
