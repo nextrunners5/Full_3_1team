@@ -6,11 +6,11 @@ import pool from "../../backend/config/dbConfig";
 import ProductService from "../../backend/feature/product/services/ProductService";
 import { RowDataPacket } from "mysql2";
 import { getProductById, getCategories, getProducts } from "../feature/product/controller/ProductController"
+import ProductImage from "../feature/product/img/ProductImage";
 
 const router = Router();
 
 // 모든 카테고리 조회 API
-
 router.get("/api/categories", getCategories);
 // router.get("/categories", async (req: Request, res: Response) => {
 //   try {
@@ -25,10 +25,16 @@ router.get("/api/categories", getCategories);
 // });
 
 // 상품 등록 API
-router.post("/", async (req: Request, res: Response) => {
+router.post("/products", async (req: Request, res: Response): Promise<void> => {
   try {
     const newProduct = await ProductService.createProduct(req.body);
-    res.status(201).json({ message: "상품 등록 성공", product: newProduct });
+    console.log(" 상품 등록 성공:", newProduct);
+
+    res.status(201).json({
+      message: "상품 등록 성공",
+      product_id: newProduct.product_id,
+    });
+
   } catch (error) {
     console.error("상품 등록 실패:", error);
     res.status(500).json({ message: "서버 오류: 상품을 등록할 수 없습니다." });
@@ -48,11 +54,11 @@ router.get("/products", async (req: Request, res: Response) => {
 
 // 상품 상세 조회 API
 router.get(
-  "/products/:product_id",
+  "/productImages/:product_id",
   async (req: Request<{ product_id: string }>, res: Response): Promise<void> => {
     try {
       const { product_id } = req.params;
-      console.log("요청된 product_id:", product_id); // 디버깅
+      console.log("요청된 product_id:", product_id);
 
       const id = parseInt(product_id, 10);
       if (isNaN(id)) {
@@ -61,19 +67,28 @@ router.get(
         return;
       }
 
-      // MySQL 조회 쿼리 실행
+      // MySQL에서 상품 데이터 조회
       const [rows] = await pool
         .promise()
         .query<RowDataPacket[]>("SELECT * FROM Products WHERE product_id = ?", [id]);
-
-      console.log("조회된 데이터:", rows);
 
       if (!rows || rows.length === 0) {
         res.status(404).json({ message: "해당 상품을 찾을 수 없습니다." });
         return;
       }
 
-      res.json(rows[0]);
+      const product = rows[0];
+
+      const productImage = await ProductImage.findOne({ product_id });
+
+      const productWithImages = {
+        ...product,
+        main_image: productImage ? `http://localhost:3000/${productImage.main_image}` : null, // 대표 이미지
+        detail_images: productImage ? productImage.detail_images.map(img => `http://localhost:3000/${img}`) : [], // 상세 이미지
+      };
+
+      console.log("최종 응답 데이터:", productWithImages);
+      res.status(200).json(productWithImages);
     } catch (error) {
       console.error("상품 데이터를 불러오는 중 오류 발생:", error);
       res.status(500).json({ message: "서버 내부 오류" });
@@ -85,6 +100,5 @@ router.get(
 router.get("/products/:id", getProductById);
 // 다수 상품 조회
 router.get("/products", getProducts);
-
 
 export default router;

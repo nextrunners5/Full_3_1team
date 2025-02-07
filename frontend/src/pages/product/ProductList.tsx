@@ -9,6 +9,7 @@ interface Product {
   origin_price: number;
   discount_price: number;
   final_price: number;
+  main_image: string;
 }
 
 const ProductList: React.FC = () => {
@@ -19,8 +20,11 @@ const ProductList: React.FC = () => {
 
   useEffect(() => {
     axiosInstance
-      .get("/api/products")
-      .then((res) => setProducts(res.data))
+      .get("/api/productImages")
+      .then((res) => {
+        console.log("서버에서 받아온 상품 데이터:", res.data);
+        setProducts(res.data);
+      })
       .catch((err) => console.error("상품 불러오기 실패:", err));
 
     if (userId === "guest") {

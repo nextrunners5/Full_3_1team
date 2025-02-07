@@ -15,12 +15,14 @@ interface Product {
   origin_price: number;
   discount_price: number;
   final_price: number;
-  image_url: string;
+  // image_url: string;
   rating: number;
   review_count: number;
   // free_shipping: boolean;
   sizes: string[];
   colors: string[];
+  main_image: string;
+  detail_images: string[];
 }
 
 const ProductDetail: React.FC = () => {
@@ -38,28 +40,57 @@ const ProductDetail: React.FC = () => {
 
   console.log("요청된 product_id:", product_id);
 
+  // useEffect(() => {
+  //   if (!product_id) {
+  //     console.error(" product_id가 존재하지 않습니다.");
+  //     setError("잘못된 상품 정보입니다.");
+  //     return;
+  //   }
+
+  //   console.log(" API 요청:", `/api/products/${product_id}`);
+
+  //   axiosInstance
+  //     .get<Product>(`/api/products/${product_id}`)
+  //     .then((res) => {
+  //       console.log(" 상품 정보 불러오기 :", res.data);
+  //       setProduct(res.data);
+  //       setSelectedSize(res.data.sizes.length > 0 ? res.data.sizes[0] : "");
+  //       setSelectedColor(res.data.colors.length > 0 ? res.data.colors[0] : "");
+  //     })
+  //     .catch((err) => {
+  //       console.error(" 상품 정보 가져오기 실패:", err);
+  //       setError("상품을 찾을 수 없습니다.");
+  //     });
+  // }, [product_id]);
+
   useEffect(() => {
-    if (!product_id) {
-      console.error(" product_id가 존재하지 않습니다.");
-      setError("잘못된 상품 정보입니다.");
-      return;
-    }
-
-    console.log(" API 요청:", `/api/products/${product_id}`);
-    console.log(" 요청 URL:", `/products/${product_id}`);
-
-    axiosInstance
-      .get<Product>(`/api/products/${product_id}`)
-      .then((res) => {
-        console.log(" 상품 정보 불러오기 성공:", res.data);
-        setProduct(res.data);
-        setSelectedSize(res.data.sizes.length > 0 ? res.data.sizes[0] : "");
-        setSelectedColor(res.data.colors.length > 0 ? res.data.colors[0] : "");
-      })
-      .catch((err) => {
-        console.error(" 상품 정보 가져오기 실패:", err);
-        setError("상품을 찾을 수 없습니다.");
-      });
+    const fetchProductData = async () => {
+      try {
+        const productRes = await axiosInstance.get(`/api/products/${product_id}`);
+        const productData = productRes.data;
+  
+        const imageRes = await axiosInstance.get(`/api/productImages/${product_id}`);
+        const imageData = imageRes.data;
+  
+        console.log("프론트엔드 -> 상품 데이터:", productData);
+        console.log("이미지 데이터:", imageData);
+        
+        setProduct({
+          ...productData,
+          main_image: imageData?.main_image || null,
+          detail_images: imageData?.detail_images || [],
+          sizes: productData.sizes ? productData.sizes : [], // 안전 처리
+          colors: productData.colors ? productData.colors : [], // 안전 처리
+        });
+        
+        setSelectedSize(productData.sizes && productData.sizes.length > 0 ? productData.sizes[0] : "");
+        setSelectedColor(productData.colors && productData.colors.length > 0 ? productData.colors[0] : "");
+      } catch (error) {
+        console.error("상품 데이터 가져오기 실패:", error);
+        setError("잘못된 상품 정보입니다.");
+      }
+    };
+    fetchProductData();
   }, [product_id]);
 
   const handleOrder = async () => {
@@ -143,7 +174,7 @@ const ProductDetail: React.FC = () => {
         <div className="product-header">
           <div className="product-image">
             <img
-              src={product.image_url || "https://placehold.co/500x500"}
+              src={product.main_image || "https://placehold.co/500x500"}
               alt={product.product_name}
             />
           </div>
@@ -268,11 +299,13 @@ const ProductDetail: React.FC = () => {
               {/* 상세 이미지 */}
               <div className="product-detail-image">
                 <h3>상세 이미지</h3>
-                {/* <img src={product.image_url || "https://placehold.co/800x400"} alt={product.product_name}/> */}
-                <img
-                  src="https://placehold.co/800x400"
-                  alt="상품 상세 이미지"
-                />
+                {product.detail_images?.length > 0 ? (
+                    product.detail_images.map((image, index) => (
+                      <img key={index} src={image} alt={`상품 상세 이미지 ${index + 1}`} />
+                    ))
+                  ) : (
+                    <img src="https://placehold.co/800x400" alt="기본 이미지" />
+                  )}
               </div>
             </div>
           )}

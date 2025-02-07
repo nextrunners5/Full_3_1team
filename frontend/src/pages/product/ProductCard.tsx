@@ -7,6 +7,7 @@ interface Product {
   origin_price: number;
   discount_price: number;
   final_price: number;
+  main_image: string;
 }
 
 interface ProductCardProps {
@@ -22,7 +23,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
   
 }) => {
   console.log("ProductCard 렌더링:", product.product_id, "isWishlisted:", isWishlisted);
-
+  console.log("상품 이미지 URL:", product.main_image);
   return (
     <div key={product.product_id} className="product-card">
       <button
@@ -36,7 +37,10 @@ const ProductCard: React.FC<ProductCardProps> = ({
       </button>
 
       <Link to={`/products/${product.product_id}`} className="product-link">
-        <img src="https://placehold.co/250x250" alt={product.product_name} />
+      <img
+        src={`http://localhost:3000/${product.main_image}`}
+        alt={product.product_name}
+      />
         <div className="product-info">
           <h3>{product.product_name}</h3>
           <p className="rating">별점 4.2</p>
