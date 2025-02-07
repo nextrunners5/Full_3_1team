@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import "./CSS/ProductCreate.css"
+import "./CSS/ProductCreate.css";
 
 interface ProductImgProps {
   onUpload: (mainImage: File | null, detailImages: File[]) => void;
@@ -9,28 +9,34 @@ const ProductImg: React.FC<ProductImgProps> = ({ onUpload }) => {
   const [mainImage, setMainImage] = useState<File | null>(null);
   const [detailImages, setDetailImages] = useState<File[]>([]);
 
-  // 대표 이미지 업로드 핸들러
+  // 대표 이미지
   const handleMainImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files[0]) {
       const file = event.target.files[0];
       setMainImage(file);
-      onUpload(file, detailImages); // 부모 컴포넌트로 데이터 전달
+      onUpload(file, detailImages);
     }
   };
 
-  // 상세 이미지 업로드 핸들러
+  // 상세 이미지
   const handleDetailImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files) {
       const filesArray = Array.from(event.target.files);
       setDetailImages((prev) => [...prev, ...filesArray]);
-      onUpload(mainImage, [...detailImages, ...filesArray]); // 부모 컴포넌트로 데이터 전달
+      onUpload(mainImage, [...detailImages, ...filesArray]);
     }
   };
 
+  const handleRemoveAllImages = () => {
+    setMainImage(null);
+    setDetailImages([]);
+    onUpload(null, []);
+  };
+
   return (
-    <div className="img-box">
-      {/* 대표 이미지 (왼쪽) */}
-      <div className="image-section">
+    <div className="img-container">
+      {/* 대표 이미지 업로드 */}
+      <div className="image-upload-section">
         <h2>대표 이미지</h2>
         <label htmlFor="main-image-upload" className="image-upload-box">
           <div className="image-preview">
@@ -55,8 +61,8 @@ const ProductImg: React.FC<ProductImgProps> = ({ onUpload }) => {
         </label>
       </div>
 
-      {/* 상세 이미지 (오른쪽) */}
-      <div className="image-section">
+      {/* 상세 이미지 업로드 */}
+      <div className="image-upload-section">
         <h2>상세 이미지</h2>
         <label htmlFor="detail-image-upload" className="image-upload-box">
           <div className="image-preview">
@@ -82,6 +88,14 @@ const ProductImg: React.FC<ProductImgProps> = ({ onUpload }) => {
             hidden
           />
         </label>
+      </div>
+
+      {/* 삭제 & 저장 버튼 */}
+      <div className="button-container">
+        <button type="button" className="remove-all-btn" onClick={handleRemoveAllImages}>
+          모든 이미지 삭제
+        </button>
+        
       </div>
     </div>
   );

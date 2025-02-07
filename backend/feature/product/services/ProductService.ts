@@ -15,7 +15,6 @@ interface Product {
 }
 
 class ProductService {
-  // 상품 등록
   static async createProduct(product: Product) {
     try {
       const {
@@ -53,7 +52,12 @@ class ProductService {
       ];
 
       const [result]: any = await pool.promise().query(query, values);
-      return { id: result.insertId, ...product };
+      console.log("MySQL Insert 결과:", result);
+
+      const newProduct = { ...product, product_id: result.insertId };
+      console.log("생성된 상품 정보:", newProduct);
+      return newProduct;
+
     } catch (error) {
       console.error("상품 등록 실패:", error);
       throw new Error("상품 등록 실패");

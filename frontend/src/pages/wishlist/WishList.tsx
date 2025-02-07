@@ -9,6 +9,7 @@ interface Product {
   origin_price: number;
   discount_price: number;
   final_price: number;
+  main_image: string;
 }
 
 const WishList: React.FC = () => {
