@@ -13,6 +13,7 @@ import ProductList from "../pages/product/ProductList";
 import MyPage from "../pages/profile/MyPage";
 import ProductDetail from "../pages/product/ProductDetail";
 import Wishlist from "../pages/wishlist/WishList";
+import PayCompleteModal from "../shared/ui/PaycompleteModal";
 
 function App() {
   return (
@@ -32,6 +33,7 @@ function App() {
         <Route path="/ProductList" element={<ProductList />} />
         <Route path="/products/:product_id" element={<ProductDetail />} />
         <Route path="/wishlist" element={<Wishlist />} />
+        <Route path="/PayCompleteModal" element={<PayCompleteModal />} />
       </Routes>
     </Router>
   );
