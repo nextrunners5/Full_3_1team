@@ -15,8 +15,8 @@
 
 /* 상품 이미지 */
 .product-image img {
-  width: 500px;
-  height: 500px;
+  /* width: 500px; */
+  /* height: 500px; */
   object-fit: cover;
   border-radius: 10px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);

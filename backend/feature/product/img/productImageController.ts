@@ -1,19 +1,21 @@
 import { Request, Response } from "express";
 import multer from "multer";
 import ProductImage from "../img/ProductImage";
-import pool from "../../../config/dbConfig"
+import pool from "../../../config/dbConfig";
+import sharp from "sharp";
+import path from "path";
 
-// Multer 설정 (이미지 저장 디렉토리 지정)
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, "uploads/");
-  },
-  filename: (req, file, cb) => {
-    cb(null, `${Date.now()}-${file.originalname}`);
-  },
-});
+// // Multer 설정 (이미지 저장 디렉토리 지정)
+// const storage = multer.diskStorage({
+//   destination: (req, file, cb) => {
+//     cb(null, "uploads/");
+//   },
+//   filename: (req, file, cb) => {
+//     cb(null, `${Date.now()}-${file.originalname}`);
+//   },
+// });
 
-const upload = multer({ storage });
+// const upload = multer({ storage });
 
 // 상품 이미지 업로드 (MongoDB 저장)
 export const uploadImages = async (
@@ -29,32 +31,47 @@ export const uploadImages = async (
 
     if (!product_id) {
       res.status(400).json({ message: "상품 ID가 없습니다." });
+      return;
     }
 
     if (!req.files || typeof req.files !== "object") {
       res.status(400).json({ message: "업로드된 파일이 없습니다." });
+      return;
     }
 
-    // 업로드된 파일 처리
     const files = req.files as { [fieldname: string]: Express.Multer.File[] };
 
-    const mainImage =
-      files["mainImage"] && Array.isArray(files["mainImage"])
-        ? files["mainImage"][0]?.path
-        : null;
-
-    const detailImages =
-      files["detailImage"] && Array.isArray(files["detailImage"])
-        ? files["detailImage"].map((file) => file.path)
-        : [];
-
-    if (!mainImage) {
+    // 대표 이미지 처리 (리사이징 적용)
+    if (!files["mainImage"] || !files["mainImage"][0]) {
       res.status(400).json({ message: "대표 이미지가 필요합니다." });
+      return;
     }
+
+    const originalMainImage = files["mainImage"][0].path;
+    const filename = path.basename(originalMainImage);
+
+    const resized500Path = `uploads/resized_500x500_${filename}`;
+    const resized300Path = `uploads/resized_300x250_${filename}`;
+
+    await sharp(originalMainImage)
+      .resize(500, 500, {
+        fit: "contain",
+        background: { r: 180, g: 180, b: 180, alpha: 1 },
+      })
+      .toFile(resized500Path);
+    await sharp(originalMainImage)
+      .resize(300, 250, {
+        fit: "contain",
+        background: { r: 100, g: 100, b: 100, alpha: 1 },
+      })
+      .toFile(resized300Path);
+
+    const detailImages = files["detailImage"]?.map((file) => file.path) || [];
 
     const newProductImage = new ProductImage({
       product_id: String(product_id),
-      main_image: mainImage,
+      main_image: resized500Path,
+      small_image: resized300Path,
       detail_images: detailImages,
     });
 
@@ -64,16 +81,17 @@ export const uploadImages = async (
     res
       .status(201)
       .json({ message: "이미지 업로드 성공", data: newProductImage });
+    return;
   } catch (error) {
     console.error("이미지 업로드 실패:", error);
     res
       .status(500)
       .json({ message: "서버 오류: 이미지를 업로드할 수 없습니다." });
+    return;
   }
 };
 
 export const getProductsWithImages = async (req: Request, res: Response) => {
-  
   try {
     const query = "SELECT * FROM Products";
     const [rows] = await pool.promise().query(query);
@@ -82,26 +100,31 @@ export const getProductsWithImages = async (req: Request, res: Response) => {
 
     const productList = await Promise.all(
       (rows as any[]).map(async (product) => {
-    
-        const productImage = await ProductImage.findOne({ product_id: String(product.product_id) });
+        const productImage = await ProductImage.findOne({
+          product_id: String(product.product_id),
+        });
 
-        console.log(`MongoDB에서 조회된 이미지 상품 ID: ${product.product_id}:`, productImage);
+        console.log(
+          `MongoDB에서 조회된 이미지 상품 ID: ${product.product_id}:`,
+          productImage
+        );
 
         return {
           ...product,
           main_image: productImage ? productImage.main_image : null,
+          small_image: productImage ? productImage.small_image : null,
           detail_images: productImage ? productImage.detail_images : [],
         };
-        
       })
     );
 
     console.log("최종 상품 리스트:", productList);
     res.status(200).json(productList);
-
   } catch (error) {
     console.error("상품 목록 조회 실패:", error);
-    res.status(500).json({ message: "서버 오류: 상품 목록을 불러올 수 없습니다." });
+    res
+      .status(500)
+      .json({ message: "서버 오류: 상품 목록을 불러올 수 없습니다." });
   }
 };
 
@@ -135,7 +158,10 @@ export const getProductsWithImages = async (req: Request, res: Response) => {
 // };
 
 // 특정 상품 상세
-export const getProductImages = async (req: Request, res: Response): Promise<void> => {
+export const getProductImages = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
   try {
     const { productId } = req.params;
     console.log("[백엔드] 상품 ID", productId, "에 대한 이미지 조회 요청");
@@ -144,7 +170,9 @@ export const getProductImages = async (req: Request, res: Response): Promise<voi
 
     if (!productImage) {
       console.log("[백엔드] 상품 ID", productId, "에 대한 이미지 없음");
-      res.status(404).json({ message: "해당 상품의 이미지를 찾을 수 없습니다." });
+      res
+        .status(404)
+        .json({ message: "해당 상품의 이미지를 찾을 수 없습니다." });
       return;
     }
 
@@ -153,8 +181,9 @@ export const getProductImages = async (req: Request, res: Response): Promise<voi
   } catch (error) {
     console.error("이미지 조회 실패:", error);
     if (!res.headersSent) {
-      res.status(500).json({ message: "서버 오류: 이미지를 불러올 수 없습니다." });
+      res
+        .status(500)
+        .json({ message: "서버 오류: 이미지를 불러올 수 없습니다." });
     }
   }
 };
-

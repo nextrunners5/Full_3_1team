@@ -8,6 +8,7 @@ interface Product {
   discount_price: number;
   final_price: number;
   main_image: string;
+  small_image:string
 }
 
 interface ProductCardProps {
@@ -23,7 +24,8 @@ const ProductCard: React.FC<ProductCardProps> = ({
   
 }) => {
   console.log("ProductCard 렌더링:", product.product_id, "isWishlisted:", isWishlisted);
-  console.log("상품 이미지 URL:", product.main_image);
+  console.log("상품 이미지 URL:", product.main_image)
+  console.log("상품 이미지 URL:", product.small_image)
   return (
     <div key={product.product_id} className="product-card">
       <button
@@ -38,7 +40,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
 
       <Link to={`/products/${product.product_id}`} className="product-link">
       <img
-        src={`http://localhost:3000/${product.main_image}`}
+        src={`http://localhost:3000/${product.small_image}`}
         alt={product.product_name}
       />
         <div className="product-info">

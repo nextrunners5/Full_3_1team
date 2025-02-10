@@ -10,6 +10,7 @@ interface Product {
   discount_price: number;
   final_price: number;
   main_image: string;
+  small_image: string;
 }
 
 const ProductList: React.FC = () => {

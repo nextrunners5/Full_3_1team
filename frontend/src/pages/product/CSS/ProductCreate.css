@@ -293,15 +293,14 @@ select {
   margin-top: 10px;
 }
 
-.cancel-btn {
+.button-group .product-cancel-btn {
   background: #ccc;
-  color: rgb(0, 0, 0);
   border: none;
   padding: 10px 20px;
   border-radius: 5px;
   cursor: pointer;
 }
-.submit-btn {
+.button-group .product-submit-btn {
   background: #3A5372;
   color: white;
   border: none;

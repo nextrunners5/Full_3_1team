@@ -98,7 +98,6 @@ const ProductCreate: React.FC = () => {
         updatedValue = value.replace(/[^0-9]/g, "");
       }
 
-      // category_id는 숫자로 변환
       if (name === "category_id") {
         updatedValue = parseInt(value, 10) || 0;
       }
@@ -151,6 +150,27 @@ const ProductCreate: React.FC = () => {
     }));
   };
 
+  const handleImageUploadToMongoDB = async (productId: string) => {
+    if (!mainImage || detailImages.length === 0) {
+      alert("대표 이미지와 상세 이미지를 모두 업로드하세요.");
+      return;
+    }
+
+    try {
+      const formData = new FormData();
+      formData.append("product_id", productId);
+      formData.append("mainImage", mainImage);
+      detailImages.forEach((file) => {
+        formData.append("detailImage", file);
+      });
+
+      const response = await uploadImages(productId, mainImage, detailImages);
+      console.log("이미지 업로드 성공:", response.data);
+    } catch (error) {
+      console.error("이미지 업로드 실패:", error);
+    }
+  };
+
   const handleImageUpload = (main: File | null, details: File[]) => {
     setMainImage(main);
     setDetailImages(details);
@@ -184,7 +204,9 @@ const ProductCreate: React.FC = () => {
       await handleImageUploadToMongoDB(productId);
 
       alert("상품이 성공적으로 등록되었습니다.");
-      navigate("/productList");
+      setTimeout(() => {
+        navigate("/ProductList");
+      }, 2000);
 
     } catch (error) {
       console.error("상품 등록 실패:", error);
@@ -192,26 +214,7 @@ const ProductCreate: React.FC = () => {
     }
   };
 
-  const handleImageUploadToMongoDB = async (productId: string) => {
-    if (!mainImage || detailImages.length === 0) {
-      alert("대표 이미지와 상세 이미지를 모두 업로드하세요.");
-      return;
-    }
-
-    try {
-      const formData = new FormData();
-      formData.append("product_id", productId);
-      formData.append("mainImage", mainImage);
-      detailImages.forEach((file) => {
-        formData.append("detailImage", file);
-      });
-
-      const response = await uploadImages(productId, mainImage, detailImages);
-      console.log("이미지 업로드 성공:", response.data);
-    } catch (error) {
-      console.error("이미지 업로드 실패:", error);
-    }
-  };
+  
 
   return (
     <div className="product-create-container">
@@ -379,8 +382,8 @@ const ProductCreate: React.FC = () => {
           </div>
         </div>
 
-        <div className="img-container">
         <ProductImg onUpload={handleImageUpload} />
+        <div className="img-container">
 
           <div className="description-section">
             <h2>상품 설명</h2>
@@ -392,20 +395,15 @@ const ProductCreate: React.FC = () => {
             />
           </div>
 
-          <div className="debug-section">
-            <h3>(임시) 입력된 데이터 확인</h3>
-            <pre>{JSON.stringify(product, null, 2)}</pre>
-          </div>
-
           <div className="button-group">
             <button
               type="button"
-              className="cancel-btn"
+              className="product-cancel-btn"
               onClick={() => navigate("/")}
             >
               취소
             </button>
-            <button type="submit" className="submit-btn">
+            <button type="submit" className="product-submit-btn">
               저장하기
             </button>
           </div>
