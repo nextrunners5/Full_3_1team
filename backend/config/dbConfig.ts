@@ -14,6 +14,7 @@ const pool = mysql.createPool(dbConfig);
 
 console.log(` 연결된 데이터베이스: ${dbConfig.database}`);
 
+
 pool.getConnection((err, connection) => {
   if(err) {
     console.error('DB 연결 실패', err);

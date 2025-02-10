@@ -146,6 +146,7 @@ const ProductDetail: React.FC = () => {
         quantity,
         selectedSize,
         selectedColor,
+        shippingFee: 3000,
       };
   
       console.log("장바구니 추가 요청 데이터:", cartData);

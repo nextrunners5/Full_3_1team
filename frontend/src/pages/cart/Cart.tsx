@@ -4,48 +4,48 @@ import Button from "../../shared/ui/button";
 import ProductCard from "../../widgets/product-card/ProductCard";
 import axiosInstance from "../../shared/axios/axios"; // Axios 인스턴스 가져오기
 import Footer from "../../widgets/footer/Footer";
+import { useNavigate } from "react-router-dom"; 
 
 type CartItem = {
-  id: string;
+  cartItemId: string;
+  productId: string;
   name: string;
   price: number;
   quantity: number;
-  image: string;
+  size: string;
+  color: string;
+  image?: string;
   selected?: boolean; // 선택 여부 추가
 };
-
 const CartPage = () => {
-  // 임시 테스트 데이터를 초기 상태로 설정
-  const [cartItems, setCartItems] = useState<CartItem[]>([
-    {
-      id: "1",
-      name: "테스트 상품 1",
-      price: 10000,
-      quantity: 1,
-      image: "https://placeholderjs.com/80x80",
-      selected: false
-    },
-    {
-      id: "2",
-      name: "테스트 상품 2",
-      price: 20000,
-      quantity: 2,
-      image: "https://placeholderjs.com/80x80",
-      selected: false
-    }
-  ]);
-  const [selectAll, setSelectAll] = useState(false); // 전체 선택 상태
+  const [cartItems, setCartItems] = useState<CartItem[]>([]); // ✅ 임시 데이터 제거
+  const [selectAll, setSelectAll] = useState(false);
+  const [isChecked, setIsChecked] = useState(false); // ✅ 체크박스 상태 관리
+
+  const navigate = useNavigate(); // ✅ 페이지 이동을 위한 Hook
 
   useEffect(() => {
     const fetchCartItems = async () => {
       try {
-        const response = await axiosInstance.get("/cart"); // 백엔드 API 호출
-        console.log("Cart Items API Response:", response.data);
-        // API에서 배열 데이터를 받는다면 아래 코드가 동작합니다.
-        setCartItems(Array.isArray(response.data) ? response.data : []);
+        const userId = localStorage.getItem("userId") || "guest"; // 또는 사용자 ID를 가져오는 로직 (ex: localStorage.getItem("userId"))
+        const response = await axiosInstance.get(`api/carts/${userId}`);
+
+        const formattedItems = response.data.map((item: any) => ({
+          cartItemId: item.cart_item_id, // ✅ 키 변경
+          productId: item.product_id,
+          name: item.product_name,
+          price: item.final_price,
+          quantity: item.quantity,
+          size: item.sizes,
+          color: item.colors,
+          image: item.image || "https://via.placeholder.com/100", // ✅ 임시 이미지 처리
+          selected: false, 
+        }));
+
+        console.log("Cart Items API Response:", formattedItems);
+        setCartItems(formattedItems);
       } catch (error) {
         console.error("장바구니 불러오기 실패:", error);
-        // API 호출 실패 시 임시 데이터를 유지합니다.
       }
     };
 
@@ -53,32 +53,34 @@ const CartPage = () => {
   }, []);
 
   // 수량 증가 함수 (로컬 상태 업데이트)
-  const handleIncrease = async (id: string) => {
+  const handleIncrease = async (cartItemId: string) => {
     try {
       // 백엔드 API 호출 (변경된 데이터 반환이 없을 경우 아래 로직으로 대체)
-      await axiosInstance.put(`/cart/${id}/increase`);
+      await axiosInstance.put(`/api/carts/${cartItemId}/increase`);
     } catch (error) {
       console.error("수량 증가 API 호출 실패:", error);
     } finally {
       // 백엔드에서 응답 데이터를 받아오지 않더라도 로컬에서 수량 증가
       setCartItems((prevItems) =>
         prevItems.map((item) =>
-          item.id === id ? { ...item, quantity: item.quantity + 1 } : item
+          item.cartItemId === cartItemId
+            ? { ...item, quantity: item.quantity + 1 }
+            : item
         )
       );
     }
   };
 
   // 수량 감소 함수 (최소 수량 1 이상, 로컬 상태 업데이트)
-  const handleDecrease = async (id: string) => {
+  const handleDecrease = async (cartItemId: string) => {
     try {
-      await axiosInstance.put(`/cart/${id}/decrease`);
+      await axiosInstance.put(`/api/carts/${cartItemId}/decrease`);
     } catch (error) {
       console.error("수량 감소 API 호출 실패:", error);
     } finally {
       setCartItems((prevItems) =>
         prevItems.map((item) =>
-          item.id === id
+          item.cartItemId === cartItemId
             ? { ...item, quantity: item.quantity > 1 ? item.quantity - 1 : 1 }
             : item
         )
@@ -87,21 +89,31 @@ const CartPage = () => {
   };
 
   // 개별 삭제 함수
-  const handleRemove = async (id: string) => {
+  const handleRemove = async (cartItemId?: string) => {
+    console.log(cartItemId);
+    if (!cartItemId) {
+      console.error("삭제할 cartItemId가 없습니다.", cartItemId);
+      return;
+    }
+
+    console.log(`삭제 버튼 클릭됨. ID: ${cartItemId}`);
+
     try {
-      await axiosInstance.delete(`/cart/${id}`);
-      setCartItems((prev) => prev.filter((item) => item.id !== id));
+      await axiosInstance.delete(`/api/carts/${cartItemId}`);
+      setCartItems((prev) =>
+        prev.filter((item) => item.cartItemId !== cartItemId)
+      );
     } catch (error) {
       console.error("상품 삭제 실패:", error);
     }
   };
 
-  // 선택한 상품 삭제 함수 (개선됨)
+  // 선택한 상품 삭제 함수
   const handleRemoveSelected = async () => {
     try {
       const selectedIds = cartItems
         .filter((item) => item.selected)
-        .map((item) => item.id);
+        .map((item) => item.cartItemId);
 
       console.log("삭제할 선택된 상품 ID들:", selectedIds);
 
@@ -112,9 +124,9 @@ const CartPage = () => {
       }
 
       // 선택된 각 아이템에 대해 삭제 API 호출 (여러 API 호출을 병렬로 처리)
-      await Promise.all(
-        selectedIds.map((id) => axiosInstance.delete(`/cart/${id}`))
-      );
+      await axiosInstance.post(`/api/carts/remove-selected`, {
+        data: { cartItemIds: selectedIds } // ✅ DELETE 요청 시 body에 데이터 포함
+      });
 
       // 로컬 상태 업데이트: 선택된 항목 제거
       setCartItems((prev) => prev.filter((item) => !item.selected));
@@ -135,10 +147,12 @@ const CartPage = () => {
   };
 
   // 개별 선택 기능
-  const handleSelectItem = (id: string) => {
+  const handleSelectItem = (cartItemId: string) => {
     setCartItems((prev) =>
       prev.map((item) =>
-        item.id === id ? { ...item, selected: !item.selected } : item
+        item.cartItemId === cartItemId
+          ? { ...item, selected: !item.selected }
+          : item
       )
     );
   };
@@ -149,7 +163,22 @@ const CartPage = () => {
     0
   );
 
-  return (
+  // 약관동의 체크박스
+  const handleCheckboxChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setIsChecked(event.target.checked);
+    console.log("Checkbox clicked!", event.target.checked);
+  };
+
+  // 주문하기 버튼 클릭 시 실행되는 함수
+  const handleOrderClick = () => {
+    if (isChecked) {
+      navigate("/api/orders"); // ✅ 주문 페이지로 이동
+    } else {
+      alert("주문 내용을 확인하고 동의해야 합니다.");
+    }
+  };
+
+   return (
     <>
       <div className="cart-page">
         <h1>장바구니</h1>
@@ -173,36 +202,41 @@ const CartPage = () => {
                     className="remove-selected"
                   />
                 </div>
-                {cartItems.map((item) => (
-                  <div key={item.id} className="cart-item">
+                {cartItems.map((item, index) => (
+                  <div key={item.cartItemId || index} className="cart-item">
                     <input
                       type="checkbox"
                       checked={item.selected || false}
-                      onChange={() => handleSelectItem(item.id)}
+                      onChange={() => handleSelectItem(item.cartItemId)}
                     />
                     <img src={item.image} alt={item.name} />
                     <div className="cart-item-details">
                       <p className="item-name">{item.name}</p>
+                      <p className="size">{item.sizes}</p>
+                      <p className="color">{item.colors}</p>
                       <p className="item-price">
-                        {item.price.toLocaleString()}원
+                        {(item.final_price ?? 0).toLocaleString()}원
                       </p>
                     </div>
                     <div className="item-quantity">
                       <Button
                         text="-"
-                        onClick={() => handleDecrease(item.id)}
+                        onClick={() => handleDecrease(item.cartItemId)}
                         className="quantity-button"
                       />
                       <input type="number" value={item.quantity} readOnly />
                       <Button
                         text="+"
-                        onClick={() => handleIncrease(item.id)}
+                        onClick={() => handleIncrease(item.cartItemId)}
                         className="quantity-button"
                       />
                     </div>
                     <Button
                       text="삭제"
-                      onClick={() => handleRemove(item.id)}
+                      onClick={() => {
+                        console.log("삭제 버튼 클릭됨. ID:", item.cartItemId);
+                        handleRemove(item.cartItemId);
+                      }}
                       className="remove-item"
                     />
                   </div>
@@ -227,13 +261,15 @@ const CartPage = () => {
               <span>{(totalAmount + 3000).toLocaleString()}원</span>
             </p>
             <label className="terms">
-              <input type="checkbox" /> 주문 내용을 확인했으며 동의합니다.
+              <input type="checkbox" checked={isChecked} onChange={handleCheckboxChange} /> 주문 내용을 확인했으며 동의합니다.
             </label>
-            <Button
-              text="주문하기"
-              onClick={() => alert("주문 완료")}
-              className="order-button"
-            />
+            <Button text="주문하기" onClick={(handleOrderClick) => {
+              if (isChecked) {
+                alert("주문 완료");
+              } else {
+                alert("주문 내용을 확인하고 동의해야 합니다.");
+              }
+            }} className="order-button" disabled={!isChecked} />
           </aside>
         </div>
 
