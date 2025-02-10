@@ -15,9 +15,6 @@ const OrderPay: React.FC = () => {
       <div className="orderPayTitle">결제 금액</div>
       <div className="orderCouponPoint"><OrderCouponPoint points={points} onPointsChange={handlePointChange}/></div>
       <div className="orderPrice"><OrderPrice points={points}/></div>
-      {/* <div className="orderFinalPrice">
-        <div className="orderFinalPriceTitle">최종 결제 금액</div>
-      </div> */}
       <div className="orderBtnContainer">
         <div className="orderBtn">결제하기</div>
       </div>

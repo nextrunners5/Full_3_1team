@@ -96,30 +96,6 @@ export const getUserDetailsAddress = async(userId: string) => {
   }
 }
 
-
-//주문하는 제품 정보 가져오기
-export const getOrderProducts = async(userId: string) => {
-  const query = ` SELECT cd.quantity, p.product_name, p.final_price 
-                  FROM CartDetail cd 
-                  JOIN Products p ON cd.product_id = p.product_id 
-                  JOIN Cart c ON cd.cart_id = c.cart_id 
-                  WHERE c.user_id = ?`;
-  try{
-    const [res] = await pool.promise().query(query,[userId]);
-    const rows = res as any[]; 
-    if(rows.length > 0){
-      for(let i = 0; i < rows.length; i++){
-        const finalPrice = rows[i].final_price;
-        const price = parseFloat(finalPrice).toFixed(0);
-        rows[i].final_price = price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-        console.log('orderProducts: ', price);
-      }
-      return rows;
-    }
-  }catch(err){
-    console.error('주문하려는 제품의 정보를 가져오지 못했습니다.', err);
-  }
-}
 interface ShippingFee{
   shipping_fee:string;
 }
@@ -147,3 +123,125 @@ export const getShippingFee = async (userId: string): Promise<ShippingFee[]> => 
     });
   });
 };
+
+//주문하는 제품 정보 가져오기
+export const getOrderSingleProducts = async(userId: string) => {
+//   const query = ` SELECT cd.quantity, p.product_name, p.final_price 
+//                   FROM CartDetail cd 
+//                   JOIN Products p ON cd.product_id = p.product_id 
+//                   JOIN Cart c ON cd.cart_id = c.cart_id 
+//                   WHERE c.user_id = ?`;
+  const singleProductQuery = `SELECT oi.product_count, p.product_name, o.final_amount, oi.option_color, oi.option_size
+                              FROM Orders o
+                              JOIN OrderItems  oi ON o.order_id = oi.order_id
+                              JOIN Products p ON oi.product_id = p.product_id
+                              WHERE o.user_id = 'user123' AND o.order_type = 'OT002' 
+                              ORDER BY o.order_date DESC LIMIT 1`;
+  try{
+    const [res] = await pool.promise().query(singleProductQuery,[userId]);
+    const rows = res as any[]; 
+    if(rows.length > 0){
+      for(let i = 0; i < rows.length; i++){
+        const finalPrice = rows[i].final_amount;
+        const price = parseFloat(finalPrice).toFixed(0);
+        rows[i].final_price = Number(price);
+        console.log('orderProducts: ', price);
+      }
+      return rows;
+    }
+  }catch(err){
+    console.error('주문하려는 제품의 정보를 가져오지 못했습니다.', err);
+  }
+}
+
+export const getOrderProductItems = async (userId: string) => {
+  try{
+    const cartProductQuery = `SELECT SELECT oi.product_count, p.product_name, o.final_amount, oi.option_color, oi.option_size
+                                FROM Orders o
+                                JOIN OrderItems  oi ON o.order_id = oi.order_id
+                                JOIN Products p ON oi.product_id = p.product_id
+                                WHERE o.user_id = 'user123' AND o.order_type = 'OT001'`;
+
+  }catch(err){
+    console.error('주문하려는 제품의 정보를 가져오지 못했습니다.', err);
+  }
+}
+
+// 단일 상품 주문
+// export const insertOrder = async (userid: string, totalAmount: number, discountAmount:number, finalAmount:number, shippingFee:number, statusid:string, orderType:string) => {
+//   console.log('삽입값:',userid,statusid);
+//   const query = `INSERT INTO Orders(user_id, status_id, total_amount, discount_amount, final_amount, shipping_fee, order_type) VALUES(?,?,?,?,?,?,?)`;
+//   // const order_type = "OT002";
+//   try{
+//     const [res] = await pool.promise().query(query, [userid, statusid, totalAmount, discountAmount, finalAmount, shippingFee, orderType]);
+//     console.log('insert 결과: ',res);
+//     const orderIdQuery = `SELECT order_id FROM Orders ORDER BY order_date DESC LIMIT 1`;
+//     const [orderIdResult] = await pool.promise().query(orderIdQuery);
+//     const orderId = (orderIdResult as any[])[0]?.order_id;
+//     console.log('orderId', orderId);
+//     return orderId;
+//   } catch(err){
+//     console.error('단일 상품 정보를 주문 테이블에 넣지 못했습니다.', err);
+//   }
+// }
+
+// export const insertOrderItems = async (orderId: string, productId: number, statusid: string,quantity:number,selectedSize:any,selectedColor:any) => {
+//   console.log('insertOrderItems삽입값:',productId,orderId);
+//   const query = `INSERT INTO OrderItems(order_id, product_id, order_status, product_count, option_size, option_color) VALUES(?,?,?,?,?,?)`;
+//   try{
+//     const res = await pool.promise().query(query, [orderId, productId, statusid, quantity, selectedSize, selectedColor]);
+//     console.log('insert 결과: ',res);
+//   } catch(err){
+//     console.error('단일 상품 상세 정보를 주문 테이블에 넣지 못했습니다.', err);
+//   }
+// }
+
+export const insertOrderItems = async(userid: string, totalAmount:number, discountAmount:number, finalAmount:number, shippingFee:number, orderType:string, productId:number, statusid:string,quantity:number,selectedSize:any,selectedColor:any) => {
+  const connection = await pool.promise().getConnection();
+  try{
+    await connection.beginTransaction();
+
+    const createOrderId = () => {
+      const timestamp = Date.now().toString().slice(-6);
+      return `ODR${timestamp}`;
+    };
+    const orderId = createOrderId();
+    console.log('generated orderId', orderId);
+    
+    const orderQuery = `INSERT INTO Orders(order_id, user_id, status_id, total_amount, discount_amount, final_amount, shipping_fee, order_type) VALUES(?,?,?,?,?,?,?,?)`;
+
+    console.log('Executing orderQuery:', orderQuery);
+    console.log('Query parameters:', [orderId, userid, statusid, totalAmount, discountAmount, finalAmount, shippingFee, orderType]);
+
+    const [orderInsertResult] = await connection.query(orderQuery, [orderId, userid, statusid, totalAmount, discountAmount,finalAmount,shippingFee,orderType]);
+    console.log('order insert result', orderInsertResult);
+
+
+    console.log('생성된 orderid', orderId);
+    await connection.commit();
+
+    const orderIdCheckQuery = `SELECT order_id FROM Orders WHERE order_id = ?`;
+    const [orderIdCheckResult] = await connection.query(orderIdCheckQuery, [orderId]);
+    if ((orderIdCheckResult as any[]).length === 0) {
+      throw new Error('order_id를 Orders 테이블에서 찾지 못했습니다.');
+    }
+    console.log("orderidcheck",orderIdCheckResult);
+
+    const createOrderItemId = () => {
+      const timestamp = Date.now().toString().slice(-6);
+      return `ODRI${timestamp}`;
+    };
+    const orderItemId = createOrderItemId();
+    console.log('generated orderItemId', orderItemId);
+    const orderItemsQuery = `INSERT INTO OrderItems(orderItems_id, order_id, product_id, order_status, product_count, option_size, option_color) VALUES(?,?,?,?,?,?,?)`;
+    await connection.query(orderItemsQuery,[orderItemId, orderId, productId, statusid, quantity, selectedSize,selectedColor ]);
+    await connection.commit();
+    return orderId;
+  }catch(err){
+    await connection.rollback();
+    console.error('주문 상세 정보를 주문 테이블에 추가하지 못했습니다.', err);
+    throw err;
+  }finally{
+    connection.release();
+  }
+}

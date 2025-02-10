@@ -26,8 +26,16 @@ export interface OrderProducts{
   product_id: number;
   category_id: number;
   product_name: string;
-  quantity: number;
+  product_count: number;
+  final_amount: string;
   final_price: number;
+  option_color: string;
+  option_size: string;
+}
+
+export interface OrderState{
+  orderInfo: OrderProducts[];
+  totalPrice: number;
 }
 
 export interface OrderCouponPointProps{

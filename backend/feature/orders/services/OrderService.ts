@@ -4,7 +4,18 @@
 
 //controller -> service -> repository -> db
 
-import {getDeliveryMessage, getOrderProducts, getShippingFee, getUserAddress, getUserDetailsAddress, getUserPoints} from "../repo/OrderRepo";
+import {
+  getDeliveryMessage, 
+  getOrderProductItems, 
+  getOrderSingleProducts, 
+  // getOrderProducts, 
+  getShippingFee, 
+  getUserAddress, 
+  getUserDetailsAddress, 
+  getUserPoints, 
+  // insertOrder,
+  insertOrderItems, 
+} from "../repo/OrderRepo";
 
 export const fetchUserPoints = async(userId: string) => {
   try {
@@ -50,7 +61,7 @@ export const fetchUserDetailsAddress = async(userId: string) => {
 
 export const fetchOrderProducts = async() => {
   try{
-    const orderProductsInfo = await getOrderProducts('user123');
+    const orderProductsInfo = await getOrderSingleProducts('user123');
     return orderProductsInfo;
   } catch(err){
     console.error('제품 정보를 가져오지 못했습니다.', err);
@@ -68,3 +79,23 @@ export const fetchShippingFee = async(userId: string) => {
     throw err;
   }
 };
+
+export const fetchOrderSingleProduct = async(orderData:any) => {
+  try{
+    const userid = 'user123';
+    const statusid = 'OS001';
+    const orderType = 'OT002';
+    const {userId, productId, quantity, totalAmount, discountAmount, finalAmount, shippingFee, selectedSize, selectedColor, statusId} = orderData;
+    // const orderId = await insertOrder(userid, totalAmount, discountAmount, finalAmount, shippingFee, statusid, orderType);
+    const orderId = await insertOrderItems(userid, totalAmount, discountAmount, finalAmount, shippingFee, orderType, productId, statusid,quantity,selectedSize,selectedColor);
+    console.log('orderID', orderId,typeof(orderId));
+    if(!orderId){
+      throw new Error('order_id가 존재하지 않습니다.');
+    }
+    return orderId;
+    // await insertOrderItems(orderId, productId, statusid,quantity,selectedSize,selectedColor);
+  } catch(err){
+    console.error('단일 상품 저장 실패', err);
+    throw err;
+  }
+}

@@ -55,6 +55,7 @@ export const fetchOrderProducts = async() => {
   }
 };
 
+//배송비 정보 가져오기
 export const fetchShippingFee = async() => {
   try{
     const response = await axiosInstance.get<OrderShippingFee[]>('/api/orders/OrderShippingFee');
@@ -64,3 +65,14 @@ export const fetchShippingFee = async() => {
     console.error('배송비 정보를 가져오지 못했습니다.', err);
   }
 };
+
+
+export const fetchPostOrderProducts = async() => {
+  try{
+    const response = await axiosInstance.post('/api/orders/OrderSingleProduct');
+    console.log('frontend single product: ', response.data);
+    return response.data;
+  } catch(err){
+    console.error('주문하려는 단일 상품 정보 저장 실패', err);
+  }
+}

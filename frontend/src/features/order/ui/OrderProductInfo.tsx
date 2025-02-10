@@ -1,9 +1,13 @@
 import { useEffect, useState } from "react";
 import "./OrderProductInfo.css"
-import { OrderProducts, OrderProductsProps } from "../model/OrderModel";
+import { OrderProducts } from "../model/OrderModel";
 import { fetchOrderProducts } from "../api/Order";
+import { useDispatch } from "react-redux";
+import { updateOrderInfo } from "../../../pages/order/orderRedux/slice";
 
-const OrderProduct: React.FC<OrderProductsProps> = ({onTotalPriceChange}) => {
+const OrderProduct: React.FC = () => {
+  
+  const dispatch = useDispatch();
   const [orderProducts, setOrderProducts] = useState<OrderProducts[]>([]);
 
   useEffect(() => {
@@ -12,10 +16,13 @@ const OrderProduct: React.FC<OrderProductsProps> = ({onTotalPriceChange}) => {
         const productInfo = await fetchOrderProducts();
         console.log('제품 정보 가져오기 성공:', productInfo);
         if(productInfo && productInfo.length > 0) {
+          const transformedProduct = productInfo.map(product => ({
+            ...product,
+            final_price : Number(product.final_amount.toString().replace(/,/g, ''))
+          }));
           setOrderProducts(productInfo);
-          const total = productInfo.reduce((acc, product) => acc + (product.final_price * product.quantity), 0);
-          // setTotalPrice(total);
-          onTotalPriceChange(total);
+          console.log('제품정보', transformedProduct);
+          dispatch(updateOrderInfo(transformedProduct));
         }
         console.log('제품 정보 : ', productInfo);
       } catch(err){
@@ -23,7 +30,8 @@ const OrderProduct: React.FC<OrderProductsProps> = ({onTotalPriceChange}) => {
       }
     };
     getOrderProduct();
-  },[onTotalPriceChange]);
+  },[dispatch]);
+
 
   return (
     <div className="orderProductContainer">
@@ -35,8 +43,8 @@ const OrderProduct: React.FC<OrderProductsProps> = ({onTotalPriceChange}) => {
           <div className="midRight">
             <div className="productName">{data.product_name}</div>
             <div className="productName">{data.product_id}</div>
-            <div className="productType">종류: 강아지용 | 사이즈: M</div>
-            <div className="productPrice">{data.final_price}원 x {data.quantity}개</div>
+            <div className="productType">종류: 강아지용 | 사이즈: {data.option_size} {data.option_color && `| 색상: ${data.option_color}`}</div>
+            <div className="productPrice">{data.final_price.toLocaleString()}원 x {data.product_count}개</div>
           </div>
         </div>
       ))}

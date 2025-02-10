@@ -2,31 +2,36 @@ import { useEffect, useState } from "react";
 import { OrderPriceProps, OrderShippingFee } from "../model/OrderModel";
 import "./OrderPrice.css"
 import { fetchShippingFee } from "../api/Order";
+import { useSelector } from "react-redux";
+// import { RootState } from "../../../pages/order/orderRedux/store";
+import { selectTotalPrice } from "../../../pages/order/orderRedux/slice";
 
 const OrderPrice: React.FC<OrderPriceProps> = ({points}) => {
   const [shippingFee, setShippingFee] = useState<OrderShippingFee>({shipping_fee: 0});
+  const orderInfo = useSelector(selectTotalPrice);
 
   useEffect(()=> {
     const getShippingFee = async() => {
       try{
         const fee = await fetchShippingFee();
         if(fee && fee.length > 0){
-          setShippingFee( {shipping_fee: fee[0].shipping_fee});
+          setShippingFee({ shipping_fee: Number(fee[0].shipping_fee.toString().replace(/,/g,'')) });
         }
-        console.log('배송비 가져오기 setShippingFee: ', fee);
+        // console.log('배송비 가져오기 setShippingFee: ', shippingFee);
+        // console.log('total', orderInfo);
       } catch(err){
         console.error('배송비를 가져오지 못했습니다.', err);
       }
     };
     getShippingFee();
-  },[])
+  },[]);
+  
   return (
     <div>
       <div className="orderPriceContainer">
         <div className="orderProductPriceContainer">
           <div className="orderProductPriceTitle">상품 금액</div>
-          <div className="orderProductPrice">89,000원</div>
-          {/* <div className="orderProductPrice">{total_productPrice.toLocaleString()}원</div> */}
+          <div className="orderProductPrice">{orderInfo}원</div>
         </div>
         <div className="orderCouponPriceContainer">
           <div className="orderCouponPriceTitle">쿠폰 할인</div>
@@ -43,7 +48,7 @@ const OrderPrice: React.FC<OrderPriceProps> = ({points}) => {
       </div>
       <div className="orderFinalPriceContainer">
         <div className="orderFinalPriceTitle">최종 결제 금액</div>
-        <div className="orderFinalPrice">92,000원</div>
+        <div className="orderFinalPrice">{(orderInfo - (points + shippingFee.shipping_fee)).toLocaleString()}원</div>
       </div>
     </div>
   )
