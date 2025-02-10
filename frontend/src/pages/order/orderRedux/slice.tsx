@@ -11,7 +11,7 @@ const orderSlice = createSlice({
   reducers: {
     updateOrderInfo: (state, action: PayloadAction<OrderProducts[]>) => {
       state.orderInfo = action.payload;
-      state.totalPrice = action.payload.reduce((total, product) => total + (product.final_price * product.product_count),0);
+      state.totalPrice = action.payload.reduce((total, product) => total + product.final_price * product.product_count,0);
     },
   },
 });

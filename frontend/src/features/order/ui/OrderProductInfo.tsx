@@ -18,9 +18,9 @@ const OrderProduct: React.FC = () => {
         if(productInfo && productInfo.length > 0) {
           const transformedProduct = productInfo.map(product => ({
             ...product,
-            final_price : Number(product.final_amount.toString().replace(/,/g, ''))
+            final_price : Number(product.final_amount.toString().replace(/,/g, '')) / product.product_count,
           }));
-          setOrderProducts(productInfo);
+          setOrderProducts(transformedProduct);
           console.log('제품정보', transformedProduct);
           dispatch(updateOrderInfo(transformedProduct));
         }

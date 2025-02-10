@@ -38,6 +38,11 @@ export interface OrderState{
   totalPrice: number;
 }
 
+// export interface UpdateOrderInfoPayload {
+//   products: OrderProducts[];
+//   updateTotalPrice: boolean;
+// }
+
 export interface OrderCouponPointProps{
   points: number;
   onPointsChange: (newPoints: number) => void;
