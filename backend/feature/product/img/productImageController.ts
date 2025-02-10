@@ -42,9 +42,10 @@ export const uploadImages = async (
     const files = req.files as { [fieldname: string]: Express.Multer.File[] };
 
     // 대표 이미지 처리 (리사이징 적용)
-    if (!files["mainImage"] || !files["mainImage"][0]) {
-      res.status(400).json({ message: "대표 이미지가 필요합니다." });
-      return;
+    const mainImageFile = files["mainImage"]?.[0];
+
+    if (!mainImageFile) {
+      res.status(400).json({ message: "대표 이미지는 필수 업로드해야 합니다." });
     }
 
     const originalMainImage = files["mainImage"][0].path;
@@ -66,7 +67,11 @@ export const uploadImages = async (
       })
       .toFile(resized300Path);
 
-    const detailImages = files["detailImage"]?.map((file) => file.path) || [];
+      let detailImages = files["detailImage"] ? files["detailImage"].map(file => file.path) : [];
+
+      if (detailImages.length > 5) {
+        res.status(400).json({ message: "상세 이미지는 최대 5개까지만 업로드할 수 있습니다." });
+      }
 
     const newProductImage = new ProductImage({
       product_id: String(product_id),

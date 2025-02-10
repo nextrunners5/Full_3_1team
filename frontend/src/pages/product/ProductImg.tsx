@@ -13,6 +13,12 @@ const ProductImg: React.FC<ProductImgProps> = ({ onUpload }) => {
   const handleMainImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files[0]) {
       const file = event.target.files[0];
+
+      if (mainImage) {
+        alert("대표 이미지는 1개만 업로드할 수 있습니다.");
+        return;
+      }
+
       setMainImage(file);
       onUpload(file, detailImages);
     }
@@ -22,6 +28,14 @@ const ProductImg: React.FC<ProductImgProps> = ({ onUpload }) => {
   const handleDetailImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files) {
       const filesArray = Array.from(event.target.files);
+  
+      const totalImages = detailImages.length + filesArray.length;
+  
+      if (totalImages > 5) {
+        alert("상세 이미지는 최대 5개까지만 업로드할 수 있습니다.");
+        return;
+      }
+  
       setDetailImages((prev) => [...prev, ...filesArray]);
       onUpload(mainImage, [...detailImages, ...filesArray]);
     }
@@ -45,9 +59,9 @@ const ProductImg: React.FC<ProductImgProps> = ({ onUpload }) => {
             ) : (
               <>
                 <span className="material-symbols-outlined">image</span>
-                <p>이미지 업로드</p>
+                <p>필수 이미지 업로드</p>
                 <span>또는 드래그 앤 드롭</span>
-                <small>PNG, JPG 최대 10MB</small>
+                <small>PNG, JPG 1개 제한</small>
               </>
             )}
           </div>
@@ -75,7 +89,7 @@ const ProductImg: React.FC<ProductImgProps> = ({ onUpload }) => {
                 <span className="material-symbols-outlined">image</span>
                 <p>이미지 업로드</p>
                 <span>또는 드래그 앤 드롭</span>
-                <small>PNG, JPG 최대 10MB</small>
+                <small>PNG, JPG 최대 5개 업로드 가능</small>
               </>
             )}
           </div>
