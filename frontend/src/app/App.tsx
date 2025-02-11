@@ -5,7 +5,6 @@ import TestPage from "../pages/home/TestPage";
 import Login from "../pages/login/Login";
 import Cart from "../pages/cart/Cart";
 import Order from "../pages/order/Order";
-import CuponModal from "../widgets/Cupon/CuponModal";
 import FindAccount from '../pages/login/FindAccount';
 import Signup from "../pages/login/Signup";
 import ProductCreate from "../pages/product/ProductCreate";
@@ -13,7 +12,7 @@ import ProductList from "../pages/product/ProductList";
 import MyPage from "../pages/profile/MyPage";
 import ProductDetail from "../pages/product/ProductDetail";
 import Wishlist from "../pages/wishlist/WishList";
-import PayCompleteModal from "../shared/ui/PaycompleteModal";
+import MDashBoard from "../pages/manager/MDashBoard";
 
 function App() {
   return (
@@ -25,7 +24,6 @@ function App() {
         <Route path="/Signup" element={<Signup />} />
         <Route path="/cart" element={<Cart />} />
         <Route path="/order" element={<Order />} />
-        <Route path="/Cupon" element={<CuponModal />} />
         <Route path="/ProductCreate" element={<ProductCreate />} />
         <Route path="/find-account" element={<FindAccount />} />
         <Route path="/ProductList" element={<ProductList />} />        
@@ -33,7 +31,7 @@ function App() {
         <Route path="/ProductList" element={<ProductList />} />
         <Route path="/products/:product_id" element={<ProductDetail />} />
         <Route path="/wishlist" element={<Wishlist />} />
-        <Route path="/PayCompleteModal" element={<PayCompleteModal />} />
+        <Route path="/MDashBoard" element={<MDashBoard />} />
       </Routes>
     </Router>
   );
