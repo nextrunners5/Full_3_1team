@@ -32,6 +32,9 @@ const TestPage: React.FC = () => {
       <button>
       <Link to={'/WishList'}>위시리스트</Link>
       </button>
+      <button>
+      <Link to={'/ProductBoard'}>상품 관리 페이지</Link>
+      </button>
       
     </div>
 

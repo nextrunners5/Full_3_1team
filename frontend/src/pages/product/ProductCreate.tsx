@@ -1,18 +1,20 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import "./CSS/ProductCreate.css";
 import axiosInstance from "axios";
-import { createProduct, uploadImages } from "../../features/product/api/Product";
+import { createProduct, uploadImages, updateProduct } from "../../features/product/api/Product";
 import ProductImg from "./ProductImg"
 
 const ProductCreate: React.FC = () => {
   const navigate = useNavigate();
   const [colorInput, setColorInput] = useState("");
   const [categories, setCategories] = useState<
-    { category_id: number; category_name: string }[]
+  { category_id: number; category_name: string }[]
   >([]);
   const [mainImage, setMainImage] = useState<File | null>(null);
   const [detailImages, setDetailImages] = useState<File[]>([]);
+  const { productId } = useParams<{ productId: string }>();
+  const [isEditMode, setIsEditMode] = useState<boolean>(false);
   
   const [product, setProduct] = useState<{
     product_id: string;
@@ -76,6 +78,18 @@ const ProductCreate: React.FC = () => {
         setCategories([]);
       });
   }, []);
+
+  useEffect(() => {
+    if (productId) {
+      setIsEditMode(true);
+      axiosInstance
+        .get(`/api/products/${productId}`)
+        .then((res) => {
+          setProduct(res.data);
+        })
+        .catch((err) => console.error("상품 정보 불러오기 실패:", err));
+    }
+  }, [productId]);
 
   const statusMap: { [key: string]: string } = {
     판매중: "PRS001",
@@ -176,10 +190,10 @@ const ProductCreate: React.FC = () => {
     setDetailImages(details);
   };
 
-  // 상품 등록
+  // 상품 수정/등록
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-
+    
     const formattedProduct = {
       ...product,
       origin_price: parseFloat(product.origin_price) || 0,
@@ -188,40 +202,62 @@ const ProductCreate: React.FC = () => {
       stock_quantity: parseInt(product.stock_quantity, 10) || 0,
     };
 
-    try {
-      const response = await createProduct(formattedProduct);
-        console.log("전체 response 객체:", response);
-      
-        const responseData = response.data ? response.data : response;
-        console.log("파싱된 responseData:", responseData);
+    console.log("프론트 디버그 isEditMode:", isEditMode);
+    console.log("프론트 디버그 product_id:", product.product_id);
+    console.log("프론트 디버그 formattedProduct:", formattedProduct);
 
-        if (!response || !response.data || !response.data.product_id) {
-          throw new Error("상품 등록 실패: response.data가 없음");
-        }
+    try {
+      let response;
+      
+      if (isEditMode && product.product_id) {
+
+        const productId = Number(product.product_id);
+
+        console.log("--------------------------------------프론트 디버깅 updateProduct API 호출");
+        console.log("프론트 디버깅 productId:", productId);
+        console.log("프론트 디버깅 formattedProduct:", formattedProduct);
+        
+        response = await updateProduct(product.product_id, formattedProduct);
+        console.log("상품 수정 성공:", response.data);
+        alert("상품이 성공적으로 수정되었습니다.");
+      } else {
+        response = await createProduct(formattedProduct);
+        console.log("상품 등록 성공:", response.data);
+        alert("상품이 성공적으로 등록되었습니다.");
+      }
+
+      if (!response || !response.data || !response.data.product_id) {
+        throw new Error("상품 저장 실패: response.data가 없음");
+      }
 
       const productId = response.data.product_id;
 
-      await handleImageUploadToMongoDB(productId);
+      if (mainImage || detailImages.length > 0) {
+        await handleImageUploadToMongoDB(productId);
+      }
 
-      alert("상품이 성공적으로 등록되었습니다.");
       setTimeout(() => {
         navigate("/ProductList");
-      }, 2000);
+      }, 1000);
 
     } catch (error) {
-      console.error("상품 등록 실패:", error);
-      alert("상품 등록에 실패했습니다.");
+      console.error("상품 저장 실패:", error);
+      alert("상품 저장 중 오류가 발생했습니다.");
     }
-  };
-
-  
+};
 
   return (
     <div className="product-create-container">
       <form onSubmit={handleSubmit}>
         <div className="product-create">
           <div className="page-header">
-            <h2>새 상품 등록</h2>
+          <h2>{isEditMode ? "상품 수정" : "새 상품 등록"}</h2>
+            <input
+              type="text"
+              name="product_name"
+              value={product.product_name}
+              onChange={(e) => setProduct({ ...product, product_name: e.target.value })}
+            />
             <button className="back-btn" onClick={() => navigate("/")}>
               ← 돌아가기
             </button>
@@ -403,9 +439,7 @@ const ProductCreate: React.FC = () => {
             >
               취소
             </button>
-            <button type="submit" className="product-submit-btn">
-              저장하기
-            </button>
+            <button type="submit">{isEditMode ? "수정 완료" : "등록하기"}</button>
           </div>
         </div>
       </form>

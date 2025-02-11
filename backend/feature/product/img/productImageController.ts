@@ -45,7 +45,9 @@ export const uploadImages = async (
     const mainImageFile = files["mainImage"]?.[0];
 
     if (!mainImageFile) {
-      res.status(400).json({ message: "대표 이미지는 필수 업로드해야 합니다." });
+      res
+        .status(400)
+        .json({ message: "대표 이미지는 필수 업로드해야 합니다." });
     }
 
     const originalMainImage = files["mainImage"][0].path;
@@ -57,21 +59,27 @@ export const uploadImages = async (
     await sharp(originalMainImage)
       .resize(500, 500, {
         fit: "contain",
-        background: { r: 180, g: 180, b: 180, alpha: 1 },
+        background: { r: 255, g: 255, b: 255, alpha: 1 },
       })
       .toFile(resized500Path);
     await sharp(originalMainImage)
       .resize(300, 250, {
         fit: "contain",
-        background: { r: 100, g: 100, b: 100, alpha: 1 },
+        background: { r: 255, g: 255, b: 255, alpha: 1 },
       })
       .toFile(resized300Path);
 
-      let detailImages = files["detailImage"] ? files["detailImage"].map(file => file.path) : [];
+    let detailImages = files["detailImage"]
+      ? files["detailImage"].map((file) => file.path)
+      : [];
 
-      if (detailImages.length > 5) {
-        res.status(400).json({ message: "상세 이미지는 최대 5개까지만 업로드할 수 있습니다." });
-      }
+    if (detailImages.length > 5) {
+      res
+        .status(400)
+        .json({
+          message: "상세 이미지는 최대 5개까지만 업로드할 수 있습니다.",
+        });
+    }
 
     const newProductImage = new ProductImage({
       product_id: String(product_id),

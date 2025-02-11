@@ -1,5 +1,5 @@
 import axiosInstance from "axios";
-import { Product, OrderProduct, CartProduct } from "../model/ProductModel";
+import { Product, OrderProduct, CartProduct, ProductUpdate } from "../model/ProductModel";
 
 // 상품 등록 API 요청
 export const createProduct = async (productData: Product) => {
@@ -9,6 +9,19 @@ export const createProduct = async (productData: Product) => {
     return response
   } catch (error) {
     console.error("상품 등록 실패:", error);
+    throw error;
+  }
+};
+
+// 상품 수정
+export const updateProduct = async (productId: string, updatedData: ProductUpdate) => {
+  console.log("프론트 API 호출 updateProduct:", `/api/products/${productId}`, updatedData);
+
+  try {
+    const response = await axiosInstance.put(`/api/products/${productId}`, updatedData);
+    return response.data;
+  } catch (error) {
+    console.error("상품 수정 실패:", error);
     throw error;
   }
 };

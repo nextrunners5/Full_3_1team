@@ -49,7 +49,6 @@ const ProductImg: React.FC<ProductImgProps> = ({ onUpload }) => {
 
   return (
     <div className="img-container">
-      {/* 대표 이미지 업로드 */}
       <div className="image-upload-section">
         <h2>대표 이미지</h2>
         <label htmlFor="main-image-upload" className="image-upload-box">
@@ -75,7 +74,6 @@ const ProductImg: React.FC<ProductImgProps> = ({ onUpload }) => {
         </label>
       </div>
 
-      {/* 상세 이미지 업로드 */}
       <div className="image-upload-section">
         <h2>상세 이미지</h2>
         <label htmlFor="detail-image-upload" className="image-upload-box">
@@ -104,7 +102,6 @@ const ProductImg: React.FC<ProductImgProps> = ({ onUpload }) => {
         </label>
       </div>
 
-      {/* 삭제 & 저장 버튼 */}
       <div className="button-container">
         <button type="button" className="remove-all-btn" onClick={handleRemoveAllImages}>
           모든 이미지 삭제

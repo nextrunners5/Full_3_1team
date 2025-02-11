@@ -280,13 +280,13 @@ const ProductDetail: React.FC = () => {
             className={activeTab === "review" ? "active" : ""}
             onClick={() => setActiveTab("review")}
           >
-            리뷰 ({product.review_count})
+            리뷰 
           </button>
           <button
             className={activeTab === "qna" ? "active" : ""}
             onClick={() => setActiveTab("qna")}
           >
-            Q&A (45)
+            Q&A
           </button>
         </div>
 

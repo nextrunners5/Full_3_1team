@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import axiosInstance from "../../shared/axios/axios";
 import ProductCard from "../product/ProductCard";
 import "./CSS/ProductList.css";
+import ProductToggle from "./ProductToggle";
 
 interface Product {
   product_id: number;
@@ -9,13 +10,14 @@ interface Product {
   origin_price: number;
   discount_price: number;
   final_price: number;
+  created_at: string;
   main_image: string;
   small_image: string;
 }
 
 const ProductList: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
-  const [sortOption, setSortOption] = useState<string>("lowPrice");
+  const [sortOption, setSortOption] = useState("recommended");
   const [wishlist, setWishlist] = useState<number[]>([]);
   const userId = localStorage.getItem("userId") || "guest";
 
@@ -75,8 +77,22 @@ const ProductList: React.FC = () => {
       alert("위시리스트 업데이트 중 오류가 발생했습니다.");
     }
   };
-  
 
+  const sortedProducts = [...products].sort((a, b) => {
+    switch (sortOption) {
+      case "sales":
+        return b.discount_price - a.discount_price;
+        case "newest":
+          return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+      case "lowPrice":
+        return a.final_price - b.final_price;
+      case "highPrice":
+        return b.final_price - a.final_price;
+      default:
+        return 0;
+    }
+  });
+  
   return (
     <div className="product-page">
       <div className="banner-container">
@@ -85,17 +101,11 @@ const ProductList: React.FC = () => {
 
       <div className="controls-container">
         <h2>상품 목록</h2>
-        <select
-          value={sortOption}
-          onChange={(e) => setSortOption(e.target.value)}
-        >
-          <option value="lowPrice">낮은 가격순</option>
-          <option value="highPrice">높은 가격순</option>
-        </select>
+        <ProductToggle sortOption={sortOption} setSortOption={setSortOption} />
       </div>
 
       <div className="products">
-        {products.map((product) => (
+        {sortedProducts.map((product) => (
           <ProductCard
             key={product.product_id}
             product={product}

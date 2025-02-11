@@ -5,7 +5,7 @@ import express, { Router, Request, Response } from "express";
 import pool from "../../backend/config/dbConfig";
 import ProductService from "../../backend/feature/product/services/ProductService";
 import { RowDataPacket } from "mysql2";
-import { getProductById, getCategories, getProducts } from "../feature/product/controller/ProductController"
+import { getProductById, getCategories, getProducts, deleteProduct, updateProduct } from "../feature/product/controller/ProductController"
 import ProductImage from "../feature/product/img/ProductImage";
 
 const router = Router();
@@ -67,7 +67,6 @@ router.get(
         return;
       }
 
-      // MySQL에서 상품 데이터 조회
       const [rows] = await pool
         .promise()
         .query<RowDataPacket[]>("SELECT * FROM Products WHERE product_id = ?", [id]);
@@ -83,8 +82,8 @@ router.get(
 
       const productWithImages = {
         ...product,
-        main_image: productImage ? `http://localhost:3000/${productImage.main_image}` : null, // 대표 이미지
-        detail_images: productImage ? productImage.detail_images.map(img => `http://localhost:3000/${img}`) : [], // 상세 이미지
+        main_image: productImage ? `http://localhost:3000/${productImage.main_image}` : null,
+        detail_images: productImage ? productImage.detail_images.map(img => `http://localhost:3000/${img}`) : [],
       };
 
       console.log("최종 응답 데이터:", productWithImages);
@@ -100,5 +99,9 @@ router.get(
 router.get("/products/:id", getProductById);
 // 다수 상품 조회
 router.get("/products", getProducts);
+// 상품 수정
+router.put("/producets/:productId", updateProduct);
+// 상품 삭제
+router.delete("/products/:productId", deleteProduct);
 
 export default router;

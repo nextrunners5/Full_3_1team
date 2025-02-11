@@ -13,6 +13,7 @@ import ProductList from "../pages/product/ProductList";
 import MyPage from "../pages/profile/MyPage";
 import ProductDetail from "../pages/product/ProductDetail";
 import Wishlist from "../pages/wishlist/WishList";
+import ProductBoard from "../pages/product/ProductBoard";
 
 function App() {
   return (
@@ -26,12 +27,14 @@ function App() {
         <Route path="/order" element={<Order />} />
         <Route path="/payment" element={<Payment />} />
         <Route path="/ProductCreate" element={<ProductCreate />} />
+        <Route path="/product-create/:productId" element={<ProductCreate />} />
         <Route path="/find-account" element={<FindAccount />} />
         <Route path="/ProductList" element={<ProductList />} />        
         <Route path="/MyPage" element={<MyPage/>} />    
         <Route path="/ProductList" element={<ProductList />} />
         <Route path="/products/:product_id" element={<ProductDetail />} />
         <Route path="/wishlist" element={<Wishlist />} />
+        <Route path="/ProductBoard" element={<ProductBoard />} />
       </Routes>
     </Router>
   );
