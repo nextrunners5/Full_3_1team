@@ -5,13 +5,15 @@ import * as cartService from "../services/CartService";
 export const getCart = async (req: Request, res: Response) => {
   try {
     const { userId } = req.params; // ✅ 사용자의 고유 ID (Users 테이블의 `user_id`)
-    console.log("")
     
-    if (!userId) {
-      return res.status(400).json({ message: "`userId`가 필요합니다." });
-      }
+    console.log("🛠 장바구니 조회 요청 - userId:", userId);
+    
+    if (!userId || userId === "null") {
+      return res.status(400).json({ message: "유효하지 않은 userId입니다." });
+    }
 
     const items = await cartService.getCart(userId);
+
     res.json(items);
   } catch (error) {
     res.status(500).json({ message: "장바구니 불러오기 실패", error });
@@ -31,7 +33,7 @@ export const addToCart = async (req: Request, res: Response) => {
     const parsedProductId = String(productId);
 
     // ✅ `Cart` 테이블에 사용자 장바구니 정보 추가 후 `cart_id` 반환
-    const cartId: number = await cartService.addToCart(userId, shippingFee);
+    const cartId: number = await cartService.addToCart(userId, shippingFee, productId, quantity);
     console.log("생성된 Cart ID:", cartId);
 
         // ✅ `CartDetail` 테이블에 해당 `cart_id`와 함께 상품 정보 추가
