@@ -9,23 +9,23 @@
     flex-direction: column;
     padding: 20px;
     margin-top: -90px;
-  }
-  
-  .logo-M-s {
+}
+
+.logo-M-s {
     font-size: 30px;
     margin-bottom: 30px;
     font-family: 'Rubik Bubbles', cursive;
     margin-left: 50px;
+    margin-bottom: 40px;
+}
 
-  }
-  
-  nav ul {
+nav ul {
     list-style: none;
     padding: 0;
     margin: 0;
-  }
-  
-  .nav-item-M-s {
+}
+
+.nav-item-M-s {
     display: flex;
     align-items: center;
     padding: 12px 10px;
@@ -34,22 +34,32 @@
     cursor: pointer;
     border-radius: 8px;
     transition: background 0.3s ease;
-  }
-  
-  .nav-item-M-s:hover {
+    text-decoration: none; /* 🔹 밑줄 제거 */
+}
+
+.nav-item-M-s:hover {
     background-color: #f4f4f4;
-  }
-  
-  .icon-M-s {
+}
+
+/* 🔹 링크 스타일 초기화 */
+.nav-link-M-s {
+    text-decoration: none; /* 기본 링크 스타일 제거 */
+    color: inherit; /* 부모 요소의 색상을 상속 */
+    display: flex;
+    align-items: center;
+    width: 100%;
+}
+
+.icon-M-s {
     margin-right: 12px;
     font-size: 18px;
-  }
-  
-  .logout-section-M-s {
+}
+
+.logout-section-M-s {
     margin-top: auto;
-  }
-  
-  .logout-button-M-s {
+}
+
+.logout-button-M-s {
     width: 100%;
     padding: 12px;
     background-color: #000;
@@ -62,9 +72,8 @@
     font-size: 16px;
     cursor: pointer;
     transition: background 0.3s ease;
-  }
-  
-  .logout-button-M-s:hover {
+}
+
+.logout-button-M-s:hover {
     background-color: #333;
-  }
-  
+}

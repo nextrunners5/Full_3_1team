@@ -1,6 +1,7 @@
-import { FaTachometerAlt, FaBoxOpen, FaClipboardList, FaBullhorn, FaTicketAlt } from 'react-icons/fa';
-import { FiLogOut } from 'react-icons/fi';
-import './M-sidebar.css';
+import { Link } from "react-router-dom";
+import { FaTachometerAlt, FaBoxOpen, FaClipboardList } from "react-icons/fa";
+import { FiLogOut } from "react-icons/fi";
+import "./M-sidebar.css";
 
 const MSidebar = () => {
   return (
@@ -9,19 +10,19 @@ const MSidebar = () => {
       <nav>
         <ul>
           <li className="nav-item-M-s">
-            <FaTachometerAlt className="icon-M-s" /> 대시보드
+            <Link to="/MDashBoard" className="nav-link-M-s">
+              <FaTachometerAlt className="icon-M-s" /> 대시보드
+            </Link>
           </li>
           <li className="nav-item-M-s">
-            <FaBoxOpen className="icon-M-s" /> 상품관리
+            <Link to="/MProduct" className="nav-link-M-s">
+              <FaBoxOpen className="icon-M-s" /> 상품관리
+            </Link>
           </li>
           <li className="nav-item-M-s">
-            <FaClipboardList className="icon-M-s" /> 주문관리
-          </li>
-          <li className="nav-item-M-s">
-            <FaBullhorn className="icon-M-s" /> 광고관리
-          </li>
-          <li className="nav-item-M-s">
-            <FaTicketAlt className="icon-M-s" /> 쿠폰관리
+            <Link to="/order" className="nav-link-M-s">
+              <FaClipboardList className="icon-M-s" /> 주문관리
+            </Link>
           </li>
         </ul>
       </nav>

@@ -13,6 +13,7 @@ import MyPage from "../pages/profile/MyPage";
 import ProductDetail from "../pages/product/ProductDetail";
 import Wishlist from "../pages/wishlist/WishList";
 import MDashBoard from "../pages/manager/MDashBoard";
+import MProduct from "../pages/manager/MProduct";
 
 function App() {
   return (
@@ -32,6 +33,7 @@ function App() {
         <Route path="/products/:product_id" element={<ProductDetail />} />
         <Route path="/wishlist" element={<Wishlist />} />
         <Route path="/MDashBoard" element={<MDashBoard />} />
+        <Route path="/MProduct" element={<MProduct />} />
       </Routes>
     </Router>
   );
