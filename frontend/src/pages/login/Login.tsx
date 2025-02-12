@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import FailModal from '../../shared/ui/FailModal';
+import axios from '../../shared/axios/axios';
 import "../login/Login.css";
 
 // Define types for the form inputs
@@ -20,8 +21,8 @@ const Login: React.FC = () => {
 
   // State for API call status
   const [loading, setLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null); // 에러 메시지 저장
   const [showModal, setShowModal] = useState<boolean>(false); // 모달 상태
+  const [modalMessage, setModalMessage] = useState<string>(''); // 모달 메시지 저장
 
   // Handle form input changes
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -33,28 +34,39 @@ const Login: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
-    setError(null);
 
     try {
-      const response = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form),
+      const response = await axios.post('/auth/login', {
+        userId: form.username,
+        password: form.password
       });
 
-      if (!response.ok) {
-        throw new Error('이메일 또는 비밀번호가 일치하지 않습니다.');
+      if (response.data.success) {
+        console.log('로그인 성공:', response.data);
+        localStorage.setItem('token', response.data.token);
+        localStorage.setItem('user', JSON.stringify(response.data.user));
+        navigate('/');
+      } else {
+        throw new Error('로그인에 실패했습니다.');
       }
-
-      const data = await response.json();
-      console.log('로그인 성공:', data);
-      // Handle successful login (e.g., redirect or update state)
-    } catch (error: any) {
-      setError(error.message || '로그인 중 문제가 발생했습니다.');
-      setShowModal(true); // Show modal on error
+    } catch (error) {
+      const errorMessage = error instanceof Error 
+        ? error.message 
+        : '로그인에 실패했습니다.';
+      setModalMessage(errorMessage);
+      setShowModal(true);
     } finally {
       setLoading(false);
     }
+  };
+
+  // 카카오 로그인 핸들러
+  const handleKakaoLogin = () => {
+    const KAKAO_CLIENT_ID = import.meta.env.VITE_KAKAO_CLIENT_ID;
+    const KAKAO_REDIRECT_URI = import.meta.env.VITE_KAKAO_REDIRECT_URI;
+    const kakaoURL = `https://kauth.kakao.com/oauth/authorize?client_id=${KAKAO_CLIENT_ID}&redirect_uri=${KAKAO_REDIRECT_URI}&response_type=code`;
+    
+    window.location.href = kakaoURL;
   };
 
   return (
@@ -65,7 +77,7 @@ const Login: React.FC = () => {
         {showModal && (
           <FailModal
             title="로그인 실패"
-            message={error || "아이디와 비밀번호를 확인해주세요."} // error 상태 전달
+            message={modalMessage}
             icon="src/assets/Fail.png"
             onClose={() => setShowModal(false)} // 모달 닫기
           />
@@ -91,11 +103,19 @@ const Login: React.FC = () => {
             {loading ? '로딩 중...' : '로그인'}
           </button>
         </form>
-        <button className="l_kakao-button">카카오로 간편 로그인/가입</button>
-        <button className="l_alternative-button">다른 방법으로 로그인 / 가입</button>
+        
+        <button 
+          className="l_kakao-button"
+          onClick={handleKakaoLogin}
+          type="button"
+        >
+          카카오로 간편 로그인/가입
+        </button>
+
         <div className="l_links">
-          <a className="l_link" href="#" onClick={() => navigate('/find-account')}>아이디/비밀번호 찾기</a>
-          <a className="l_link" href="#" onClick={() => navigate('/signup')}>회원가입</a>
+          <a className="l_link" onClick={() => navigate('/find-account')} style={{ cursor: 'pointer' }}>아이디/비밀번호 찾기</a>
+          <span className="l_divider">|</span>
+          <a className="l_link" onClick={() => navigate('/signup')} style={{ cursor: 'pointer' }}>회원가입</a>
         </div>
       </div>
     </div>

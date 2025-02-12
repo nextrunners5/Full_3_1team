@@ -1,9 +1,9 @@
 import { config } from "dotenv";
 config();
-import express from "express";
+import express, { Request, Response, NextFunction } from "express";
 import mongoose from "mongoose";
 import cors from "cors";
-import { Request, Response, NextFunction } from "express";
+import cookieParser from "cookie-parser";
 import ProductRoutes from "../backend/routes/ProductRoutes";
 import QnARoutes from "../backend/routes/QnARoutes";
 import OrderRoutes from "../backend/routes/OrderRoutes";
@@ -18,47 +18,92 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // 미들웨어 설정
+app.use(cookieParser());
 app.use(
   cors({
-    origin: "*",
-    methods: ["GET", "PUT", "POST", "DELETE"], // 허용할 메서드
-    allowedHeaders: ["Content-Type", "Authorization"], // 허용할 헤더
+    origin: "http://localhost:5173", // 프론트엔드 주소
+    credentials: true, // 쿠키 전송을 위해 필요
+    methods: ["GET", "PUT", "POST", "DELETE"],
+    allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-//기본 라우트
-app.get("/", (req, res) => {
-  res.send("Hello, TypeScript with Express!");
-});
+// Auth 라우터 설정
+const authRouter = express.Router();
 
-// product 라우트
-app.use("/api", ProductRoutes);
-app.use("/api", CategoryRoutes);
-app.use("/api", WishlistRoutes);
+// 타입 안전한 비동기 핸들러
+const asyncHandler = (handler: (req: Request, res: Response, next: NextFunction) => Promise<any>) => {
+  return async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      await handler(req, res, next);
+    } catch (error) {
+      next(error);
+    }
+  };
+};
+
+authRouter.post('/signup', asyncHandler(async (req, res) => {
+  const { signup } = await import('./feature/auth/controller/AuthController');
+  await signup(req, res);
+}));
+
+authRouter.get('/check-userid/:userId', asyncHandler(async (req, res) => {
+  const { checkUserId } = await import('./feature/auth/controller/AuthController');
+  await checkUserId(req, res);
+}));
+
+authRouter.post('/login', asyncHandler(async (req, res) => {
+  const { login } = await import('./feature/auth/controller/AuthController');
+  await login(req, res);
+}));
+
+authRouter.post('/logout', asyncHandler(async (req, res) => {
+  const { logout } = await import('./feature/auth/controller/AuthController');
+  await logout(req, res);
+}));
+
+authRouter.post('/kakao/callback', asyncHandler(async (req, res) => {
+  const { kakaoCallback } = await import('./feature/auth/controller/AuthController');
+  await kakaoCallback(req, res);
+}));
+
+// 아이디/비밀번호 찾기 라우트 추가
+authRouter.post('/find-userid', asyncHandler(async (req, res) => {
+  const { findUserId } = await import('./feature/auth/controller/AuthController');
+  await findUserId(req, res);
+}));
+
+authRouter.post('/reset-password', asyncHandler(async (req, res) => {
+  const { resetPassword } = await import('./feature/auth/controller/AuthController');
+  await resetPassword(req, res);
+}));
+
+// Auth 라우터 등록
+app.use('/api/auth', authRouter);
+
+// 기존 라우터들...
+app.use("/api/products", ProductRoutes);
 app.use("/api/qna", QnARoutes);
-// 이미지 업로드
-app.use("/api/productImages", ProductImageUplordRoutes);
-// 이미지 API 
+app.use("/api/orders", OrderRoutes);
+app.use("/api/wishlist", WishlistRoutes);
+app.use("/api/categories", CategoryRoutes);
+app.use("/api/carts", CartRoutes);
 app.use("/api", productImageRoutes);
 app.use("/uploads", express.static(path.join(__dirname, "./uploads")));
-
-// 주문 라우터
-app.use("/api/orders", OrderRoutes);
-
-// 장바구니 라우터
-app.use("/api/carts", CartRoutes);
 
 // 오류 처리 미들웨어
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
   console.error(err.stack);
-  res
-    .status(500)
-    .json({ success: false, message: "서버 오류 발생", error: err.message });
+  res.status(500).json({ 
+    success: false, 
+    message: "서버 오류 발생", 
+    error: err.message 
+  });
 });
 
-// Mongo DB
+// MongoDB 연결
 mongoose
   .connect(process.env.MONGO_URI as string)
   .then(() => console.log("MongoDB 연결 성공"))
