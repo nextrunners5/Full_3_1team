@@ -28,7 +28,7 @@ router.delete(
 );
 
 // ✅ 장바구니 선택 상품 삭제
-router.post(
+router.delete(
   "/removeSelected",
   cartController.removeSelectedItems as express.RequestHandler
 );
