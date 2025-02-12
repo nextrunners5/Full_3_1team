@@ -11,7 +11,32 @@ export const signup = async (req: Request, res: Response) => {
   
   try {
     const { userId, password, name, email, phone } = req.body;
-    console.log(`[회원가입 요청] 사용자: ${userId}, 이메일: ${email}`);
+
+    // 필수 필드 검증
+    if (!userId || !password || !name || !email || !phone) {
+      return res.status(400).json({
+        success: false,
+        message: '모든 필수 정보를 입력해주세요.'
+      });
+    }
+
+    // 이메일 형식 검증
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({
+        success: false,
+        message: '올바른 이메일 형식이 아닙니다.'
+      });
+    }
+
+    // 전화번호 형식 검증
+    const phoneRegex = /^01[0-9]-?[0-9]{4}-?[0-9]{4}$/;
+    if (!phoneRegex.test(phone)) {
+      return res.status(400).json({
+        success: false,
+        message: '올바른 전화번호 형식이 아닙니다.'
+      });
+    }
 
     const result = await Auth.signup({
       userId,
@@ -23,28 +48,26 @@ export const signup = async (req: Request, res: Response) => {
 
     const endTime = new Date();
     const duration = endTime.getTime() - startTime.getTime();
-    console.log(`[${endTime.toISOString()}] 회원가입 성공 - 사용자: ${userId}, 소요시간: ${duration}ms`);
+    console.log(`[${endTime.toISOString()}] 회원가입 성공 - IP: ${req.ip}, 소요시간: ${duration}ms`);
 
     res.status(201).json(result);
   } catch (error) {
     const endTime = new Date();
     const duration = endTime.getTime() - startTime.getTime();
-    
-    // 에러 로그 상세 출력
     console.error(`[${endTime.toISOString()}] 회원가입 실패 - IP: ${req.ip}, 소요시간: ${duration}ms`);
-    if (error instanceof Error) {
-      console.error('에러 메시지:', error.message);
-      if ('code' in error) {
-        console.error('SQL 에러 코드:', (error as any).code);
-        console.error('SQL 에러 상태:', (error as any).sqlState);
-      }
-    }
+    console.error('에러 상세:', error instanceof Error ? error.message : error);
 
-    res.status(400).json({ 
-      success: false,
-      message: error instanceof Error ? error.message : '회원가입에 실패했습니다.',
-      errorCode: (error as any).code || 'UNKNOWN_ERROR'
-    });
+    if (error instanceof Error) {
+      res.status(400).json({
+        success: false,
+        message: error.message
+      });
+    } else {
+      res.status(500).json({
+        success: false,
+        message: '회원가입 처리 중 오류가 발생했습니다.'
+      });
+    }
   }
 };
 

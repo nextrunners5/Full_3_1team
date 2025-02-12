@@ -188,11 +188,13 @@ export class Auth {
       await connection.beginTransaction();
 
       try {
+        // Users 테이블에 기본 정보 저장
         await connection.query(
           'INSERT INTO Users (user_id, name, email, phone, signup_type) VALUES (?, ?, ?, ?, ?)',
           [userId, name, email, phone, 'local']
         );
 
+        // UserAuth 테이블에 인증 정보 저장
         await connection.query(
           'INSERT INTO UserAuth (user_id, auth_type, password) VALUES (?, ?, ?)',
           [userId, 'local', hashedPassword]
