@@ -7,20 +7,16 @@ const TestPage: React.FC = () => {
 
   const handleLogout = async () => {
     try {
-      // 1. 백엔드에 로그아웃 요청
-      const response = await axios.post('/auth/logout');
+      // /api 추가
+      await axios.post('/api/auth/logout');
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
       
-      if (response.data.success) {
-        // 2. 로컬 스토리지의 인증 관련 데이터 제거
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
-        
-        // 3. axios 인스턴스의 헤더에서 토큰 제거 (선택적)
-        axios.defaults.headers.common['Authorization'] = '';
-        
-        // 4. 로그인 페이지로 리다이렉트
-        navigate('/login');
-      }
+      // 3. axios 인스턴스의 헤더에서 토큰 제거 (선택적)
+      axios.defaults.headers.common['Authorization'] = '';
+      
+      // 4. 로그인 페이지로 리다이렉트
+      navigate('/login');
     } catch (error) {
       console.error('로그아웃 실패:', error);
       // 에러가 발생하더라도 로컬 데이터는 삭제하고 로그인 페이지로 이동

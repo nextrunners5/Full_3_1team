@@ -360,6 +360,31 @@ export class Auth {
       throw error;
     }
   }
+
+  static async findUserId(params: { name: string; email: string }) {
+    const { name, email } = params;
+    
+    console.log('[아이디 찾기 요청] 이름:', name, '이메일:', email);
+
+    try {
+      const [rows] = await pool.promise().query<RowDataPacket[]>(
+        'SELECT user_id FROM Users WHERE name = ? AND email = ?',
+        [name, email]
+      );
+
+      if (rows.length === 0) {
+        throw new Error('일치하는 사용자를 찾을 수 없습니다.');
+      }
+
+      return {
+        success: true,
+        userId: rows[0].user_id
+      };
+    } catch (error) {
+      console.error('사용자 조회 실패:', error);
+      throw error;
+    }
+  }
 }
 
 export default Auth;

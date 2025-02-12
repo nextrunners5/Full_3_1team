@@ -17,6 +17,7 @@ import path from "path";
 import { errorHandler } from './middlewares/AuthMiddleware';
 import PaymentRoutes from './routes/PaymentRoutes';
 
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -72,3 +73,5 @@ mongoose
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
 });
+
+export default app;

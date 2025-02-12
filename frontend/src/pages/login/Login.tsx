@@ -37,7 +37,7 @@ const Login: React.FC = () => {
 
     try {
       const response = await axios.post('/api/auth/login', {
-        email: form.username,
+        userId: form.username,
         password: form.password
       });
 

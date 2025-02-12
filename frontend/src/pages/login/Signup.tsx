@@ -36,6 +36,8 @@ const Signup: React.FC = () => {
   const [showModal, setShowModal] = useState(false);
   const [modalMessage, setModalMessage] = useState('');
   const [isIdChecked, setIsIdChecked] = useState(false);
+  const [showFailModal, setShowFailModal] = useState(false);
+  const [failMessage, setFailMessage] = useState('');
 
   const validateForm = (): boolean => {
     const newErrors: { [key: string]: string } = {};
@@ -91,10 +93,11 @@ const Signup: React.FC = () => {
 
     try {
       const response = await axios.post('/api/auth/signup', {
+        userId: form.userId,
         email: form.email,
         password: form.password,
         name: form.name,
-        phone: form.phone
+        phone: form.phone,
       });
 
       if (response.data.success) {
@@ -104,25 +107,47 @@ const Signup: React.FC = () => {
           navigate('/login');
         }, 2000);
       }
-    } catch (error: unknown) {
-      const apiError = error as ApiError;
-      setModalMessage(apiError.response?.data?.message || '회원가입 중 오류가 발생했습니다.');
-      setShowModal(true);
+    } catch (error: any) {
+      const errorMessage = error.response?.data?.message || '회원가입 중 오류가 발생했습니다.';
+      setFailMessage(errorMessage);
+      setShowFailModal(true);
     }
   };
 
   const handleIdCheck = async () => {
     try {
+      // 아이디 형식 검증
+      if (!form.userId.trim()) {
+        setFailMessage('아이디를 입력해주세요.');
+        setShowFailModal(true);
+        return;
+      }
+
+      if (!/^[a-zA-Z0-9]{6,12}$/.test(form.userId)) {
+        setFailMessage('아이디는 영문, 숫자 조합 6~12자여야 합니다.');
+        setShowFailModal(true);
+        return;
+      }
+
       const response = await axios.get(`/api/auth/check-userid/${form.userId}`);
+      console.log('아이디 중복 체크 응답:', response.data); // 응답 확인용 로그
+
       if (response.data.success) {
         setIsIdChecked(true);
         setModalMessage('사용 가능한 아이디입니다.');
         setShowModal(true);
+      } else {
+        // success가 false인 경우도 처리
+        setFailMessage(response.data.message || '이미 사용 중인 아이디입니다.');
+        setShowFailModal(true);
+        setIsIdChecked(false);
       }
-    } catch (error: unknown) {
-      const apiError = error as ApiError;
-      setModalMessage(apiError.response?.data?.message || '이미 사용 중인 아이디입니다.');
-      setShowModal(true);
+    } catch (error: any) {
+      console.error('아이디 중복 체크 에러:', error); // 에러 확인용 로그
+      // 중복 확인 실패 시 FailModal 표시
+      setFailMessage(error.response?.data?.message || '이미 사용 중인 아이디입니다.');
+      setShowFailModal(true);
+      setIsIdChecked(false);
     }
   };
 
@@ -152,6 +177,15 @@ const Signup: React.FC = () => {
           message={modalMessage}
           icon="src/assets/Fail.png"
           onClose={() => setShowModal(false)}
+        />
+      )}
+
+      {showFailModal && (
+        <FailModal
+          title="회원가입 실패"
+          message={failMessage}
+          icon="src/assets/Fail.png"
+          onClose={() => setShowFailModal(false)}
         />
       )}
 
