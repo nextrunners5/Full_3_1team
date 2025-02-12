@@ -17,6 +17,8 @@ import ProductBoard from "../pages/product/ProductBoard";
 import KakaoCallback from "../pages/login/KakaoCallback";
 import PaymentSuccess from '../pages/payments/PaymentSuccess';
 import PaymentFail from '../pages/payments/PaymentFail';
+import MDashBoard from "../pages/manager/MDashBoard";
+import MProduct from "../pages/manager/MProduct";
 
 function App() {
   return (
@@ -39,6 +41,8 @@ function App() {
       <Route path="/wishlist" element={<Wishlist />} />
       <Route path="/ProductBoard" element={<ProductBoard />} />
       <Route path="/oauth/callback/kakao" element={<KakaoCallback />} />
+      <Route path="/MDashBoard" element={<MDashBoard />} />
+      <Route path="/MProduct" element={<MProduct />} />
     </Routes>
   );
 }
