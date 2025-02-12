@@ -55,6 +55,21 @@ export const fetchOrderProducts = async() => {
   }
 };
 
+//주문 제품 이미지 가져오기
+export const fetchOrderProductImage = async(product_id: number) => {
+  try{
+    const response = await axiosInstance.get<{main_image: string}>(`/api/${product_id}`);
+    if(response.data && response.data.main_image){
+      return response.data.main_image;
+    }
+    console.log('이미지데이터' , response.data.main_image);
+    // return response.data;
+  } catch(err){
+    console.error('상품 이미지 데티어 조회 실패', err);
+    throw err;
+  }
+}
+
 //배송비 정보 가져오기
 export const fetchShippingFee = async() => {
   try{
@@ -65,6 +80,18 @@ export const fetchShippingFee = async() => {
     console.error('배송비 정보를 가져오지 못했습니다.', err);
   }
 };
+
+export const fetchProcessPayment = async(order_id: string, final_price: number) => {
+  try{
+    const response = await axiosInstance.post('/api/payments', {
+      order_id,
+      final_price,
+    });
+    return response.data;
+  } catch(err){
+    console.error('결제 요청 실패', err);
+  }
+}
 
 
 export const fetchPostOrderProducts = async() => {

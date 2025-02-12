@@ -87,7 +87,19 @@ export const fetchOrderSingleProduct = async(orderData:any) => {
     const orderType = 'OT002';
     const {userId, productId, quantity, totalAmount, discountAmount, finalAmount, shippingFee, selectedSize, selectedColor, statusId} = orderData;
     // const orderId = await insertOrder(userid, totalAmount, discountAmount, finalAmount, shippingFee, statusid, orderType);
-    const orderId = await insertOrderItems(userid, totalAmount, discountAmount, finalAmount, shippingFee, orderType, productId, statusid,quantity,selectedSize,selectedColor);
+    const orderId = await insertOrderItems(
+      userid, 
+      totalAmount, 
+      discountAmount, 
+      finalAmount, 
+      shippingFee, 
+      orderType, 
+      productId, 
+      statusid,
+      quantity,
+      selectedSize,
+      selectedColor
+    );
     console.log('orderID', orderId,typeof(orderId));
     if(!orderId){
       throw new Error('order_id가 존재하지 않습니다.');

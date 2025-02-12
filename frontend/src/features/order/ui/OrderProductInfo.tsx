@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import "./OrderProductInfo.css"
 import { OrderProducts } from "../model/OrderModel";
-import { fetchOrderProducts } from "../api/Order";
+import {  fetchOrderProductImage, fetchOrderProducts } from "../api/Order";
 import { useDispatch } from "react-redux";
-import { updateOrderInfo } from "../../../pages/order/orderRedux/slice";
+import { setOrderId, updateOrderInfo } from "../../../pages/order/orderRedux/slice";
 
 const OrderProduct: React.FC = () => {
   
@@ -16,9 +16,31 @@ const OrderProduct: React.FC = () => {
         const productInfo = await fetchOrderProducts();
         console.log('제품 정보 가져오기 성공:', productInfo);
         if(productInfo && productInfo.length > 0) {
-          const transformedProduct = productInfo.map(product => ({
-            ...product,
-            final_price : Number(product.final_amount.toString().replace(/,/g, '')) / product.product_count,
+          const transformedProduct = await Promise.all(productInfo.map(async (product) => {
+            const order_id = product.order_id;
+            dispatch(setOrderId(order_id));
+            let imageUrl;
+            try {
+              imageUrl = await fetchOrderProductImage(product.product_id);
+              // if (!imageUrl) {
+              //   imageUrl = 'https://placehold.co/500x500'; // 기본 이미지 URL 설정
+              // }
+            } catch (error) {
+              console.error(`이미지를 가져오는 데 실패했습니다. 상품 ID: ${product.product_id}`, error);
+              // 이미지가 없는 경우 기본 이미지 URL 설정
+              imageUrl = 'https://placehold.co/300x300';
+            }
+            if(imageUrl !== 'https://placehold.co/300x300'){
+
+              const baseURL = import.meta.env.VITE_API_BASE_URL;
+              imageUrl = `${baseURL}/${imageUrl}`;
+            }
+            console.log('이미지 URL', imageUrl);
+            return {
+              ...product,
+              final_price: Number(product.final_amount.toString().replace(/,/g, '')) / product.product_count,
+              main_image: imageUrl,
+            };
           }));
           setOrderProducts(transformedProduct);
           console.log('제품정보', transformedProduct);
@@ -38,11 +60,10 @@ const OrderProduct: React.FC = () => {
       {orderProducts.map((data,index)=> (
         <div className="repeatProduct" key={index}>
           <div className="midLeft">
-            <img src="" alt="" className="productImg"/>
+            <img src={data.main_image} alt={data.product_name} className="productImg"/>
           </div>
           <div className="midRight">
             <div className="productName">{data.product_name}</div>
-            <div className="productName">{data.product_id}</div>
             <div className="productType">종류: 강아지용 | 사이즈: {data.option_size} {data.option_color && `| 색상: ${data.option_color}`}</div>
             <div className="productPrice">{data.final_price.toLocaleString()}원 x {data.product_count}개</div>
           </div>

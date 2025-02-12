@@ -4,6 +4,7 @@ import { OrderProducts, OrderState } from "../../../features/order/model/OrderMo
 const initialState: OrderState = {
   orderInfo: [],
   totalPrice: 0,
+  order_id: '',
 }
 const orderSlice = createSlice({
   name: 'order',
@@ -13,10 +14,14 @@ const orderSlice = createSlice({
       state.orderInfo = action.payload;
       state.totalPrice = action.payload.reduce((total, product) => total + product.final_price * product.product_count,0);
     },
+    setOrderId: (state, action: PayloadAction<string>) => {
+      state.order_id = action.payload;
+    }
   },
 });
 
-export const {updateOrderInfo} = orderSlice.actions;
+export const {updateOrderInfo, setOrderId} = orderSlice.actions;
 export default orderSlice.reducer;
 export const selectOrderInfo = (state: {order: OrderState}) => state.order.orderInfo;
 export const selectTotalPrice = (state: {order: OrderState}) => state.order.totalPrice;
+export const selectOrderId = (state: {order: OrderState}) => state.order.order_id;

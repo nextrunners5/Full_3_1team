@@ -131,7 +131,7 @@ export const getOrderSingleProducts = async(userId: string) => {
 //                   JOIN Products p ON cd.product_id = p.product_id 
 //                   JOIN Cart c ON cd.cart_id = c.cart_id 
 //                   WHERE c.user_id = ?`;
-  const singleProductQuery = `SELECT oi.product_count, p.product_name, o.final_amount, oi.option_color, oi.option_size
+  const singleProductQuery = `SELECT oi.product_count, p.product_id, p.product_name, o.final_amount, o.order_id, oi.option_color, oi.option_size
                               FROM Orders o
                               JOIN OrderItems  oi ON o.order_id = oi.order_id
                               JOIN Products p ON oi.product_id = p.product_id
@@ -156,11 +156,11 @@ export const getOrderSingleProducts = async(userId: string) => {
 
 export const getOrderProductItems = async (userId: string) => {
   try{
-    const cartProductQuery = `SELECT SELECT oi.product_count, p.product_name, o.final_amount, oi.option_color, oi.option_size
-                                FROM Orders o
-                                JOIN OrderItems  oi ON o.order_id = oi.order_id
-                                JOIN Products p ON oi.product_id = p.product_id
-                                WHERE o.user_id = 'user123' AND o.order_type = 'OT001'`;
+    const cartProductQuery = `SELECT oi.product_count, p.product_id, p.product_name, o.final_amount, o.order_id, oi.option_color, oi.option_size
+                              FROM Orders o
+                              JOIN OrderItems  oi ON o.order_id = oi.order_id
+                              JOIN Products p ON oi.product_id = p.product_id
+                              WHERE o.user_id = 'user123' AND o.order_type = 'OT001'`;
 
   }catch(err){
     console.error('주문하려는 제품의 정보를 가져오지 못했습니다.', err);
@@ -208,20 +208,31 @@ export const insertOrderItems = async(userid: string, totalAmount:number, discou
     const orderId = createOrderId();
     console.log('generated orderId', orderId);
     
-    const orderQuery = `INSERT INTO Orders(order_id, user_id, status_id, total_amount, discount_amount, final_amount, shipping_fee, order_type) VALUES(?,?,?,?,?,?,?,?)`;
+    const orderQuery = `INSERT INTO Orders(order_id, user_id, status_id, total_amount, discount_amount, final_amount, shipping_fee, order_type) 
+                        VALUES(?,?,?,?,?,?,?,?)`;
 
     console.log('Executing orderQuery:', orderQuery);
     console.log('Query parameters:', [orderId, userid, statusid, totalAmount, discountAmount, finalAmount, shippingFee, orderType]);
 
-    const [orderInsertResult] = await connection.query(orderQuery, [orderId, userid, statusid, totalAmount, discountAmount,finalAmount,shippingFee,orderType]);
+    const [orderInsertResult] = await connection.query(orderQuery, [
+      orderId, 
+      userid, 
+      statusid, 
+      totalAmount, 
+      discountAmount,
+      finalAmount,
+      shippingFee,
+      orderType
+    ]);
+
     console.log('order insert result', orderInsertResult);
-
-
     console.log('생성된 orderid', orderId);
+
     await connection.commit();
 
     const orderIdCheckQuery = `SELECT order_id FROM Orders WHERE order_id = ?`;
     const [orderIdCheckResult] = await connection.query(orderIdCheckQuery, [orderId]);
+
     if ((orderIdCheckResult as any[]).length === 0) {
       throw new Error('order_id를 Orders 테이블에서 찾지 못했습니다.');
     }
@@ -233,15 +244,24 @@ export const insertOrderItems = async(userid: string, totalAmount:number, discou
     };
     const orderItemId = createOrderItemId();
     console.log('generated orderItemId', orderItemId);
-    const orderItemsQuery = `INSERT INTO OrderItems(orderItems_id, order_id, product_id, order_status, product_count, option_size, option_color) VALUES(?,?,?,?,?,?,?)`;
-    await connection.query(orderItemsQuery,[orderItemId, orderId, productId, statusid, quantity, selectedSize,selectedColor ]);
+    const orderItemsQuery = `INSERT INTO OrderItems(orderItems_id, order_id, product_id, order_status, product_count, option_size, option_color) 
+                              VALUES(?,?,?,?,?,?,?)`;
+    await connection.query(orderItemsQuery,[
+      orderItemId, 
+      orderId, 
+      productId, 
+      statusid, 
+      quantity, 
+      selectedSize,
+      selectedColor 
+    ]);
     await connection.commit();
     return orderId;
-  }catch(err){
+  } catch(err){
     await connection.rollback();
     console.error('주문 상세 정보를 주문 테이블에 추가하지 못했습니다.', err);
     throw err;
-  }finally{
+  } finally{
     connection.release();
   }
 }

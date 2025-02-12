@@ -23,6 +23,7 @@ export interface UserAddressInfo{
 }
 
 export interface OrderProducts{
+  order_id: string;
   product_id: number;
   category_id: number;
   product_name: string;
@@ -31,11 +32,13 @@ export interface OrderProducts{
   final_price: number;
   option_color: string;
   option_size: string;
+  main_image: string;
 }
 
 export interface OrderState{
   orderInfo: OrderProducts[];
   totalPrice: number;
+  order_id: string;
 }
 
 // export interface UpdateOrderInfoPayload {

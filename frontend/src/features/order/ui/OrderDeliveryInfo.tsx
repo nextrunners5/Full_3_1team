@@ -42,12 +42,16 @@ const OrderDeliveryInfo: React.FC = () => {
         const addressDetails = await fetchDetailsAddress();
         console.log('주소 상세 데이터 가져오기 성공:', addressDetails);
         if(addressDetails && addressDetails.length > 0){
-          // const sortedAddress = addressDetails.sort((a,b) => b.is_default - a.is_default);
+          
           setUserAddressDetails(addressDetails);
 
           const defaultAddress = addressDetails.find(addr => addr.is_default === 1)
           if(defaultAddress){
+            console.log('origin default address', defaultAddress);
             setSelectedAddress(defaultAddress);
+            console.log('Selected default address', defaultAddress);
+          } else {
+            console.log('default address not found');
           }
         }
         setIsLoading(false);
@@ -58,7 +62,11 @@ const OrderDeliveryInfo: React.FC = () => {
       }
     };
     getUserAddress();
-  },[])
+  },[]);
+
+  useEffect(() => {
+    console.log('Selected address changed:', selectedAddress);
+  }, [selectedAddress]);
 
   useEffect(()=>{
     const getDeliveryMessage = async() => {

@@ -76,7 +76,18 @@ const postOrderSingleProduct = async(req: Request, res: Response) => {
   console.log('single Information', req.body);
   console.log('single Information', totalAmount, discountAmount);
   try{
-    const orderId = await fetchOrderSingleProduct({userId, productId, quantity, totalAmount, discountAmount, finalAmount, shippingFee, selectedSize, selectedColor, statusId});
+    const orderId = await fetchOrderSingleProduct({
+      userId, 
+      productId, 
+      quantity, 
+      totalAmount, 
+      discountAmount, 
+      finalAmount, 
+      shippingFee, 
+      selectedSize, 
+      selectedColor, 
+      statusId
+    });
     console.log("orderProductInfo",orderId);
     res.json(orderId);
   }catch(err){
