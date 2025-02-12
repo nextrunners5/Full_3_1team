@@ -7,7 +7,6 @@ import { fetchDeliveryMessage, fetchDetailsAddress } from "../api/Order";
 // import OrderDeliveryAddModal from "./OrderDeliveryAddModal";
 // import OrderDeliveryUpdateModal from "./OrderDeliveryUpdateModal";
 
-
 const OrderDeliveryInfo: React.FC = () => {
 
   const [deliveryMessage, setDeliveryMessage] = useState<Common[]>([]);
@@ -17,24 +16,6 @@ const OrderDeliveryInfo: React.FC = () => {
   const [selectedAddress, setSelectedAddress] = useState<UserAddressInfo|null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState<boolean>(false);
-
-  // useEffect(() => {
-  //   const getUserAddress = async() => {
-  //     try{
-  //       const address = await fetchDetailsAddress();
-  //       console.log('주소 데이터 가져오기 성공:', address);
-  //       if(address && address.length > 0){
-  //         setUserAddressDetails(address);
-  //       }
-  //       setIsLoading(false);
-  //       console.log('주소:', address);
-  //     } catch(err){
-  //       console.log('사용자의 주소정보를 가져오지 못했습니다.', err);
-  //       setIsLoading(false);
-  //     }
-  //   };
-  //   getUserAddress();
-  // },[])
 
   useEffect(() => {
     const getUserAddress = async() => {
