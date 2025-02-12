@@ -100,16 +100,13 @@ const Signup: React.FC = () => {
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!validateForm()) return;
-
     try {
-      const response = await axios.post('/auth/signup', {
-        userId: form.userId,
+      const response = await axios.post('/api/auth/signup', {
+        email: form.email,
         password: form.password,
         name: form.name,
-        email: form.email,
         phone: form.phone
       });
 
@@ -123,6 +120,21 @@ const Signup: React.FC = () => {
     } catch (error: unknown) {
       const apiError = error as ApiError;
       setModalMessage(apiError.response?.data?.message || '회원가입 중 오류가 발생했습니다.');
+      setShowModal(true);
+    }
+  };
+
+  const checkEmailDuplicate = async () => {
+    try {
+      const response = await axios.post('/api/auth/check-email', { email: form.email });
+      if (response.data.success) {
+        setIsIdChecked(true);
+        setModalMessage('사용 가능한 이메일입니다.');
+        setShowModal(true);
+      }
+    } catch (error: unknown) {
+      const apiError = error as ApiError;
+      setModalMessage(apiError.response?.data?.message || '이미 사용 중인 이메일입니다.');
       setShowModal(true);
     }
   };
@@ -141,7 +153,7 @@ const Signup: React.FC = () => {
         />
       )}
 
-      <form onSubmit={handleSubmit} className="signup-form">
+      <form onSubmit={handleSignup} className="signup-form">
         <div className="form-group">
           <label htmlFor="userId">아이디</label>
           <div className="input-with-btn">

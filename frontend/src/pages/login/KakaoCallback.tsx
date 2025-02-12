@@ -20,7 +20,7 @@ const KakaoCallback = () => {
 
         console.log('카카오 인증 코드:', code);
 
-        const response = await axios.post('/auth/kakao/callback', { code });
+        const response = await axios.post('/api/auth/kakao/callback', { code });
 
         if (response.data.success) {
           localStorage.setItem('token', response.data.token);

@@ -6,12 +6,10 @@ const LogoutButton = () => {
 
   const handleLogout = async () => {
     try {
-      const response = await axios.post('/auth/logout');
-      if (response.data.success) {
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
-        navigate('/login');
-      }
+      await axios.post('/api/auth/logout');
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      navigate('/login');
     } catch (error) {
       console.error('로그아웃 실패:', error);
     }

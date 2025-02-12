@@ -13,13 +13,13 @@ const ProductCreate: React.FC = () => {
   const navigate = useNavigate();
   const [colorInput, setColorInput] = useState("");
   const [categories, setCategories] = useState<
-    { category_id: number; category_name: string }[]
+  { category_id: number; category_name: string }[]
   >([]);
   const [mainImage, setMainImage] = useState<File | null>(null);
   const [detailImages, setDetailImages] = useState<File[]>([]);
   const { productId } = useParams<{ productId: string }>();
   const [isEditMode, setIsEditMode] = useState<boolean>(false);
-
+  
   const [product, setProduct] = useState<{
     product_id: string;
     category_id: number;
@@ -201,7 +201,7 @@ const ProductCreate: React.FC = () => {
   // 상품 수정/등록
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-
+    
     const {
       mainImage = "",
       detailImages = [],
@@ -220,7 +220,7 @@ const ProductCreate: React.FC = () => {
 
     try {
       let response;
-
+      
       if (isEditMode && product.product_id) {
         console.log("-----프론트 디버깅 updateProduct API 호출");
         response = await updateProduct(product.product_id, formattedProduct);
@@ -258,14 +258,14 @@ const ProductCreate: React.FC = () => {
       console.error("상품 저장 실패:", error);
       alert("상품 저장 중 오류가 발생했습니다.");
     }
-  };
+};
 
   return (
     <div className="product-create-container">
       <form onSubmit={handleSubmit}>
         <div className="product-create">
           <div className="page-header">
-            <h2>{isEditMode ? "상품 수정" : "새 상품 등록"}</h2>
+          <h2>{isEditMode ? "상품 수정" : "새 상품 등록"}</h2>
             <button className="back-btn" onClick={() => navigate("/")}>
               ← 돌아가기
             </button>
