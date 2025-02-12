@@ -15,6 +15,7 @@ import productImageRoutes from "./routes/ProductImageRoutes";
 import ProductImageUplordRoutes from "./routes/ProductImageUplordRoutes";
 import path from "path";
 import { errorHandler } from './middlewares/AuthMiddleware';
+import PaymentRoutes from './routes/PaymentRoutes';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -54,6 +55,9 @@ app.use("/api/carts", CartRoutes);
 
 // 정적 파일 제공
 app.use("/uploads", express.static(path.join(__dirname, "./uploads")));
+
+// API 라우터 등록 (에러 핸들러 이전에 위치해야 함)
+app.use('/api/payments', PaymentRoutes);
 
 // 에러 처리 미들웨어를 마지막에 추가
 app.use(errorHandler);

@@ -28,3 +28,35 @@
 //   // Delete the product
 //   await productRepository.delete(newProduct.id);
 // }
+
+import pool from '../../../config/dbConfig';
+import { Payment } from '../domains/Payments';
+
+export class PaymentsRepo {
+  static async savePayment(payment: Payment): Promise<void> {
+    const connection = await pool.promise().getConnection();
+    try {
+      await connection.beginTransaction();
+
+      await connection.query(
+        `INSERT INTO Payments 
+        (payment_key, order_id, amount, status, payment_data) 
+        VALUES (?, ?, ?, ?, ?)`,
+        [
+          payment.paymentKey,
+          payment.orderId,
+          payment.amount,
+          payment.status,
+          JSON.stringify(payment.paymentData)
+        ]
+      );
+
+      await connection.commit();
+    } catch (error) {
+      await connection.rollback();
+      throw error;
+    } finally {
+      connection.release();
+    }
+  }
+}
