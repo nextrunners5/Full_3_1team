@@ -100,7 +100,7 @@ router.get("/products/:id", getProductById);
 // 다수 상품 조회
 router.get("/products", getProducts);
 // 상품 수정
-router.put("/producets/:productId", updateProduct);
+router.put("/product-create/:productId", updateProduct);
 // 상품 삭제
 router.delete("/products/:productId", deleteProduct);
 
