@@ -87,7 +87,7 @@ const Signup: React.FC = () => {
 
   const handleIdCheck = async () => {
     try {
-      const response = await axios.get(`/auth/check-userid/${form.userId}`);
+      const response = await axios.get(`/api/auth/check-userid/${form.userId}`);
       if (response.data.success) {
         setIsIdChecked(true);
         setModalMessage('사용 가능한 아이디입니다.');

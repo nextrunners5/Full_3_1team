@@ -41,9 +41,8 @@ const FindAccount: React.FC = () => {
 
     try {
       if (mode === 'id') {
-        const response = await axios.post('/auth/find-userid', {
+        const response = await axios.post('/api/auth/find-id', {
           name: formData.userId,
-          email: formData.email,
           phone: formData.phone
         });
 
@@ -51,8 +50,7 @@ const FindAccount: React.FC = () => {
           setMessage(`찾은 아이디: ${response.data.userId}`);
         }
       } else {
-        const response = await axios.post('/auth/reset-password', {
-          userId: formData.userId,
+        const response = await axios.post('/api/auth/find-password', {
           email: formData.email,
           phone: formData.phone
         });
@@ -103,18 +101,6 @@ const FindAccount: React.FC = () => {
               />
             </label>
             <label className="find-label">
-              이메일 주소
-              <input 
-                name="email" 
-                type="email" 
-                className="find-input" 
-                placeholder="이메일 주소를 입력하세요" 
-                required 
-                onChange={handleChange}
-                value={formData.email} 
-              />
-            </label>
-            <label className="find-label">
               휴대폰 번호
               <input 
                 name="phone" 
@@ -129,18 +115,6 @@ const FindAccount: React.FC = () => {
           </>
         ) : (
           <>
-            <label className="find-label">
-              아이디
-              <input 
-                name="userId" 
-                type="text" 
-                className="find-input" 
-                placeholder="아이디를 입력하세요" 
-                required 
-                onChange={handleChange}
-                value={formData.userId} 
-              />
-            </label>
             <label className="find-label">
               이메일 주소
               <input 

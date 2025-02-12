@@ -19,10 +19,10 @@ const PaymentSuccess: React.FC = () => {
       isProcessingRef.current = true;
 
       try {
-        const response = await axios.post('/payments/confirm', {
+        const response = await axios.post('/api/payments/confirm', {
           paymentKey,
           orderId,
-          amount: Number(amount),
+          amount: Number(amount)
         });
 
         if (response.data.success) {
