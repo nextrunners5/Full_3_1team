@@ -22,6 +22,17 @@ axiosInstance.interceptors.request.use(
   }
 );
 
+// 에러 인터셉터 추가
+axiosInstance.interceptors.response.use(
+  response => response,
+  error => {
+    if (error.code === 'ERR_CONNECTION_REFUSED') {
+      console.error('서버 연결 실패. 서버가 실행 중인지 확인해주세요.');
+    }
+    return Promise.reject(error);
+  }
+);
+
 export default axiosInstance;
 
 
