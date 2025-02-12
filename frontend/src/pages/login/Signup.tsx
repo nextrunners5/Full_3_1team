@@ -85,23 +85,10 @@ const Signup: React.FC = () => {
     }
   };
 
-  const handleIdCheck = async () => {
-    try {
-      const response = await axios.get(`/api/auth/check-userid/${form.userId}`);
-      if (response.data.success) {
-        setIsIdChecked(true);
-        setModalMessage('사용 가능한 아이디입니다.');
-        setShowModal(true);
-      }
-    } catch (error: unknown) {
-      const apiError = error as ApiError;
-      setModalMessage(apiError.response?.data?.message || '이미 사용 중인 아이디입니다.');
-      setShowModal(true);
-    }
-  };
-
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!validateForm()) return;
+
     try {
       const response = await axios.post('/api/auth/signup', {
         email: form.email,
@@ -120,6 +107,21 @@ const Signup: React.FC = () => {
     } catch (error: unknown) {
       const apiError = error as ApiError;
       setModalMessage(apiError.response?.data?.message || '회원가입 중 오류가 발생했습니다.');
+      setShowModal(true);
+    }
+  };
+
+  const handleIdCheck = async () => {
+    try {
+      const response = await axios.get(`/api/auth/check-userid/${form.userId}`);
+      if (response.data.success) {
+        setIsIdChecked(true);
+        setModalMessage('사용 가능한 아이디입니다.');
+        setShowModal(true);
+      }
+    } catch (error: unknown) {
+      const apiError = error as ApiError;
+      setModalMessage(apiError.response?.data?.message || '이미 사용 중인 아이디입니다.');
       setShowModal(true);
     }
   };
