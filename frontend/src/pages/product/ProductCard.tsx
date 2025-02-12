@@ -24,8 +24,10 @@ const ProductCard: React.FC<ProductCardProps> = ({
   
 }) => {
   console.log("ProductCard 렌더링:", product.product_id, "isWishlisted:", isWishlisted);
-  console.log("상품 이미지 URL:", product.main_image)
-  console.log("상품 이미지 URL:", product.small_image)
+  console.log("Product Data:", product);
+  console.log("상품 이미지 URL (main_image):", product.main_image);
+  console.log("상품 이미지 URL (small_image):", product.small_image);
+
   return (
     <div key={product.product_id} className="product-card">
       <button

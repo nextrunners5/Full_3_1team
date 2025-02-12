@@ -15,14 +15,21 @@ export const createProduct = async (productData: Product) => {
 
 // 상품 수정
 export const updateProduct = async (productId: string, updatedData: ProductUpdate) => {
-  console.log("프론트 API 호출 updateProduct:", `/api/products/${productId}`, updatedData);
+  console.log("프론트 API 호출 updateProduct:", `/api/product-create/${productId}`, updatedData);
 
   try {
-    const response = await axiosInstance.put(`/api/products/${productId}`, updatedData);
-    return response.data;
+      const response = await axiosInstance.put(`/api/product-create/${productId}`, updatedData);
+      console.log("서버 응답:", response);
+
+      if (!response || !response.data) {
+          console.error("응답이 비어 있음:", response);
+          throw new Error("응답이 비어 있음");
+      }
+
+      return response.data;
   } catch (error) {
-    console.error("상품 수정 실패:", error);
-    throw error;
+      console.error("상품 수정 실패:", error);
+      throw error;
   }
 };
 

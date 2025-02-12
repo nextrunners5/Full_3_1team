@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import { Request, Response, RequestHandler } from "express";
 import pool from "../../../config/dbConfig";
 import ProductImage from "../img/ProductImage"
 import { ResultSetHeader } from "mysql2";
@@ -70,32 +70,56 @@ export const getCategories = async (req: Request, res: Response): Promise<void> 
 };
 
 export const updateProduct = async (req: Request, res: Response): Promise<void> => {
-  const { productId } = req.params;
+  const productId = req.params.productId || req.params.id;
   const updatedData = req.body;
 
-  console.log("백엔드 디버그 수정 요청 수신");
-  console.log("백엔드 디버그 수정 요청된 상품 ID:", productId);
-  console.log("백엔드 디버그 수정 요청 데이터:", updatedData);
+  console.log("updateProduct API 호출됨");
+  console.log("수정 요청된 상품 ID:", productId);
+  console.log("수정 요청 데이터:", updatedData);
 
   if (!productId) {
       res.status(400).json({ message: "상품 ID가 제공되지 않았습니다." });
       return;
   }
 
+  // 이미지 필드를 제외한 데이터 필터링
+  const {
+      mainImage,      // 대표 이미지 제거
+      detailImages,   // 상세 이미지 제거
+      ...filteredData // 나머지 상품 정보만 저장
+  } = updatedData;
+
   try {
-      const [result] = await pool.promise().query<ResultSetHeader>(
-          "UPDATE Products SET ? WHERE product_id = ?",
-          [updatedData, productId]
+      const [result] = await pool.promise().query(
+          `UPDATE Products 
+          SET category_id=?, product_name=?, description=?, origin_price=?, 
+              discount_price=?, final_price=?, stock_quantity=?, product_status=?, 
+              sizes=?, colors=?, updated_at=?
+          WHERE product_id=?`,
+          [
+              filteredData.category_id,
+              filteredData.product_name,
+              filteredData.description,
+              filteredData.origin_price,
+              filteredData.discount_price,
+              filteredData.final_price,
+              filteredData.stock_quantity,
+              filteredData.product_status,
+              JSON.stringify(filteredData.sizes),
+              JSON.stringify(filteredData.colors),
+              new Date(),
+              productId
+          ]
       );
 
-      if (result.affectedRows === 0) {
+      if ((result as any).affectedRows === 0) {
           res.status(404).json({ message: "해당 상품을 찾을 수 없습니다." });
           return;
       }
 
-      res.status(200).json({ message: "상품이 성공적으로 수정되었습니다." });
+      res.status(200).json({ message: "상품이 성공적으로 수정되었습니다.",product_id: productId});
   } catch (error) {
-      console.error("상품 수정 실패:", error);
+      console.error("상품 수정 오류:", error);
       res.status(500).json({ message: "서버 오류 발생" });
   }
 };

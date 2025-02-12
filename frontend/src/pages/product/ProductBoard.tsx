@@ -50,7 +50,7 @@ const ProductBoard: React.FC = () => {
   return (
     <div className="product-board-container">
       <h2>전체 상품 목록</h2>
-      <button onClick={() => navigate("/product-create")}>+ 새 상품 등록</button>
+      <button onClick={() => navigate("/ProductCreate")}>+ 새 상품 등록</button>
 
       <table className="product-table">
         <thead>
