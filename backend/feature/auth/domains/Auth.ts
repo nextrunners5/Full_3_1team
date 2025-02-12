@@ -385,6 +385,22 @@ export class Auth {
       throw error;
     }
   }
+
+  // 이메일 중복 체크 메서드 추가
+  static async checkEmail(email: string): Promise<boolean> {
+    try {
+      const [rows] = await pool.promise().query<RowDataPacket[]>(
+        'SELECT user_id FROM Users WHERE email = ?',
+        [email]
+      );
+      
+      // 이메일이 존재하지 않으면 true (사용 가능)
+      return rows.length === 0;
+    } catch (error) {
+      console.error('이메일 중복 확인 실패:', error);
+      throw new Error('이메일 중복 확인 중 오류가 발생했습니다.');
+    }
+  }
 }
 
 export default Auth;
