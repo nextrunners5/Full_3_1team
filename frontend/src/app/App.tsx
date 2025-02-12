@@ -5,6 +5,7 @@ import TestPage from "../pages/home/TestPage";
 import Login from "../pages/login/Login";
 import Cart from "../pages/cart/Cart";
 import Order from "../pages/order/Order";
+import Payment from "../pages/payments/Payments";
 import FindAccount from '../pages/login/FindAccount';
 import Signup from "../pages/login/Signup";
 import ProductCreate from "../pages/product/ProductCreate";
@@ -40,6 +41,8 @@ function App() {
       <Route path="/wishlist" element={<Wishlist />} />
       <Route path="/ProductBoard" element={<ProductBoard />} />
       <Route path="/oauth/callback/kakao" element={<KakaoCallback />} />
+      <Route path="/MDashBoard" element={<MDashBoard />} />
+      <Route path="/MProduct" element={<MProduct />} />
     </Routes>
   );
 }
