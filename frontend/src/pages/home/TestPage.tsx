@@ -66,7 +66,7 @@ const TestPage: React.FC = () => {
           <Link to={'/order'}>주문 페이지</Link>
         </button>
         <button>
-          <Link to={'/payment'}>결제 페이지</Link>
+          <Link to={'/payments'}>결제 페이지</Link>
         </button>
         <button>
           <Link to={'/ProductCreate'}>상품 등록 페이지</Link>
