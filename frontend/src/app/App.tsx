@@ -5,7 +5,6 @@ import TestPage from "../pages/home/TestPage";
 import Login from "../pages/login/Login";
 import Cart from "../pages/cart/Cart";
 import Order from "../pages/order/Order";
-import Payment from "../pages/payments/Payments";
 import FindAccount from '../pages/login/FindAccount';
 import Signup from "../pages/login/Signup";
 import ProductCreate from "../pages/product/ProductCreate";
@@ -17,6 +16,8 @@ import ProductBoard from "../pages/product/ProductBoard";
 import KakaoCallback from "../pages/login/KakaoCallback";
 import PaymentSuccess from '../pages/payments/PaymentSuccess';
 import PaymentFail from '../pages/payments/PaymentFail';
+import MDashBoard from "../pages/manager/MDashBoard";
+import MProduct from "../pages/manager/MProduct";
 
 function App() {
   return (
