@@ -32,7 +32,6 @@ interface DashboardState {
   error: string | null;
 }
 
-// 액션 타입 정의
 type Action =
   | {
       type: "FETCH_SUCCESS";
@@ -44,7 +43,6 @@ type Action =
     }
   | { type: "FETCH_ERROR"; error: string };
 
-// 초기 상태
 const initialState: DashboardState = {
   salesData: [],
   userPurchases: [],
@@ -53,7 +51,6 @@ const initialState: DashboardState = {
   error: null,
 };
 
-// 리듀서 함수
 function reducer(state: DashboardState, action: Action): DashboardState {
   switch (action.type) {
     case "FETCH_SUCCESS":
@@ -65,7 +62,6 @@ function reducer(state: DashboardState, action: Action): DashboardState {
   }
 }
 
-// DashboardCard 컴포넌트의 Props 타입
 interface DashboardCardProps {
   title: string;
   value: string;
@@ -119,13 +115,11 @@ function ChartContainer({ title, data }: ChartContainerProps) {
   );
 }
 
-// TableContainer 컴포넌트의 Props 타입
 interface TableContainerProps {
   title: string;
   data: TableRow[];
 }
 
-// 테이블 컴포넌트
 function TableContainer({ title, data }: TableContainerProps) {
   if (!data || data.length === 0) {
     return <p>{title} 데이터가 없습니다.</p>;
@@ -153,17 +147,20 @@ function TableContainer({ title, data }: TableContainerProps) {
           </tr>
         </thead>
         <tbody>
-          {data.map((row, rowIndex: number) => (
-            <tr key={rowIndex}>
-              {Object.entries(row).map(([_key, value], cellIndex: number) => (
-                <td key={cellIndex}>
-                  {typeof value === "number"
-                    ? value.toLocaleString()
-                    : String(value)}
-                </td>
-              ))}
-            </tr>
-          ))}
+          {data.map((row) => {
+            const rowKey = JSON.stringify(row); 
+            return (
+              <tr key={rowKey}>
+                {Object.entries(row).map(([key, value]) => (
+                  <td key={`${rowKey}-${key}`}>
+                    {typeof value === "number"
+                      ? value.toLocaleString()
+                      : String(value)}
+                  </td>
+                ))}
+              </tr>
+            );
+          })}
         </tbody>
       </table>
     </div>

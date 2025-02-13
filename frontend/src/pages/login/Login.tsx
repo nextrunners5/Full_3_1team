@@ -114,7 +114,6 @@ const Login: React.FC = () => {
 
         <div className="l_links">
           <a className="l_link" onClick={() => navigate('/find-account')} style={{ cursor: 'pointer' }}>아이디/비밀번호 찾기</a>
-          <span className="l_divider">|</span>
           <a className="l_link" onClick={() => navigate('/signup')} style={{ cursor: 'pointer' }}>회원가입</a>
         </div>
       </div>
