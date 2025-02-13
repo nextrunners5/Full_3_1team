@@ -92,6 +92,15 @@ const Signup: React.FC = () => {
     if (!validateForm()) return;
 
     try {
+      // 요청 데이터 로깅 추가
+      console.log('회원가입 요청 데이터:', {
+        userId: form.userId,
+        email: form.email,
+        password: form.password,
+        name: form.name,
+        phone: form.phone,
+      });
+
       const response = await axios.post('/api/auth/signup', {
         userId: form.userId,
         email: form.email,
@@ -108,6 +117,8 @@ const Signup: React.FC = () => {
         }, 2000);
       }
     } catch (error: any) {
+      // 에러 응답 상세 로깅 추가
+      console.error('회원가입 에러:', error.response?.data || error);
       const errorMessage = error.response?.data?.message || '회원가입 중 오류가 발생했습니다.';
       setFailMessage(errorMessage);
       setShowFailModal(true);
@@ -153,16 +164,14 @@ const Signup: React.FC = () => {
 
   const checkEmailDuplicate = async () => {
     try {
-      const response = await axios.post('/api/auth/check-email', { email: form.email });
+      const response = await axios.get(`/api/auth/check-email/${form.email}`);
       if (response.data.success) {
-        setIsIdChecked(true);
         setModalMessage('사용 가능한 이메일입니다.');
         setShowModal(true);
       }
-    } catch (error: unknown) {
-      const apiError = error as ApiError;
-      setModalMessage(apiError.response?.data?.message || '이미 사용 중인 이메일입니다.');
-      setShowModal(true);
+    } catch (error: any) {
+      setFailMessage(error.response?.data?.message || '이메일 중복 확인에 실패했습니다.');
+      setShowFailModal(true);
     }
   };
 
