@@ -38,7 +38,7 @@ const CartPage = () => {
 
         console.log("Cart API Response:", response.data); // ✅ API 응답 데이터 확인
 
-         const formattedItems = response.data.map((item: any) => ({
+        const formattedItems = response.data.map((item: any) => ({
         cartItemId: item.cart_item_id ?? "",  // ✅ 기본값 설정
         productId: item.product_id ?? "",
         name: item.product_name ?? "상품명 없음",
