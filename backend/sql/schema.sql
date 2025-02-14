@@ -34,25 +34,59 @@ CREATE TABLE UserAuth (
 );
 
 -- 배송지 테이블
-DROP TABLE IF EXISTS UserAddresses;
-
 CREATE TABLE UserAddresses (
-  address_id INT AUTO_INCREMENT PRIMARY KEY,
-  user_id VARCHAR(50) NOT NULL COMMENT '사용자 ID',
-  address_name VARCHAR(100) NOT NULL COMMENT '배송지명',
-  recipient_name VARCHAR(100) NOT NULL COMMENT '수령인 이름',
-  recipient_phone VARCHAR(20) NOT NULL COMMENT '수령인 연락처',
-  address VARCHAR(255) NOT NULL COMMENT '기본주소',
-  detailed_address VARCHAR(255) COMMENT '상세주소',
-  postal_code VARCHAR(10) NOT NULL COMMENT '우편번호',
-  is_default BOOLEAN DEFAULT false COMMENT '기본 배송지 여부',
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  FOREIGN KEY (user_id) REFERENCES Users(user_id) ON DELETE CASCADE,
-  INDEX idx_user_default (user_id, is_default)
+    address_id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id VARCHAR(50) NOT NULL,
+    address_name VARCHAR(100) NOT NULL,
+    recipient_name VARCHAR(100) NOT NULL,
+    recipient_phone VARCHAR(20) NOT NULL,
+    address VARCHAR(255) NOT NULL,
+    detailed_address VARCHAR(255),
+    postal_code VARCHAR(10) NOT NULL,
+    is_default BOOLEAN DEFAULT false,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES Users(user_id) ON DELETE CASCADE,
+    INDEX idx_user_default (user_id, is_default)
 ) COMMENT '사용자 배송지 정보';
 
--- Payment 테이블 생성
+-- ProductCategories 테이블
+CREATE TABLE ProductCategories (
+    category_id INT PRIMARY KEY AUTO_INCREMENT,
+    category_name VARCHAR(50) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Products 테이블
+CREATE TABLE Products (
+    product_id INT PRIMARY KEY AUTO_INCREMENT,
+    category_id INT,
+    product_name VARCHAR(100) NOT NULL,
+    description TEXT,
+    origin_price DECIMAL(10, 2) NOT NULL,
+    discount_price DECIMAL(10, 2) DEFAULT 0.00,
+    final_price DECIMAL(10, 2) NOT NULL,
+    stock_quantity INT NOT NULL,
+    product_status VARCHAR(50),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    product_code VARCHAR(50) NOT NULL,
+    sizes JSON,
+    colors JSON,
+    FOREIGN KEY (category_id) REFERENCES ProductCategories(category_id)
+);
+
+-- ProductImages 테이블
+CREATE TABLE ProductImages (
+    image_id INT PRIMARY KEY AUTO_INCREMENT,
+    product_id INT NOT NULL,
+    image_url VARCHAR(255) NOT NULL,
+    is_main BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (product_id) REFERENCES Products(product_id) ON DELETE CASCADE
+);
+
+-- Payment 테이블
 CREATE TABLE Payment (
     payment_id INT PRIMARY KEY AUTO_INCREMENT,
     order_id VARCHAR(100) NOT NULL,
@@ -75,7 +109,6 @@ CREATE TABLE Payment (
 );
 
 -- 테스트용 데이터 삽입
--- 관리자 계정
 INSERT INTO Users 
 (user_id, name, email, phone, signup_type, isAdmin) 
 VALUES 
@@ -101,4 +134,18 @@ VALUES
 INSERT INTO UserAddresses 
 (user_id, address_name, recipient_name, recipient_phone, address, detailed_address, postal_code, is_default) 
 VALUES 
-('testuser', '집', '테스트유저', '010-1234-5678', '서울시 강남구 테헤란로', '123-45', '06234', true); 
+('testuser', '집', '테스트유저', '010-1234-5678', '서울시 강남구 테헤란로', '123-45', '06234', true);
+
+-- 카테고리 데이터 삽입
+INSERT INTO ProductCategories (category_name) VALUES
+('강아지 사료'),
+('강아지 간식'),
+('강아지 장난감'),
+('강아지 용품'),
+('강아지 집'),
+('강아지 옷'),
+('강아지 위생 용품'),
+('강아지 건강관리'),
+('강아지 미용 용품'),
+('강아지 이동장'),
+('강아지 훈련 용품');
