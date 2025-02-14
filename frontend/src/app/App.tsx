@@ -20,6 +20,7 @@ import PaymentFail from '../pages/payments/PaymentFail';
 import MDashBoard from "../pages/manager/MDashBoard";
 import MProduct from "../pages/manager/MProduct";
 import About from "../pages/home/About";
+import Support from "../pages/home/Support";
 
 function App() {
   return (
@@ -45,6 +46,7 @@ function App() {
       <Route path="/MDashBoard" element={<MDashBoard />} />
       <Route path="/MProduct" element={<MProduct />} />
       <Route path="/About" element={<About />} />
+      <Route path="/Support" element={<Support />} />
     </Routes>
   );
 }
