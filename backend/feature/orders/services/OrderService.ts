@@ -19,8 +19,10 @@ import {
 
 export const fetchUserPoints = async(userId: string) => {
   try {
-    // const userPoints = await getUserPoints(userId);
-    const userPoints = await getUserPoints('user123');
+    console.log('OrderService fetchUserPoints userId', userId);
+    const userPoints = await getUserPoints(userId);
+    // const userPoints = await getUserPoints('user123');
+    console.log('OrderService userPoints', userPoints);
     return userPoints;
   } catch(err){
     console.error('사용자 포인트를 가져오지 못했습니다.', err);
@@ -40,8 +42,10 @@ export const fetchDeliveryMessage = async() => {
 
 export const fetchUserAddress = async(userId: string) => {
   try{
-    const userAddress = await getUserAddress('user123');
-    // const userAddress = await getUserAddress(userId);
+    // const userAddress = await getUserAddress('user123');
+    console.log('OrderService userId', userId);
+    const userAddress = await getUserAddress(userId);
+    console.log('OrderService userAddress', userAddress);
     return userAddress;
   } catch(err){
     console.error('배송지 정보를 가져오지 못했습니다.', err);
@@ -51,7 +55,10 @@ export const fetchUserAddress = async(userId: string) => {
 
 export const fetchUserDetailsAddress = async(userId: string) => {
   try{
-    const userAddress = await getUserDetailsAddress('user123');
+    // const userAddress = await getUserDetailsAddress('user123');
+    console.log('OrderService fetchUserDetailsAddress userId', userId);
+    const userAddress = await getUserDetailsAddress(userId);
+    console.log('OrderService fetchUserDetailsAddress userAddress', userAddress);
     return userAddress;
   } catch(err){
     console.error('배송지 상세 리스트 정보를 가져오지 못했습니다.', err);
@@ -59,9 +66,10 @@ export const fetchUserDetailsAddress = async(userId: string) => {
   } 
 };
 
-export const fetchOrderProducts = async() => {
+export const fetchOrderProducts = async(userId: string) => {
   try{
-    const orderProductsInfo = await getOrderSingleProducts('user123');
+    // const orderProductsInfo = await getOrderSingleProducts('user123');
+    const orderProductsInfo = await getOrderSingleProducts(userId);
     return orderProductsInfo;
   } catch(err){
     console.error('제품 정보를 가져오지 못했습니다.', err);
@@ -71,7 +79,9 @@ export const fetchOrderProducts = async() => {
 
 export const fetchShippingFee = async(userId: string) => {
   try{
-    const shippingFee = await getShippingFee('user123');
+    // const shippingFee = await getShippingFee('user123');
+    console.log('fetchShippingFee 유저아이디', userId)
+    const shippingFee = await getShippingFee(userId);
     console.log('shipping fee: ', shippingFee);
     return shippingFee;
   } catch(err){
@@ -82,13 +92,43 @@ export const fetchShippingFee = async(userId: string) => {
 
 export const fetchOrderSingleProduct = async(orderData:any) => {
   try{
-    const userid = 'user123';
     const statusid = 'OS001';
     const orderType = 'OT002';
     const {userId, productId, quantity, totalAmount, discountAmount, finalAmount, shippingFee, selectedSize, selectedColor, statusId} = orderData;
     // const orderId = await insertOrder(userid, totalAmount, discountAmount, finalAmount, shippingFee, statusid, orderType);
     const orderId = await insertOrderItems(
-      userid, 
+      userId, 
+      totalAmount, 
+      discountAmount, 
+      finalAmount, 
+      shippingFee, 
+      orderType, 
+      productId, 
+      statusid,
+      quantity,
+      selectedSize,
+      selectedColor
+    );
+    console.log('orderID', orderId,typeof(orderId));
+    if(!orderId){
+      throw new Error('order_id가 존재하지 않습니다.');
+    }
+    return orderId;
+    // await insertOrderItems(orderId, productId, statusid,quantity,selectedSize,selectedColor);
+  } catch(err){
+    console.error('단일 상품 저장 실패', err);
+    throw err;
+  }
+}
+
+export const fetchOrderCartProduct = async(orderData:any) => {
+  try{
+    const statusid = 'OS001';
+    const orderType = 'OT001';
+    const {userId, productId, quantity, totalAmount, discountAmount, finalAmount, shippingFee, selectedSize, selectedColor, statusId} = orderData;
+    // const orderId = await insertOrder(userid, totalAmount, discountAmount, finalAmount, shippingFee, statusid, orderType);
+    const orderId = await insertOrderItems(
+      userId, 
       totalAmount, 
       discountAmount, 
       finalAmount, 

@@ -60,6 +60,9 @@ const TestPage: React.FC = () => {
           <Link to={'/login'}>로그인 페이지</Link>
         </button>
         <button>
+          <Link to={'/mypage'}>마이 페이지</Link>
+        </button>
+        <button>
           <Link to={'/cart'}>장바구니 페이지</Link>
         </button>
         <button>

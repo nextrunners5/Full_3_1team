@@ -1,7 +1,7 @@
 //컨트롤러는 사용자로부터의 요청을 받아서 처리하고, 적절한 응답을 반환하는 역할을 합니다. 
 //비즈니스 로직을 서비스 계층에 위임하고, 서비스로부터 받은 결과를 클라이언트에 반환합니다.
 
-import { RequestHandler } from 'express';
+import { Request, Response, RequestHandler } from 'express';
 import pool from '../../../config/dbConfig';
 import { RowDataPacket } from 'mysql2';
 import { AuthenticatedRequest } from '../../auth/types/user';
@@ -17,171 +17,355 @@ interface Address extends RowDataPacket {
   is_default: boolean;
 }
 
-export const getUserProfile: RequestHandler = async (req, res) => {
-  try {
-    const userId = (req as AuthenticatedRequest).user?.user_id;
-    if (!userId) {
-      res.status(401).json({ success: false, message: '인증이 필요합니다.' });
-      return;
+export class UserController {
+  static getProfile: RequestHandler = async (req: Request, res: Response) => {
+    try {
+      const authReq = req as AuthenticatedRequest;
+      console.log('=== getProfile 시작 ===');
+      console.log('사용자 정보:', authReq.user);
+
+      if (!authReq.user?.user_id) {
+        res.status(401).json({
+          success: false,
+          message: '인증된 사용자가 아닙니다.'
+        });
+        return;
+      }
+
+      const connection = await pool.promise().getConnection();
+
+      try {
+        const [rows] = await connection.query<RowDataPacket[]>(
+          `SELECT user_id, name, email, phone 
+           FROM Users 
+           WHERE user_id = ?`,
+          [authReq.user.user_id]
+        );
+
+        if (rows.length === 0) {
+          res.status(404).json({
+            success: false,
+            message: '사용자를 찾을 수 없습니다.'
+          });
+          return;
+        }
+
+        const userProfile = rows[0];
+        res.json({
+          success: true,
+          name: userProfile.name,
+          email: userProfile.email,
+          phone: userProfile.phone
+        });
+
+      } finally {
+        connection.release();
+      }
+
+    } catch (error) {
+      console.error('프로필 조회 실패:', error);
+      res.status(500).json({
+        success: false,
+        message: '프로필 조회에 실패했습니다.'
+      });
     }
+  };
 
-    const [rows] = await pool.promise().query<RowDataPacket[]>(
-      `SELECT user_id as username, name, email, phone, created_at as createdAt
-       FROM Users 
-       WHERE user_id = ?`,
-      [userId]
-    );
+  static getAddresses: RequestHandler = async (req: Request, res: Response) => {
+    try {
+      const authReq = req as AuthenticatedRequest;
+      console.log('=== getAddresses 시작 ===');
+      console.log('사용자 정보:', authReq.user);
 
-    if (!Array.isArray(rows) || rows.length === 0) {
-      res.status(404).json({ success: false, message: '사용자를 찾을 수 없습니다.' });
-      return;
+      if (!authReq.user?.user_id) {
+        res.status(401).json({
+          success: false,
+          message: '인증된 사용자가 아닙니다.'
+        });
+        return;
+      }
+
+      const connection = await pool.promise().getConnection();
+
+      try {
+        // 테이블 존재 여부 확인
+        const [tables] = await connection.query<RowDataPacket[]>(
+          'SHOW TABLES LIKE "UserAddresses"'
+        );
+        console.log('테이블 확인:', tables);
+
+        if (tables.length === 0) {
+          // 테이블이 없으면 생성
+          await connection.query(`
+            CREATE TABLE IF NOT EXISTS UserAddresses (
+              address_id INT AUTO_INCREMENT PRIMARY KEY,
+              user_id VARCHAR(255) NOT NULL,
+              recipient_name VARCHAR(50) NOT NULL,
+              address VARCHAR(255) NOT NULL,
+              address_detail VARCHAR(255),
+              postal_code VARCHAR(10) NOT NULL,
+              phone VARCHAR(20) NOT NULL,
+              is_default BOOLEAN DEFAULT false,
+              created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+              updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+              FOREIGN KEY (user_id) REFERENCES Users(user_id)
+            )
+          `);
+          console.log('UserAddresses 테이블 생성됨');
+        }
+
+        const [addresses] = await connection.query<Address[]>(
+          `SELECT * FROM UserAddresses 
+           WHERE user_id = ? 
+           ORDER BY is_default DESC, created_at DESC`,
+          [authReq.user.user_id]
+        );
+
+        console.log('조회된 배송지:', addresses);
+
+        res.json({
+          success: true,
+          addresses: addresses
+        });
+
+      } catch (error) {
+        console.error('SQL 쿼리 실행 중 오류:', error);
+        throw error;
+      } finally {
+        connection.release();
+      }
+
+    } catch (error) {
+      console.error('배송지 목록 조회 실패:', error);
+      res.status(500).json({
+        success: false,
+        message: '배송지 목록 조회에 실패했습니다.',
+        error: error instanceof Error ? error.message : '알 수 없는 오류'
+      });
     }
+  };
 
-    res.status(200).json({
-      success: true,
-      profile: rows[0]
-    });
-  } catch (error) {
-    console.error('프로필 조회 실패:', error);
-    res.status(500).json({ success: false, message: '서버 오류가 발생했습니다.' });
+  static addAddress: RequestHandler = async (req: Request, res: Response) => {
+    try {
+      const authReq = req as AuthenticatedRequest;
+      const {
+        address_name,
+        recipient_name,
+        recipient_phone,
+        address,
+        detailed_address,
+        postal_code,
+        is_default
+      } = req.body;
+
+      const connection = await pool.promise().getConnection();
+
+      if (!authReq.user?.user_id) {
+        res.status(401).json({
+          success: false,
+          message: '인증된 사용자가 아닙니다.'
+        });
+        return;
+      }
+
+      try {
+        if (is_default) {
+          await connection.query(
+            'UPDATE UserAddresses SET is_default = false WHERE user_id = ?',
+            [authReq.user.user_id]
+          );
+        }
+
+        const [result] = await connection.query(`
+          INSERT INTO UserAddresses 
+          (user_id, address_name, recipient_name, recipient_phone, address, detailed_address, postal_code, is_default)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        `, [
+          authReq.user.user_id,
+          address_name,
+          recipient_name,
+          recipient_phone,
+          address,
+          detailed_address,
+          postal_code,
+          is_default
+        ]);
+
+        res.json({
+          success: true,
+          message: '배송지가 추가되었습니다.'
+        });
+      } finally {
+        connection.release();
+      }
+    } catch (error) {
+      console.error('SQL 쿼리 실행 중 오류:', error);
+      res.status(500).json({
+        success: false,
+        message: '배송지 추가 중 오류가 발생했습니다.'
+      });
+    }
+  };
+
+  static async updateAddress(req: AuthenticatedRequest, res: Response) {
+    try {
+      if (!req.user?.user_id) {
+        return res.status(401).json({
+          success: false,
+          message: '인증된 사용자가 아닙니다.'
+        });
+      }
+
+      const addressId = req.params.addressId;
+      const { recipient_name, address, address_detail, postal_code, phone, is_default } = req.body;
+
+      const connection = await pool.promise().getConnection();
+
+      try {
+        if (is_default) {
+          await connection.query(
+            'UPDATE UserAddresses SET is_default = false WHERE user_id = ?',
+            [req.user.user_id]
+          );
+        }
+
+        await connection.query(
+          `UPDATE UserAddresses 
+           SET recipient_name = ?, address = ?, address_detail = ?, 
+               postal_code = ?, phone = ?, is_default = ?
+           WHERE address_id = ? AND user_id = ?`,
+          [recipient_name, address, address_detail, postal_code, phone, is_default, addressId, req.user.user_id]
+        );
+
+        res.status(200).json({
+          success: true,
+          message: '배송지가 수정되었습니다.'
+        });
+
+      } catch (error) {
+        console.error('배송지 수정 실패:', error);
+        res.status(500).json({
+          success: false,
+          message: '배송지 수정에 실패했습니다.'
+        });
+      } finally {
+        connection.release();
+      }
+
+    } catch (error) {
+      console.error('배송지 수정 실패:', error);
+      res.status(500).json({
+        success: false,
+        message: '배송지 수정에 실패했습니다.'
+      });
+    }
   }
-};
 
-export const getUserAddresses: RequestHandler = async (req, res) => {
-  try {
-    const userId = (req as AuthenticatedRequest).user?.user_id;
-    if (!userId) {
-      res.status(401).json({ success: false, message: '인증이 필요합니다.' });
-      return;
+  static deleteAddress: RequestHandler = async (req: Request, res: Response) => {
+    try {
+      const authReq = req as AuthenticatedRequest;
+      const addressId = req.params.id;  // URL 파라미터에서 id 가져오기
+
+      if (!authReq.user?.user_id) {
+        res.status(401).json({
+          success: false,
+          message: '인증된 사용자가 아닙니다.'
+        });
+        return;
+      }
+
+      const connection = await pool.promise().getConnection();
+
+      try {
+        // 삭제 전에 해당 배송지가 사용자의 것인지 확인
+        const [address] = await connection.query<RowDataPacket[]>(
+          'SELECT * FROM UserAddresses WHERE address_id = ? AND user_id = ?',
+          [addressId, authReq.user.user_id]
+        );
+
+        if (!address || (address as any[]).length === 0) {
+          res.status(404).json({
+            success: false,
+            message: '배송지를 찾을 수 없거나 삭제 권한이 없습니다.'
+          });
+          return;
+        }
+
+        // 배송지 삭제
+        await connection.query(
+          'DELETE FROM UserAddresses WHERE address_id = ? AND user_id = ?',
+          [addressId, authReq.user.user_id]
+        );
+
+        res.json({
+          success: true,
+          message: '배송지가 삭제되었습니다.'
+        });
+
+      } catch (error) {
+        console.error('SQL 쿼리 실행 중 오류:', error);
+        throw error;
+      } finally {
+        connection.release();
+      }
+
+    } catch (error) {
+      console.error('배송지 삭제 실패:', error);
+      res.status(500).json({
+        success: false,
+        message: '배송지 삭제에 실패했습니다.',
+        error: error instanceof Error ? error.message : '알 수 없는 오류'
+      });
     }
+  };
 
-    const [addresses] = await pool.promise().query<Address[]>(
-      'SELECT * FROM UserAddresses WHERE user_id = ? ORDER BY is_default DESC',
-      [userId]
-    );
+  static setDefaultAddress: RequestHandler = async (req: Request, res: Response) => {
+    try {
+      const authReq = req as AuthenticatedRequest;
+      const addressId = req.params.id;
 
-    res.status(200).json({
-      success: true,
-      addresses: addresses
-    });
-  } catch (error) {
-    console.error('배송지 목록 조회 실패:', error);
-    res.status(500).json({ success: false, message: '서버 오류가 발생했습니다.' });
-  }
-};
+      if (!authReq.user?.user_id) {
+        res.status(401).json({
+          success: false,
+          message: '인증된 사용자가 아닙니다.'
+        });
+        return;
+      }
 
-export const addUserAddress: RequestHandler = async (req, res) => {
-  try {
-    const userId = (req as AuthenticatedRequest).user?.user_id;
-    if (!userId) {
-      res.status(401).json({ success: false, message: '인증이 필요합니다.' });
-      return;
+      const connection = await pool.promise().getConnection();
+
+      try {
+        // 먼저 모든 배송지의 기본 설정을 해제
+        await connection.query(
+          'UPDATE UserAddresses SET is_default = false WHERE user_id = ?',
+          [authReq.user.user_id]
+        );
+
+        // 선택한 배송지를 기본 배송지로 설정
+        const [result] = await connection.query(
+          'UPDATE UserAddresses SET is_default = true WHERE address_id = ? AND user_id = ?',
+          [addressId, authReq.user.user_id]
+        );
+
+        res.json({
+          success: true,
+          message: '기본 배송지가 변경되었습니다.'
+        });
+
+      } catch (error) {
+        console.error('SQL 쿼리 실행 중 오류:', error);
+        throw error;
+      } finally {
+        connection.release();
+      }
+
+    } catch (error) {
+      console.error('기본 배송지 설정 실패:', error);
+      res.status(500).json({
+        success: false,
+        message: '기본 배송지 설정에 실패했습니다.',
+        error: error instanceof Error ? error.message : '알 수 없는 오류'
+      });
     }
-
-    const {
-      recipientName,
-      address,
-      addressDetail,
-      postalCode,
-      recipientPhone,
-      isDefault
-    } = req.body;
-
-    if (isDefault) {
-      await pool.promise().query(
-        'UPDATE UserAddresses SET is_default = false WHERE user_id = ?',
-        [userId]
-      );
-    }
-
-    const query = `
-      INSERT INTO UserAddresses 
-      (user_id, recipient_name, address, detailed_address, postal_code, phone, is_default)
-      VALUES (?, ?, ?, ?, ?, ?, ?)
-    `;
-
-    const values = [
-      userId,
-      recipientName,
-      address,
-      addressDetail,
-      postalCode,
-      recipientPhone,
-      isDefault
-    ];
-
-    const [result] = await pool.promise().query(query, values);
-
-    res.status(201).json({
-      success: true,
-      message: '배송지가 추가되었습니다.'
-    });
-  } catch (error) {
-    console.error('배송지 추가 실패:', error);
-    res.status(500).json({ 
-      success: false, 
-      message: '서버 오류가 발생했습니다.',
-      error: error instanceof Error ? error.message : '알 수 없는 오류'
-    });
-  }
-};
-
-export const updateUserAddress: RequestHandler = async (req, res) => {
-  try {
-    const userId = (req as AuthenticatedRequest).user?.user_id;
-    const addressId = req.params.addressId;
-    if (!userId) {
-      res.status(401).json({ success: false, message: '인증이 필요합니다.' });
-      return;
-    }
-
-    const { recipient_name, address, address_detail, postal_code, phone, is_default } = req.body;
-
-    if (is_default) {
-      await pool.promise().query(
-        'UPDATE UserAddresses SET is_default = false WHERE user_id = ?',
-        [userId]
-      );
-    }
-
-    await pool.promise().query(
-      `UPDATE UserAddresses 
-       SET recipient_name = ?, address = ?, address_detail = ?, 
-           postal_code = ?, phone = ?, is_default = ?
-       WHERE address_id = ? AND user_id = ?`,
-      [recipient_name, address, address_detail, postal_code, phone, is_default, addressId, userId]
-    );
-
-    res.status(200).json({
-      success: true,
-      message: '배송지가 수정되었습니다.'
-    });
-  } catch (error) {
-    console.error('배송지 수정 실패:', error);
-    res.status(500).json({ success: false, message: '서버 오류가 발생했습니다.' });
-  }
-};
-
-export const deleteUserAddress: RequestHandler = async (req, res) => {
-  try {
-    const userId = (req as AuthenticatedRequest).user?.user_id;
-    const addressId = req.params.addressId;
-    if (!userId) {
-      res.status(401).json({ success: false, message: '인증이 필요합니다.' });
-      return;
-    }
-
-    await pool.promise().query(
-      'DELETE FROM UserAddresses WHERE address_id = ? AND user_id = ?',
-      [addressId, userId]
-    );
-
-    res.status(200).json({
-      success: true,
-      message: '배송지가 삭제되었습니다.'
-    });
-  } catch (error) {
-    console.error('배송지 삭제 실패:', error);
-    res.status(500).json({ success: false, message: '서버 오류가 발생했습니다.' });
-  }
-};
+  };
+}

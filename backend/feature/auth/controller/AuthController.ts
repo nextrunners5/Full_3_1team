@@ -2,7 +2,7 @@
 //비즈니스 로직을 서비스 계층에 위임하고, 서비스로부터 받은 결과를 클라이언트에 반환합니다.
 
 import { Request, Response } from 'express';
-import Auth from '../domains/Auth';
+import { Auth } from '../domains/Auth';
 import axios from 'axios';
 
 export const signup = async (req: Request, res: Response) => {
@@ -10,64 +10,53 @@ export const signup = async (req: Request, res: Response) => {
   console.log(`[${startTime.toISOString()}] 회원가입 시도 - IP: ${req.ip}`);
   
   try {
-    const { userId, password, name, email, phone } = req.body;
+    // 요청 데이터 로깅
+    console.log('회원가입 요청:', req.body);
+
+    const { userId, email, password, name, phone } = req.body;
 
     // 필수 필드 검증
-    if (!userId || !password || !name || !email || !phone) {
+    if (!userId || !email || !password || !name || !phone) {
       return res.status(400).json({
         success: false,
-        message: '모든 필수 정보를 입력해주세요.'
+        message: '모든 필드를 입력해주세요.'
       });
     }
 
-    // 이메일 형식 검증
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      return res.status(400).json({
-        success: false,
-        message: '올바른 이메일 형식이 아닙니다.'
-      });
-    }
-
-    // 전화번호 형식 검증
-    const phoneRegex = /^01[0-9]-?[0-9]{4}-?[0-9]{4}$/;
-    if (!phoneRegex.test(phone)) {
-      return res.status(400).json({
-        success: false,
-        message: '올바른 전화번호 형식이 아닙니다.'
-      });
-    }
+    console.log(`[회원가입 요청] 사용자: ${userId}, 이메일: ${email}`);
 
     const result = await Auth.signup({
       userId,
+      email,
       password,
       name,
-      email,
       phone
     });
 
     const endTime = new Date();
     const duration = endTime.getTime() - startTime.getTime();
-    console.log(`[${endTime.toISOString()}] 회원가입 성공 - IP: ${req.ip}, 소요시간: ${duration}ms`);
+    console.log(`[${endTime.toISOString()}] 회원가입 성공 - 사용자: ${userId}, 소요시간: ${duration}ms`);
 
     res.status(201).json(result);
   } catch (error) {
     const endTime = new Date();
     const duration = endTime.getTime() - startTime.getTime();
+    
+    // 에러 로그 상세 출력
     console.error(`[${endTime.toISOString()}] 회원가입 실패 - IP: ${req.ip}, 소요시간: ${duration}ms`);
-    console.error('에러 상세:', error instanceof Error ? error.message : error);
-
+    console.error('에러 메시지:', error instanceof Error ? error.message : error);
     if (error instanceof Error) {
-      res.status(400).json({
-        success: false,
-        message: error.message
-      });
-    } else {
-      res.status(500).json({
-        success: false,
-        message: '회원가입 처리 중 오류가 발생했습니다.'
-      });
+      console.error('에러 메시지:', error.message);
+      if ('code' in error) {
+        console.error('SQL 에러 코드:', (error as any).code);
+        console.error('SQL 에러 상태:', (error as any).sqlState);
+      }
     }
+
+    res.status(500).json({
+      success: false,
+      message: error instanceof Error ? error.message : '서버 오류가 발생했습니다.'
+    });
   }
 };
 
@@ -167,82 +156,77 @@ export const logout = async (req: Request, res: Response) => {
 export const kakaoCallback = async (req: Request, res: Response) => {
   try {
     const { code } = req.body;
-    
-    if (!code) {
-      return res.status(400).json({
-        success: false,
-        message: '인증 코드가 없습니다.'
-      });
-    }
-
     console.log('카카오 인증 코드 받음:', code);
 
-    const tokenResponse = await axios.post(
-      'https://kauth.kakao.com/oauth/token',
-      {
+    if (!code) {
+      return res.status(400).json({ message: '인증 코드가 없습니다.' });
+    }
+
+    // 카카오 토큰 받기
+    const tokenResponse = await axios.post('https://kauth.kakao.com/oauth/token', null, {
+      params: {
         grant_type: 'authorization_code',
         client_id: process.env.KAKAO_CLIENT_ID,
-        client_secret: process.env.KAKAO_CLIENT_SECRET,
         redirect_uri: process.env.KAKAO_REDIRECT_URI,
         code
       },
-      {
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded'
-        }
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded'
       }
-    );
+    });
 
     console.log('카카오 토큰 응답:', tokenResponse.data);
 
+    // 카카오 사용자 정보 받기
     const userResponse = await axios.get('https://kapi.kakao.com/v2/user/me', {
       headers: {
-        Authorization: `Bearer ${tokenResponse.data.access_token}`,
-        'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8'
+        Authorization: `Bearer ${tokenResponse.data.access_token}`
       }
     });
 
-    console.log('카카오 사용자 정보:', userResponse.data);
-
     const kakaoUser = userResponse.data;
-    
-    // 사용자 정보로 회원가입 또는 로그인 처리
-    const user = await Auth.saveOrGetUser(
-      kakaoUser.id,
-      kakaoUser.kakao_account?.email,
-      kakaoUser.properties?.nickname || '카카오 사용자'
-    );
+    console.log('카카오 사용자 정보:', kakaoUser);
+
+    // 사용자 저장 또는 조회
+    const user = await Auth.saveOrGetUser({
+      kakao_account: {
+        email: kakaoUser.kakao_account?.email,
+        name: kakaoUser.properties?.nickname || '카카오 사용자',
+        phone_number: kakaoUser.kakao_account?.phone_number
+      },
+      properties: {
+        profile_image: kakaoUser.properties?.profile_image
+      }
+    });
 
     // JWT 토큰 생성
     const tokens = Auth.generateTokens({
-      id: user.id,
+      id: user.user_id,
       email: user.email,
-      nickname: user.nickname,
+      nickname: user.name,
       signup_type: 'kakao'
     });
 
-    console.log('카카오 로그인 성공:', user.nickname);
+    console.log('카카오 로그인 성공:', user.name);
 
-    res.status(200).json({
-      success: true,
-      message: '카카오 로그인 성공',
+    // 응답
+    res.json({
+      token: tokens.accessToken,
       user: {
-        userId: user.id,
+        userId: user.user_id,
         email: user.email,
-        name: user.nickname
-      },
-      token: tokens.accessToken
-    });
-  } catch (error: any) {
-    console.error('카카오 로그인 에러:', {
-      message: error.message,
-      response: error.response?.data
+        name: user.name
+      }
     });
 
-    res.status(500).json({
-      success: false,
-      message: '카카오 로그인 처리 중 오류가 발생했습니다.',
-      error: error.response?.data || error.message
+  } catch (error) {
+    console.error('카카오 로그인 에러:', error);
+    if (axios.isAxiosError(error)) {
+      console.error('카카오 API 응답:', error.response?.data);
+    }
+    res.status(500).json({ 
+      message: '카카오 로그인에 실패했습니다.',
+      error: error instanceof Error ? error.message : '알 수 없는 오류'
     });
   }
 };
@@ -316,6 +300,47 @@ export const resetPassword = async (req: Request, res: Response) => {
     res.status(404).json({
       success: false,
       message: error instanceof Error ? error.message : '비밀번호 재설정에 실패했습니다.'
+    });
+  }
+};
+
+export const checkEmail = async (req: Request, res: Response) => {
+  const startTime = new Date();
+  console.log(`[${startTime.toISOString()}] 이메일 중복 확인 시도 - IP: ${req.ip}`);
+
+  try {
+    const { email } = req.params;
+    console.log(`[중복확인 요청] 이메일: ${email}`);
+
+    const available = await Auth.checkEmail(email);
+    
+    const endTime = new Date();
+    const duration = endTime.getTime() - startTime.getTime();
+
+    if (available) {
+      console.log(`[${endTime.toISOString()}] 이메일 사용 가능 - ${email}, 소요시간: ${duration}ms`);
+      res.json({ 
+        success: true,
+        available: true,
+        message: '사용 가능한 이메일입니다.' 
+      });
+    } else {
+      console.log(`[${endTime.toISOString()}] 이메일 중복 - ${email}, 소요시간: ${duration}ms`);
+      res.json({ 
+        success: false,
+        available: false,
+        message: '이미 사용중인 이메일입니다.' 
+      });
+    }
+  } catch (error) {
+    const endTime = new Date();
+    const duration = endTime.getTime() - startTime.getTime();
+    console.error(`[${endTime.toISOString()}] 중복확인 실패 - IP: ${req.ip}, 소요시간: ${duration}ms`);
+    console.error('에러 상세:', error instanceof Error ? error.message : error);
+
+    res.status(400).json({ 
+      success: false,
+      message: error instanceof Error ? error.message : '이메일 중복 체크에 실패했습니다.' 
     });
   }
 };

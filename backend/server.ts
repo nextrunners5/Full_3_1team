@@ -13,10 +13,11 @@ import CategoryRoutes from "./routes/CategoryRoutes";
 import CartRoutes from "./routes/CartRoutes";
 import productImageRoutes from "./routes/ProductImageRoutes";
 import ProductImageUplordRoutes from "./routes/ProductImageUplordRoutes";
+import addressRoutes from './routes/AddressRoutes';
+import userRoutes from './routes/UserRoutes';
 import path from "path";
 import { errorHandler } from './middlewares/AuthMiddleware';
 import PaymentRoutes from './routes/PaymentRoutes';
-
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -37,6 +38,9 @@ app.use(express.urlencoded({ extended: true }));
 // Auth 라우터 등록 (가장 먼저)
 app.use('/api/auth', AuthRoutes);
 
+// Users 라우터 등록 (Auth 다음에)
+app.use('/api', userRoutes);
+
 // product 라우트
 app.use("/api", ProductRoutes);
 app.use("/api", CategoryRoutes);
@@ -53,6 +57,9 @@ app.use("/api/orders", OrderRoutes);
 
 // 장바구니 라우터
 app.use("/api/carts", CartRoutes);
+
+// 배송지 라우터 추가
+app.use("/api/addresses", addressRoutes);
 
 // 정적 파일 제공
 app.use("/uploads", express.static(path.join(__dirname, "./uploads")));

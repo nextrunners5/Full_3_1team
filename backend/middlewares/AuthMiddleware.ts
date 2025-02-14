@@ -1,5 +1,6 @@
-import { Request, Response, NextFunction } from 'express';
+import { Request, Response, NextFunction, RequestHandler } from 'express';
 import jwt from 'jsonwebtoken';
+import { AuthenticatedRequest, TokenUser } from '../feature/auth/types/user';
 
 interface AuthRequest extends Request {
   user?: any;
@@ -67,12 +68,41 @@ export const errorHandler = (err: Error, req: Request, res: Response, next: Next
 };
 
 // 비동기 핸들러 래퍼
-export const asyncHandler = (handler: (req: Request, res: Response, next: NextFunction) => Promise<any>) => {
-  return async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      await handler(req, res, next);
-    } catch (error) {
-      next(error);
-    }
+export const asyncHandler = (fn: RequestHandler): RequestHandler => {
+  return (req: Request, res: Response, next: NextFunction) => {
+    Promise.resolve(fn(req, res, next)).catch(next);
   };
+};
+
+export const authenticateToken = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): void => {
+  try {
+    const authHeader = req.headers['authorization'];
+    const token = authHeader && authHeader.split(' ')[1];
+
+    if (!token) {
+      res.status(401).json({ message: '인증 토큰이 없습니다.' });
+      return;
+    }
+
+    jwt.verify(token, process.env.JWT_SECRET as string, (err: any, decoded: any) => {
+      if (err) {
+        res.status(403).json({ message: '토큰이 유효하지 않습니다.' });
+        return;
+      }
+
+      (req as AuthenticatedRequest).user = {
+        user_id: decoded.id,
+        email: decoded.email
+      };
+      
+      next();
+    });
+  } catch (error) {
+    console.error('인증 미들웨어 에러:', error);
+    res.status(500).json({ message: '서버 에러가 발생했습니다.' });
+  }
 };
