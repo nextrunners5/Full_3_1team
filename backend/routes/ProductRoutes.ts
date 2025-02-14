@@ -7,8 +7,15 @@ import ProductService from "../../backend/feature/product/services/ProductServic
 import { RowDataPacket } from "mysql2";
 import { getProductById, getCategories, getProducts, deleteProduct, updateProduct } from "../feature/product/controller/ProductController"
 import ProductImage from "../feature/product/img/ProductImage";
+import { getBestProducts, getRecentProducts } from "../feature/product/controller/MainProductController";
 
 const router = Router();
+
+// 할인율 높은 베스트 상품
+router.get("/products/best", getBestProducts);
+
+// 최근 등록된 상품 조회
+router.get("/products/recent", getRecentProducts);
 
 // 모든 카테고리 조회 API
 router.get("/api/categories", getCategories);
@@ -103,5 +110,7 @@ router.get("/products", getProducts);
 router.put("/product-create/:productId", updateProduct);
 // 상품 삭제
 router.delete("/products/:productId", deleteProduct);
+
+
 
 export default router;

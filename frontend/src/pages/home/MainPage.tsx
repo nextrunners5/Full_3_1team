@@ -1,7 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import axiosInstance from '../../shared/axios/axios';
 import Header from '../../widgets/header/Header';
 import Footer from '../../widgets/footer/Footer';
+import ProductCard from '../product/ProductCard';
 
 import homeImage from '../../assets/Home.jpg';
 import aboutImage from '../../assets/Home2.jpg';
@@ -9,21 +11,39 @@ import bumImage from '../../assets/bum.jpg';
 
 import "./MainPage.css";
 
-function MainPage() {
+interface Product {
+  product_id: number;
+  product_name: string;
+  origin_price: number;
+  discount_price : number;
+  final_price: number;
+  main_image: string;
+  small_image: string;
+}
+
+const MainPage:React.FC = () => {
   const [selectedCategory, setSelectedCategory] = useState("best");
+  const [bestProducts, setBestProducts] = useState<Product[]>([]);
+  const [newProducts, setNewProducts] = useState<Product[]>([]);
   const navigate = useNavigate();
 
-  const bestProducts = [
-    { id: 1, title: "프리미엄 유기농 강아지 사료", oldPrice: "₩53,000", newPrice: "₩32,860", discount: "32%" },
-    { id: 2, title: "강아지 간식", oldPrice: "₩25,000", newPrice: "₩17,500", discount: "30%" },
-    { id: 3, title: "강아지 영양제", oldPrice: "₩30,000", newPrice: "₩21,000", discount: "30%" },
-  ];
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const [bestRes, newRes] = await Promise.all([
+          axiosInstance.get("/api/products/best"),
+          axiosInstance.get("/api/products/recent"),
+        ]);
 
-  const newProducts = [
-    { id: 1, title: "신상 강아지 사료", oldPrice: "₩60,000", newPrice: "₩40,000", discount: "33%" },
-    { id: 2, title: "신상 강아지 장난감", oldPrice: "₩20,000", newPrice: "₩14,000", discount: "30%" },
-    { id: 3, title: "신상 강아지 방석", oldPrice: "₩50,000", newPrice: "₩35,000", discount: "30%" },
-  ];
+        setBestProducts(bestRes.data);
+        setNewProducts(newRes.data);
+      } catch (error) {
+        console.error("상품 데이터를 불러오는 중 오류 발생:", error);
+      }
+    };
+
+    fetchProducts();
+  }, []);
 
   const productsToShow = selectedCategory === "best" ? bestProducts : newProducts;
 
@@ -42,24 +62,23 @@ function MainPage() {
 
         <section className="sectionProductsMAIN">
           <div className="sectionTitleGroupMAIN">
-            <button className={`productButtonMAIN ${selectedCategory === "best" ? "activeButtonMAIN" : ""}`} onClick={() => setSelectedCategory("best")}>BEST PRODUCT</button>
-            <button className={`productButtonMAIN ${selectedCategory === "new" ? "activeButtonMAIN" : ""}`} onClick={() => setSelectedCategory("new")}>NEW PRODUCT</button>
+            <button 
+              className={`productButtonMAIN ${selectedCategory === "best" ? "activeButtonMAIN" : ""}`} 
+              onClick={() => setSelectedCategory("best")}
+            >
+              BEST PRODUCT
+            </button>
+            <button 
+              className={`productButtonMAIN ${selectedCategory === "new" ? "activeButtonMAIN" : ""}`} 
+              onClick={() => setSelectedCategory("new")}
+            >
+              NEW PRODUCT
+            </button>
           </div>
 
           <div className="productCardContainerMAIN">
             {productsToShow.map((product) => (
-              <div 
-                className="productCardMAIN" 
-                key={product.id} 
-                onClick={() => navigate('/ProductList')}
-              >
-                <div className="productImageMAIN" />
-                <h3>{product.title}</h3>
-                <div className="priceContainerMAIN">
-                  <p className="productPriceOldMAIN">{product.oldPrice}</p>
-                  <p className="productPriceNewMAIN">{product.newPrice} <span className="productSaleMAIN">{product.discount}</span></p>
-                </div>
-              </div>
+              <ProductCard key={product.product_id} product={product} />
             ))}
           </div>
         </section>

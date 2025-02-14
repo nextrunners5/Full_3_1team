@@ -177,19 +177,19 @@ export const getProductImages = async (
 ): Promise<void> => {
   try {
     const { productId } = req.params;
-    console.log("[백엔드] 상품 ID", productId, "에 대한 이미지 조회 요청");
+    // console.log("[백엔드] 상품 ID", productId, "에 대한 이미지 조회 요청");
 
     const productImage = await ProductImage.findOne({ product_id: productId });
 
     if (!productImage) {
-      console.log("[백엔드] 상품 ID", productId, "에 대한 이미지 없음");
+      // console.log("[백엔드] 상품 ID", productId, "에 대한 이미지 없음");
       res
         .status(404)
         .json({ message: "해당 상품의 이미지를 찾을 수 없습니다." });
       return;
     }
 
-    console.log("[백엔드] 조회된 상품 이미지 데이터:", productImage);
+    // console.log("[백엔드] 조회된 상품 이미지 데이터:", productImage);
     res.json(productImage);
   } catch (error) {
     console.error("이미지 조회 실패:", error);

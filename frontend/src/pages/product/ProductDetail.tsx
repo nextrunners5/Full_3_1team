@@ -103,6 +103,7 @@ const ProductDetail: React.FC = () => {
       setLoading(true);
   
       const orderData = {
+        type: "Single",
         userId,
         productId: product.product_id,
         quantity,
