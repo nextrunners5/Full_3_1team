@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom'; // React Router 사용
 import './Header.css';
 import SearchIcon from '../../assets/Search.png';
 import CartIcon from '../../assets/Cart.png';
@@ -11,7 +12,6 @@ const Header: React.FC = () => {
   const [searchResults, setSearchResults] = useState<string[]>([]);
   const [isSearchVisible, setIsSearchVisible] = useState(false);
 
-  // 알림 개수 가져오기
   useEffect(() => {
     const fetchNotifications = async () => {
       try {
@@ -29,7 +29,6 @@ const Header: React.FC = () => {
     fetchNotifications();
   }, []);
 
-  // 검색 처리
   const handleSearchChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const query = e.target.value;
     setSearchQuery(query);
@@ -57,37 +56,42 @@ const Header: React.FC = () => {
 
   return (
     <header className="Header-header">
-      <div className="Header-logo">PETOPIA</div>
+      <Link to="/main" className="Header-logo">PETOPIA</Link>
+
       <nav className="Header-nav">
-        <a href="/about" className="Header-nav-link">ABOUT</a>
+        <Link to="/about" className="Header-nav-link">ABOUT</Link>
+        
         <div className="Header-nav-dropdown">
           <button className="Header-nav-link">DOG</button>
           <div className="Header-dropdown-content">
-            <a href="/dog/bathroom">BATHROOM</a>
-            <a href="/dog/livingroom">LIVINGROOM</a>
-            <a href="/dog/outside">OUTSIDE</a>
-            <a href="/dog/kitchen">KITCHEN</a>
-            <a href="/dog/clothes">CLOTHES</a>
+            <Link to="/ProductList">BATHROOM</Link>
+            <Link to="/ProductList">LIVINGROOM</Link>
+            <Link to="/ProductList">OUTSIDE</Link>
+            <Link to="/ProductList">KITCHEN</Link>
+            <Link to="/ProductList">CLOTHES</Link>
           </div>
         </div>
+
         <div className="Header-nav-dropdown">
           <button className="Header-nav-link">CAT</button>
           <div className="Header-dropdown-content">
-            <a href="/cat/bathroom">BATHROOM</a>
-            <a href="/cat/livingroom">LIVINGROOM</a>
-            <a href="/cat/outside">OUTSIDE</a>
-            <a href="/cat/kitchen">KITCHEN</a>
-            <a href="/cat/clothes">CLOTHES</a>
+            <Link to="/ProductList">BATHROOM</Link>
+            <Link to="/ProductList">LIVINGROOM</Link>
+            <Link to="/ProductList">OUTSIDE</Link>
+            <Link to="/ProductList">KITCHEN</Link>
+            <Link to="/ProductList">CLOTHES</Link>
           </div>
         </div>
-        {/* SUPPORT 추가 */}
-        <a href="/support" className="Header-nav-link">SUPPORT</a>
+
+        <Link to="/support" className="Header-nav-link">SUPPORT</Link>
       </nav>
+      
       <div className="Header-search-cart-profile">
         <div className="Header-icons">
           <button className="Header-icon-button" onClick={handleSearchIconClick}>
             <img src={SearchIcon} alt="검색" className="Header-icon-image" />
           </button>
+          
           {isSearchVisible && (
             <div className="Header-search-container">
               <input
@@ -108,18 +112,21 @@ const Header: React.FC = () => {
               )}
             </div>
           )}
-          <button className="Header-icon-button">
+
+          <Link to="/cart" className="Header-icon-button">
             <img src={CartIcon} alt="장바구니" className="Header-icon-image" />
-          </button>
+          </Link>
+
           <button className="Header-icon-button Header-notification">
             <img src={BellIcon} alt="알람" className="Header-icon-image" />
             {notificationCount > 0 && (
               <span className="Header-notification-badge">{notificationCount}</span>
             )}
           </button>
-          <button className="Header-icon-button">
+
+          <Link to="/MyPage" className="Header-icon-button">
             <img src={MyIcon} alt="프로필" className="Header-icon-image" />
-          </button>
+          </Link>
         </div>
       </div>
     </header>
