@@ -31,8 +31,12 @@ function MainPage() {
     <>
       <Header />
       <main className="mainContentMAIN">
-        <section className="heroSectionMAIN" style={{ backgroundImage: `url(${homeImage})` }}>
-          <button className="heroButtonMAIN" onClick={() => navigate('/ProductBoard')}>SHOP NOW!</button>
+        <section 
+          className="heroSectionMAIN" 
+          style={{ backgroundImage: `url(${homeImage})` }}
+          onClick={() => navigate('/ProductList')}
+        >
+          <button className="heroButtonMAIN">SHOP NOW!</button>
           <h1 className="heroTitleMAIN">A BRAND FOR PETS!</h1>
         </section>
 
@@ -44,7 +48,11 @@ function MainPage() {
 
           <div className="productCardContainerMAIN">
             {productsToShow.map((product) => (
-              <div className="productCardMAIN" key={product.id}>
+              <div 
+                className="productCardMAIN" 
+                key={product.id} 
+                onClick={() => navigate('/ProductList')}
+              >
                 <div className="productImageMAIN" />
                 <h3>{product.title}</h3>
                 <div className="priceContainerMAIN">
@@ -56,7 +64,10 @@ function MainPage() {
           </div>
         </section>
 
-        <section className="newProductsSectionMAIN">
+        <section 
+          className="newProductsSectionMAIN" 
+          onClick={() => navigate('/ProductList')}
+        >
           <div className="newProductsContentMAIN">
             <div className="imageBlockMAIN">
               <img src={bumImage} alt="범퍼 침대" className="bumperImageMAIN" />
@@ -69,10 +80,14 @@ function MainPage() {
           </div>
         </section>
 
-        <section className="brandSectionMAIN" style={{ backgroundImage: `url(${aboutImage})` }}>
+        <section 
+          className="brandSectionMAIN" 
+          style={{ backgroundImage: `url(${aboutImage})` }}
+          onClick={() => navigate('/About')}
+        >
           <h1 className="brandTitleMAIN">PETOPIA</h1>
           <p className="brandDescMAIN">펫 토피아는 우리 아이들이 건강하게 뛰어놀 수 있도록 안전하고<br />행복한 일상을 만들어주는 반려동물 전문 브랜드 입니다.</p>
-          <button className="aboutButtonMAIN" onClick={() => navigate('/About')}>ABOUT US</button>
+          <button className="aboutButtonMAIN">ABOUT US</button>
         </section>
       </main>
       <Footer />
