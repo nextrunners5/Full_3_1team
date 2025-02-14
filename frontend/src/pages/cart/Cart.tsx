@@ -3,19 +3,20 @@ import "./Cart.css";
 import Button from "../../shared/ui/button";
 import ProductCard from "../../widgets/product-card/ProductCard";
 import axiosInstance from "../../shared/axios/axios"; // Axios 인스턴스 가져오기
-import Header from "../../widgets/header/Header"
+import Header from "../../widgets/header/Header";
 import Footer from "../../widgets/footer/Footer";
-import { useNavigate } from "react-router-dom"; 
+import { useNavigate } from "react-router-dom";
 
 type CartItem = {
   cartItemId: string;
   productId: string;
   name: string;
   price: number;
+  final_price: number;
   quantity: number;
-  size: string;
-  color: string;
-  image?: string;
+  selected_size: string;
+  selected_color: string;
+  main_image?: string;
   selected?: boolean; // 선택 여부 추가
 };
 const CartPage = () => {
@@ -27,28 +28,22 @@ const CartPage = () => {
 
   useEffect(() => {
     const fetchCartItems = async () => {
-      // if (!userId) {
-      //   alert("로그인이 필요합니다.");
-      //   navigate("/login")
-      // }
-
-      try {
+        try {
         const userId = localStorage.getItem("userId") || "guest"; // 기본값 설정
         const response = await axiosInstance.get(`api/carts/${userId}`);
 
-        console.log("Cart API Response:", response.data); // ✅ API 응답 데이터 확인
+          const formattedItems = response.data.map((item: any) => ({
+          cartItemId: item.cart_item_id, // ✅ 기본값 설정
+          productId: item.product_id,
+          name: item.name,
+          price: item.final_price ?? 0, // ✅ NaN 방지
+          quantity: item.quantity, // ✅ 기본값 설정
+          SelectedSize: item.selected_size,
+          SelectedColor: item.selected_color,
+          image: item.main_image ?? "https://via.placeholder.com/100", // ✅ 기본 이미지 설정
+          selected: false
+        }));
 
-        const formattedItems = response.data.map((item: any) => ({
-        cartItemId: item.cart_item_id ?? "",  // ✅ 기본값 설정
-        productId: item.product_id ?? "",
-        name: item.product_name ?? "상품명 없음",
-        price: item.final_price ?? 0, // ✅ NaN 방지
-        quantity: item.quantity ?? 1, // ✅ 기본값 설정
-        size: item.sizes ?? "-",
-        color: item.colors ?? "-",
-        image: item.image ?? "https://via.placeholder.com/100", // ✅ 기본 이미지 설정
-        selected: false
-      }));
         console.log("Cart Items API Response:", formattedItems);
         setCartItems(formattedItems);
       } catch (error) {
@@ -66,7 +61,7 @@ const CartPage = () => {
       return;
     }
 
-    const selectedItems = cartItems.filter(item => item.selected);
+    const selectedItems = cartItems.filter((item) => item.selected);
     if (!selectedItems.length) {
       alert("주문할 상품을 선택해주세요.");
       return;
@@ -81,20 +76,23 @@ const CartPage = () => {
       }
 
       const orderData = {
+        type: "Cart",
         userId,
-        items: selectedItems.map(item => ({
+        items: selectedItems.map((item) => ({
           productId: item.productId,
           quantity: item.quantity,
           totalAmount: item.price * item.quantity,
           shippingFee: 3000,
-          selectedSize: item.size,
-          selectedColor: item.color,
-          statusId: "PENDING",
-        })),
+          selectedSize: item.selected_size,
+          selectedColor: item.selected_color,
+          statusId: "PENDING"
+        }))
       };
 
       const response = await axiosInstance.post("/api/orders", orderData);
-      alert(`주문이 성공적으로 완료되었습니다! 주문번호: ${response.data.orderId}`);
+      alert(
+        `주문이 성공적으로 완료되었습니다! 주문번호: ${response.data.orderId}`
+      );
       navigate("/order", { state: { orderData } });
     } catch (error) {
       console.error("주문 실패:", error);
@@ -105,8 +103,10 @@ const CartPage = () => {
   // 수량 증가 함수 (로컬 상태 업데이트)
   const handleIncrease = async (cartItemId: string) => {
     try {
-      const response = await axiosInstance.put(`/api/carts/${cartItemId}/increase`);
-      setCartItems(response.data);  // 백엔드 응답을 기반으로 상태 업데이트
+      const response = await axiosInstance.put(
+        `/api/carts/${cartItemId}/increase`
+      );
+      setCartItems(response.data); // 백엔드 응답을 기반으로 상태 업데이트
     } catch (error) {
       console.error("수량 증가 API 호출 실패:", error);
     }
@@ -151,8 +151,7 @@ const CartPage = () => {
 
   // 선택한 상품 삭제 함수
   const handleRemoveSelected = async () => {
-    try {
-      const selectedIds = cartItems
+        const selectedIds = cartItems
         .filter((item) => item.selected)
         .map((item) => item.cartItemId);
 
@@ -164,6 +163,7 @@ const CartPage = () => {
         return;
       }
 
+      try {
       // 선택된 각 아이템에 대해 삭제 API 호출 (여러 API 호출을 병렬로 처리)
       await axiosInstance.delete(`/api/carts/removeSelected`, {
         data: { cartItemIds: selectedIds } // ✅ DELETE 요청 시 body에 데이터 포함
@@ -210,9 +210,9 @@ const CartPage = () => {
     console.log("Checkbox clicked!", event.target.checked);
   };
 
-   return (
+  return (
     <>
-    <Header />
+      <Header />
       <div className="cart-page">
         <h1>장바구니</h1>
         <div className="cart-container">
@@ -242,13 +242,13 @@ const CartPage = () => {
                       checked={item.selected || false}
                       onChange={() => handleSelectItem(item.cartItemId)}
                     />
-                    <img src={item.image} alt={item.name} />
+                    <img src={item.main_image} alt={item.name} />
                     <div className="cart-item-details">
                       <p className="item-name">{item.name}</p>
-                      <p className="size">{item.size}</p>
-                      <p className="color">{item.color}</p>
+                      <p className="size">{item.selected_size}</p>
+                      <p className="color">{item.selected_color}</p>
                       <p className="item-price">
-                        {(item.final_price ?? 0).toLocaleString()}원
+                        {Math.round(item.price ?? 0).toLocaleString()}원
                       </p>
                     </div>
                     <div className="item-quantity">
@@ -294,10 +294,23 @@ const CartPage = () => {
               <span>{(totalAmount + 3000).toLocaleString()}원</span>
             </p>
             <label className="terms">
-              <input type="checkbox" checked={isChecked} onChange={handleCheckboxChange} /> 주문 내용을 확인했으며 동의합니다.
+              <input
+                type="checkbox"
+                checked={isChecked}
+                onChange={handleCheckboxChange}
+              />{" "}
+              주문 내용을 확인했으며 동의합니다.
             </label>
-            <Button text="주문하기" onClick={() => (isChecked ? handleOrder() : alert("주문 내용을 확인하고 동의해야 합니다."))}
-              className="order-button" disabled={!isChecked} />
+            <Button
+              text="주문하기"
+              onClick={() =>
+                isChecked
+                  ? handleOrder()
+                  : alert("주문 내용을 확인하고 동의해야 합니다.")
+              }
+              className="order-button"
+              disabled={!isChecked}
+            />
           </aside>
         </div>
 

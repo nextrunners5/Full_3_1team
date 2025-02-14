@@ -1,5 +1,4 @@
 .cart-page {
-    max-width: 1200px;
     padding: 0 auto;
     padding: 20px;
     font-family: Arial, sans-serif;
@@ -31,13 +30,17 @@
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
     min-height: 300px; /* 설정해야할까 */
   }
+
+  .cart-item-details {
+
+  }
   
-  /* .select-all {
+  .select-all {
     margin-bottom: 10px;
     font-size: 14px;
     display: flex;
     align-items: center;
-    justify-content: flex-start;
+    justify-content: space-between;
   }
   
   .select-all label {
@@ -50,7 +53,7 @@
     width: 16px;
     height: 16px;
     cursor: pointer;
-  } */
+  }
   
   .cart-item {
     display: flex;
@@ -184,10 +187,10 @@
     transform: translateY(-2px); 
   }
   
-  /* .order-button:disabled {
+  .order-button:disabled {
     background-color: #bfc6d3; /* 비활성화 시 회색 */
     cursor: not-allowed;
-  } */
+  } 
   
   /* 추천 상품 섹션 */
   .recommended-products {

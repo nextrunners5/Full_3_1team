@@ -23,26 +23,23 @@ export const getCart = async (req: Request, res: Response) => {
 // ✅ 장바구니에 상품 추가 API (`Cart` → `CartDetail`)
 export const addToCart = async (req: Request, res: Response) => {
   try {
-    console.log("🛒 요청된 데이터:", req.body);
-    const { userId, shippingFee, productId, quantity } = req.body;
-    
-    if (!userId || shippingFee === undefined || !productId || !quantity) {
+    console.log("🛒 장바구니 추가 요청 데이터:", req.body);
+
+    const { userId, shippingFee, productId, quantity, selectedSize, selectedColor } = req.body;
+
+    if (!userId || shippingFee === undefined || !productId || !quantity || !selectedSize || !selectedColor) {
       return res.status(400).json({ message: "필수 데이터가 누락되었습니다." });
-      }
+    }
 
-    const parsedProductId = String(productId);
+    const cartId: number = await cartService.addToCart(userId, shippingFee, productId, quantity, selectedSize, selectedColor);
 
-    // ✅ `Cart` 테이블에 사용자 장바구니 정보 추가 후 `cart_id` 반환
-    const cartId: number = await cartService.addToCart(userId, shippingFee, productId, quantity);
-    console.log("생성된 Cart ID:", cartId);
-
-        // ✅ `CartDetail` 테이블에 해당 `cart_id`와 함께 상품 정보 추가
-    await cartService.addToCartDetail(cartId, parsedProductId, quantity);
+    // ✅ 선택한 사이즈와 색상을 추가로 저장
+    await cartService.addToCartDetail(cartId, productId, quantity, selectedSize, selectedColor);
 
     res.status(201).json({ message: "장바구니에 추가되었습니다.", cartId });
   } catch (error) {
-    console.error("장바구니 추가 실패:", error);
-    res.status(500).json({ message: "서버 오류 발생", error: error instanceof Error ? error.message : String(error)});
+    console.error("❌ 장바구니 추가 실패:", error);
+    res.status(500).json({ message: "서버 오류 발생", error });
   }
 };
 

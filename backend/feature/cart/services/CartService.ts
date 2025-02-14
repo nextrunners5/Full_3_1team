@@ -1,12 +1,27 @@
 import * as cartRepository from "../repo/CartRepo";
+import ProductImage from "../../product/img/ProductImage";
 
 // ✅ 장바구니 조회
 export const getCart = async (userId: string) => {
-  if (!userId || userId === "null") {
-    console.log("🚨 userId가 null! guest로 설정");
-    userId = "guest"; // ✅ 기본값 설정
+  const cartItems = await cartRepository.getCart(userId);
+
+  for (let item of cartItems) {
+    try {
+      // ✅ productId가 없을 경우 product_id 사용 (일관성 유지)
+      const productId = String(item.productId || item.product_id);
+
+      // ✅ MongoDB에서 이미지 찾기
+      const mongoProduct = await ProductImage.findOne({ product_id: productId });
+
+      // ✅ MongoDB에서 이미지가 있으면 추가, 없으면 기본 이미지 설정
+      item.image = mongoProduct?.main_image ?? "https://via.placeholder.com/100";
+    } catch (error) {
+      console.error(`🚨 MongoDB 이미지 조회 실패 (product_id: ${item.productId}):`, error);
+      item.image = "https://via.placeholder.com/100"; // 기본 이미지 설정
+    }
   }
-  return await cartRepository.getCart(userId);
+
+  return cartItems;
 };
 
 // ✅ 장바구니에 상품 추가 (상품이 존재하면 수량 증가)
@@ -14,7 +29,9 @@ export const addToCart = async (
   userId: string,
   shippingFee: number,
   productId: string,
-  quantity: number
+  quantity: number,
+  selectedSize: string,
+  selectedColor: string
 ): Promise<number> => {
   // ✅ 1️⃣ 기존 장바구니 찾기 (cartId 조회)
   let cartId = await cartRepository.findCartId(userId);
@@ -27,7 +44,9 @@ export const addToCart = async (
   }
 
   // ✅ 3️⃣ 기존 장바구니에 동일한 상품이 있는지 확인
+  console.log("🔎 findCartItem 실행:", { cartId, productId });
   const existingCartItem = await cartRepository.findCartItem(cartId, productId);
+  console.log("📌 findCartItem 결과:", existingCartItem);
 
   if (existingCartItem) {
     // ✅ 4️⃣ 동일한 상품이 있으면 수량 증가
@@ -37,9 +56,9 @@ export const addToCart = async (
   }
 
   // ✅ 5️⃣ 동일한 상품이 없으면 새로 추가
-  console.log("🛒 새 상품 추가! cartId:", cartId, "productId:", productId, "quantity:", quantity);
-  await cartRepository.addToCartDetail(cartId, productId, quantity);
-
+  console.log("🛒 새 상품 추가! cartId:", cartId, "productId:", productId, "quantity:", quantity, "size:", selectedSize, "color:", selectedColor);
+  
+  await cartRepository.addToCartDetail(cartId, productId, quantity, selectedSize, selectedColor);
   return cartId;
 };
 
@@ -47,9 +66,11 @@ export const addToCart = async (
 export const addToCartDetail = async (
   cartId: number,
   productId: string,
-  quantity: number
+  quantity: number,
+  selectedSize: string,
+  selectedColor: string
 ) => {
-  return await cartRepository.addToCartDetail(cartId, productId, quantity);
+  return await cartRepository.addToCartDetail(cartId, productId, quantity, selectedSize, selectedColor);
 };
 
 // ✅ 상품 수량 증가
