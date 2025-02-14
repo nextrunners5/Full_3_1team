@@ -6,9 +6,9 @@ import { useSelector } from "react-redux";
 import { selectOrderId, selectTotalPrice } from "../../../pages/order/orderRedux/slice";
 import { fetchProcessPayment } from "../api/Order";
 // import { RootState } from "../../../pages/order/orderRedux/store";
-import { OrderUser } from "../model/OrderModel";
+import { OrderPayProps } from "../model/OrderModel";
 
-const OrderPay: React.FC<OrderUser> = ({userId}) => {
+const OrderPay: React.FC<OrderPayProps> = ({userId, selectedAddress, selectedMessage}) => {
   // const userId = useSelector((state:RootState) => state.order.user_id);
   const [points, setPoints] = useState<number>(0);
   const totalPrice = useSelector(selectTotalPrice);
@@ -21,8 +21,8 @@ const OrderPay: React.FC<OrderUser> = ({userId}) => {
 
   const handlePayment = async() => {
     try{
-      const response = await fetchProcessPayment(orderId, totalPrice - points);
-      console.log('response handlePatment', response.message);
+      const response = await fetchProcessPayment(orderId, totalPrice - points, selectedAddress, selectedMessage);
+      console.log('response handlePayment', response.message);
     } catch(err){
       console.error('결제 에러',err);
       alert('결제 요청 실패');

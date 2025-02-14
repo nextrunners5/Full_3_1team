@@ -2,10 +2,10 @@ import { useEffect, useState } from "react";
 import "./OrderDeliveryInfo.css"
 import OrderDeliveryModal from "./OrderDeliveryModal";
 import axiosInstance from "../../../shared/axios/axios";
-import {Common, DeliveryForm, OrderUser, UserAddressInfo} from "../model/OrderModel";
+import {Common, DeliveryForm, OrderDeliveryInfoProps, UserAddressInfo} from "../model/OrderModel";
 import { fetchDeliveryMessage, fetchDetailsAddress } from "../api/Order";
 
-const OrderDeliveryInfo: React.FC<OrderUser> = ({userId}) => {
+const OrderDeliveryInfo: React.FC<OrderDeliveryInfoProps> = ({userId, addressChange, messageChange}) => {
 
   const [deliveryMessage, setDeliveryMessage] = useState<Common[]>([]);
   const [messageForm, setMessageForm] = useState<DeliveryForm>({delivery_message_id: 0, description: '배송 메시지를 선택해 주세요.'});
@@ -29,6 +29,7 @@ const OrderDeliveryInfo: React.FC<OrderUser> = ({userId}) => {
           if(defaultAddress){
             console.log('origin default address', defaultAddress);
             setSelectedAddress(defaultAddress);
+            addressChange(defaultAddress);
             console.log('Selected default address', defaultAddress);
           } else {
             console.log('default address not found');
@@ -83,6 +84,7 @@ const OrderDeliveryInfo: React.FC<OrderUser> = ({userId}) => {
       description: value,
       [name] : value,
     }))
+    messageChange(value);
   };
 
   const openModal = () => { setModalOpen(true); };
@@ -90,6 +92,7 @@ const OrderDeliveryInfo: React.FC<OrderUser> = ({userId}) => {
 
   const handleAddressChange = (address: UserAddressInfo) => {
     setSelectedAddress(address);
+    addressChange(address);
   };
 
   return (

@@ -83,7 +83,7 @@ export const getUserDetailsAddress = async(userId: string) => {
                   FROM Users u 
                   JOIN UserAddresses ua ON u.user_id = ua.user_id 
                   WHERE u.user_id = ? 
-                  ORDER BY ua.created_at ASC`;
+                  ORDER BY us.is_default DESC, ua.created_at ASC`;
   try{
     const [res] = await pool.promise().query(query,[userId]);
     const rows = res as any[];
@@ -130,7 +130,7 @@ export const getOrderSingleProducts = async(userId: string) => {
                               FROM Orders o
                               JOIN OrderItems  oi ON o.order_id = oi.order_id
                               JOIN Products p ON oi.product_id = p.product_id
-                              WHERE o.user_id = ? AND o.order_type = 'OT002' 
+                              WHERE o.user_id = ? AND o.order_type = 'OT002' AND oi.product_id = p.product_id 
                               ORDER BY o.order_date DESC LIMIT 1`;
   try{
     const [res] = await pool.promise().query(singleProductQuery,[userId]);
@@ -150,12 +150,23 @@ export const getOrderSingleProducts = async(userId: string) => {
 }
 
 export const getOrderProductItems = async (userId: string) => {
+  const cartProductQuery = `SELECT oi.product_count, p.product_id, p.product_name, o.final_amount, o.order_id, oi.option_color, oi.option_size
+                            FROM Orders o
+                            JOIN OrderItems  oi ON o.order_id = oi.order_id
+                            JOIN Products p ON oi.product_id = p.product_id
+                            WHERE o.user_id = ? AND o.order_type = 'OT001'`;
   try{
-    const cartProductQuery = `SELECT oi.product_count, p.product_id, p.product_name, o.final_amount, o.order_id, oi.option_color, oi.option_size
-                              FROM Orders o
-                              JOIN OrderItems  oi ON o.order_id = oi.order_id
-                              JOIN Products p ON oi.product_id = p.product_id
-                              WHERE o.user_id = 'user123' AND o.order_type = 'OT001'`;
+    const [res] = await pool.promise().query(cartProductQuery,[userId]);
+    const rows = res as any[]; 
+    if(rows.length > 0){
+      for(let i = 0; i < rows.length; i++){
+        const finalPrice = rows[i].final_amount;
+        const price = parseFloat(finalPrice).toFixed(0);
+        rows[i].final_price = Number(price);
+        console.log('orderProducts: ', price);
+      }
+      return rows;
+    }
 
   }catch(err){
     console.error('주문하려는 제품의 정보를 가져오지 못했습니다.', err);

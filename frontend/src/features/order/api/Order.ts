@@ -86,11 +86,13 @@ export const fetchShippingFee = async(userId: string | null | undefined) => {
   }
 };
 
-export const fetchProcessPayment = async(order_id: string, final_price: number) => {
+export const fetchProcessPayment = async(order_id: string, final_price: number, selectedAddress: UserAddressInfo | null,  selectedMessage: string) => {
   try{
     const response = await axiosInstance.post('/api/payments', {
       order_id,
       final_price,
+      selectedAddress,
+      selectedMessage
     });
     return response.data;
   } catch(err){

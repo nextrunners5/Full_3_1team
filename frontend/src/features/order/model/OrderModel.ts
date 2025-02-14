@@ -71,3 +71,15 @@ export interface OrderProductsProps{
   total_price: number;
   onTotalPriceChange: (total: number) => void; 
 }
+
+export interface OrderDeliveryInfoProps{
+  userId?: string | null | undefined;
+  addressChange: (address: UserAddressInfo) => void; 
+  messageChange: (message: string) => void;
+}
+
+export interface OrderPayProps{
+  userId?: string | null | undefined;
+  selectedAddress: UserAddressInfo | null;
+  selectedMessage: string
+}
