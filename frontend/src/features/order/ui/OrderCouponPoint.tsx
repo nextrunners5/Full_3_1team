@@ -3,14 +3,14 @@ import "./OrderCouponPint.css"
 import { fetchUserPoints } from "../api/Order";
 import { OrderCouponPointProps, UserPoint } from "../model/OrderModel";
 
-const OrderCouponPoint: React.FC<OrderCouponPointProps> = ({points, onPointsChange}) => {
+const OrderCouponPoint: React.FC<OrderCouponPointProps> = ({userId, points, onPointsChange}) => {
 
   const [userPoint, setUserPoint] = useState<UserPoint>( {point: 0} );
   
   useEffect(() => {
     const getUserPoints = async() => {
       try{
-        const data = await fetchUserPoints();
+        const data = await fetchUserPoints(userId);
         if (data && data.length > 0) {
           setUserPoint({ point: data[0].point });
         }

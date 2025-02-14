@@ -29,6 +29,7 @@
     "pg": "^8.13.1",
     "pg-hstore": "^2.3.4",
     "react": "^19.0.0",
+    "redux-persist": "^6.0.0",
     "sequelize": "^6.37.5",
     "sharp": "^0.33.5"
   },
@@ -44,6 +45,7 @@
     "@types/node": "^22.10.7",
     "@types/passport": "^1.0.17",
     "@types/passport-kakao": "^1.0.3",
+    "@types/redux-persist": "^4.0.0",
     "nodemon": "^3.1.9",
     "ts-node": "^10.9.2",
     "typescript": "^5.7.3"

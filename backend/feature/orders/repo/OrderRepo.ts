@@ -102,7 +102,7 @@ interface ShippingFee{
 
 //배송비 get
 export const getShippingFee = async (userId: string): Promise<ShippingFee[]> => {
-  const query = `SELECT shipping_fee FROM Cart WHERE user_id = ?`;
+  const query = `SELECT shipping_fee FROM Orders WHERE user_id = ?`;
   return new Promise((resolve, reject) => {
     pool.query(query, [userId], (err, results) => {
       if (err) {
@@ -126,16 +126,11 @@ export const getShippingFee = async (userId: string): Promise<ShippingFee[]> => 
 
 //주문하는 제품 정보 가져오기
 export const getOrderSingleProducts = async(userId: string) => {
-//   const query = ` SELECT cd.quantity, p.product_name, p.final_price 
-//                   FROM CartDetail cd 
-//                   JOIN Products p ON cd.product_id = p.product_id 
-//                   JOIN Cart c ON cd.cart_id = c.cart_id 
-//                   WHERE c.user_id = ?`;
   const singleProductQuery = `SELECT oi.product_count, p.product_id, p.product_name, o.final_amount, o.order_id, oi.option_color, oi.option_size
                               FROM Orders o
                               JOIN OrderItems  oi ON o.order_id = oi.order_id
                               JOIN Products p ON oi.product_id = p.product_id
-                              WHERE o.user_id = 'user123' AND o.order_type = 'OT002' 
+                              WHERE o.user_id = ? AND o.order_type = 'OT002' 
                               ORDER BY o.order_date DESC LIMIT 1`;
   try{
     const [res] = await pool.promise().query(singleProductQuery,[userId]);
@@ -167,34 +162,6 @@ export const getOrderProductItems = async (userId: string) => {
   }
 }
 
-// 단일 상품 주문
-// export const insertOrder = async (userid: string, totalAmount: number, discountAmount:number, finalAmount:number, shippingFee:number, statusid:string, orderType:string) => {
-//   console.log('삽입값:',userid,statusid);
-//   const query = `INSERT INTO Orders(user_id, status_id, total_amount, discount_amount, final_amount, shipping_fee, order_type) VALUES(?,?,?,?,?,?,?)`;
-//   // const order_type = "OT002";
-//   try{
-//     const [res] = await pool.promise().query(query, [userid, statusid, totalAmount, discountAmount, finalAmount, shippingFee, orderType]);
-//     console.log('insert 결과: ',res);
-//     const orderIdQuery = `SELECT order_id FROM Orders ORDER BY order_date DESC LIMIT 1`;
-//     const [orderIdResult] = await pool.promise().query(orderIdQuery);
-//     const orderId = (orderIdResult as any[])[0]?.order_id;
-//     console.log('orderId', orderId);
-//     return orderId;
-//   } catch(err){
-//     console.error('단일 상품 정보를 주문 테이블에 넣지 못했습니다.', err);
-//   }
-// }
-
-// export const insertOrderItems = async (orderId: string, productId: number, statusid: string,quantity:number,selectedSize:any,selectedColor:any) => {
-//   console.log('insertOrderItems삽입값:',productId,orderId);
-//   const query = `INSERT INTO OrderItems(order_id, product_id, order_status, product_count, option_size, option_color) VALUES(?,?,?,?,?,?)`;
-//   try{
-//     const res = await pool.promise().query(query, [orderId, productId, statusid, quantity, selectedSize, selectedColor]);
-//     console.log('insert 결과: ',res);
-//   } catch(err){
-//     console.error('단일 상품 상세 정보를 주문 테이블에 넣지 못했습니다.', err);
-//   }
-// }
 
 export const insertOrderItems = async(userid: string, totalAmount:number, discountAmount:number, finalAmount:number, shippingFee:number, orderType:string, productId:number, statusid:string,quantity:number,selectedSize:any,selectedColor:any) => {
   const connection = await pool.promise().getConnection();

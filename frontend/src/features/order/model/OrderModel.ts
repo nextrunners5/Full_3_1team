@@ -1,3 +1,7 @@
+export interface OrderUser{
+  userId?: string | null | undefined;
+}
+
 export interface UserPoint{
   point:number;
 }
@@ -39,6 +43,7 @@ export interface OrderState{
   orderInfo: OrderProducts[];
   totalPrice: number;
   order_id: string;
+  user_id: string|null;
 }
 
 // export interface UpdateOrderInfoPayload {
@@ -47,11 +52,13 @@ export interface OrderState{
 // }
 
 export interface OrderCouponPointProps{
+  userId?: string | null | undefined;
   points: number;
   onPointsChange: (newPoints: number) => void;
 }
 
 export interface OrderPriceProps{
+  userId?: string | null | undefined;
   points: number;
   // total_productPrice: number;
 }
