@@ -5,7 +5,11 @@ import OrderPrice from "./OrderPrice";
 import { useSelector } from "react-redux";
 import { selectOrderId, selectTotalPrice } from "../../../pages/order/orderRedux/slice";
 import { fetchProcessPayment } from "../api/Order";
-const OrderPay: React.FC = () => {
+// import { RootState } from "../../../pages/order/orderRedux/store";
+import { OrderUser } from "../model/OrderModel";
+
+const OrderPay: React.FC<OrderUser> = ({userId}) => {
+  // const userId = useSelector((state:RootState) => state.order.user_id);
   const [points, setPoints] = useState<number>(0);
   const totalPrice = useSelector(selectTotalPrice);
   const orderId = useSelector(selectOrderId);
@@ -29,8 +33,8 @@ const OrderPay: React.FC = () => {
   return (
     <div className="orderPayContainer">
       <div className="orderPayTitle">결제 금액</div>
-      <div className="orderCouponPoint"><OrderCouponPoint points={points} onPointsChange={handlePointChange}/></div>
-      <div className="orderPrice"><OrderPrice points={points}/></div>
+      <div className="orderCouponPoint"><OrderCouponPoint userId={userId} points={points} onPointsChange={handlePointChange}/></div>
+      <div className="orderPrice"><OrderPrice userId={userId} points={points}/></div>
       <div className="orderBtnContainer">
         <div className="orderBtn" onClick={handlePayment}>결제하기</div>
       </div>

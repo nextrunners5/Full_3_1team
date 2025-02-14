@@ -2,12 +2,10 @@ import { useEffect, useState } from "react";
 import "./OrderDeliveryInfo.css"
 import OrderDeliveryModal from "./OrderDeliveryModal";
 import axiosInstance from "../../../shared/axios/axios";
-import {Common, DeliveryForm, UserAddressInfo} from "../model/OrderModel";
+import {Common, DeliveryForm, OrderUser, UserAddressInfo} from "../model/OrderModel";
 import { fetchDeliveryMessage, fetchDetailsAddress } from "../api/Order";
-// import OrderDeliveryAddModal from "./OrderDeliveryAddModal";
-// import OrderDeliveryUpdateModal from "./OrderDeliveryUpdateModal";
 
-const OrderDeliveryInfo: React.FC = () => {
+const OrderDeliveryInfo: React.FC<OrderUser> = ({userId}) => {
 
   const [deliveryMessage, setDeliveryMessage] = useState<Common[]>([]);
   const [messageForm, setMessageForm] = useState<DeliveryForm>({delivery_message_id: 0, description: '배송 메시지를 선택해 주세요.'});
@@ -20,7 +18,8 @@ const OrderDeliveryInfo: React.FC = () => {
   useEffect(() => {
     const getUserAddress = async() => {
       try{
-        const addressDetails = await fetchDetailsAddress();
+        console.log('프론트 주문 배송지 유저', userId);
+        const addressDetails = await fetchDetailsAddress(userId);
         console.log('주소 상세 데이터 가져오기 성공:', addressDetails);
         if(addressDetails && addressDetails.length > 0){
           

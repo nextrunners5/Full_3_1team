@@ -2,9 +2,9 @@ import axiosInstance from "../../../shared/axios/axios";
 import { OrderProducts, OrderShippingFee, UserAddressInfo } from "../model/OrderModel";
 
 //사용자 포인트 가져오기
-export const fetchUserPoints = async() => {
+export const fetchUserPoints = async(userId: string | null | undefined) => {
   try{
-    const response = await axiosInstance.get('/api/orders/UserPoints');
+    const response = await axiosInstance.get(`/api/orders/UserPoints/${userId}`);
     return response.data;
   } catch(err){
     console.error('사용자의 포인트를 가져오지 못했습니다.', err);
@@ -23,20 +23,23 @@ export const fetchDeliveryMessage = async () => {
 };
 
 //배송지 정보 가져오기
-export const fetchAddress = async() => {
+export const fetchAddress = async(userId: string | null | undefined) => {
   try{
-    const response = await axiosInstance.get<UserAddressInfo[]>('/api/orders/UserAddress');
-    console.log("address response: ", response.data);
+    console.log('fetchAddress 실행됨 userId', userId);
+    const response = await axiosInstance.get<UserAddressInfo[]>(`/api/orders/UserAddress/${userId}`);
+    console.log("프론트 address response: ", response.data);
+    console.log("프론트 address response: ", response.status);
     return response.data;
   } catch(err){
     console.error('배송지 정보를 가져오지 못했습니다.', err);
+    return null;
   }
 };
 
 //배송지 상세 리스트 정보 가져오기
-export const fetchDetailsAddress = async() => {
+export const fetchDetailsAddress = async(userId: string | null | undefined) => {
   try{
-    const response = await axiosInstance.get<UserAddressInfo[]>('/api/orders/UserDetailsAddress');
+    const response = await axiosInstance.get<UserAddressInfo[]>(`/api/orders/UserDetailsAddress/${userId}`);
     console.log("DetailsAddress response: ", response.data);
     return response.data;
   } catch(err){
@@ -45,9 +48,9 @@ export const fetchDetailsAddress = async() => {
 };
 
 //주문 제품 정보 가져오기
-export const fetchOrderProducts = async() => {
+export const fetchOrderProducts = async(userId: string | null | undefined) => {
   try{
-    const response = await axiosInstance.get<OrderProducts[]>('/api/orders/OrderProducts');
+    const response = await axiosInstance.get<OrderProducts[]>(`/api/orders/OrderProducts/${userId}`);
     console.log('orderProductInfo: ',  response.data);
     return response.data;
   } catch(err){
@@ -71,9 +74,11 @@ export const fetchOrderProductImage = async(product_id: number) => {
 }
 
 //배송비 정보 가져오기
-export const fetchShippingFee = async() => {
+export const fetchShippingFee = async(userId: string | null | undefined) => {
   try{
-    const response = await axiosInstance.get<OrderShippingFee[]>('/api/orders/OrderShippingFee');
+    console.log('fetchShoppingFee 유저 아이디',userId);
+    const response = await axiosInstance.get<OrderShippingFee[]>(`/api/orders/OrderShippingFee/${userId}`);
+    console.log('APIshippingFee: ',response);
     console.log('APIshippingFee: ',response.data);
     return response.data;
   } catch(err){
@@ -93,13 +98,3 @@ export const fetchProcessPayment = async(order_id: string, final_price: number) 
   }
 }
 
-
-export const fetchPostOrderProducts = async() => {
-  try{
-    const response = await axiosInstance.post('/api/orders/OrderSingleProduct');
-    console.log('frontend single product: ', response.data);
-    return response.data;
-  } catch(err){
-    console.error('주문하려는 단일 상품 정보 저장 실패', err);
-  }
-}
