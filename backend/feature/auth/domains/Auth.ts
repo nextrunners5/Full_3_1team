@@ -13,7 +13,7 @@ import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 import axios from 'axios';
 import pool from '../../../config/dbConfig';
-import { RowDataPacket } from 'mysql2';
+import { RowDataPacket, OkPacket } from 'mysql2';
 
 export interface User {
   id?: number;
@@ -30,10 +30,13 @@ export interface TokenUser {
   signup_type: 'local' | 'kakao' | 'naver' | 'google';
 }
 
-export interface KakaoUser {
-  id: string;
+interface KakaoUser {
+  user_id: string;
   email: string;
-  nickname: string;
+  name: string;
+  phone?: string;
+  signup_type: 'kakao';
+  profile_image?: string;
 }
 
 export interface SignupData {
@@ -50,40 +53,55 @@ export interface LoginData {
 }
 
 export class Auth {
-  static async saveOrGetUser(kakaoId: number, email: string, nickname: string): Promise<KakaoUser & { signup_type: 'kakao' }> {
+  static async saveOrGetUser(kakaoUserInfo: any): Promise<KakaoUser> {
     try {
-      // 기존 사용자 조회
+      // 카카오 계정의 이메일로 사용자 조회
       const [rows] = await pool.promise().query<RowDataPacket[]>(
-        'SELECT user_id, email, name FROM Users WHERE kakao_id = ?',
-        [kakaoId]
+        'SELECT user_id, email, name FROM Users WHERE email = ?',
+        [kakaoUserInfo.kakao_account.email]
       );
 
       if (rows.length > 0) {
         const user = rows[0];
         return {
-          id: user.user_id,
+          user_id: user.user_id,
           email: user.email,
-          nickname: user.name,
+          name: user.name,
           signup_type: 'kakao'
         };
       }
 
       // 새 사용자 생성
-      const userId = `kakao_${kakaoId}`;
+      const userId = `kakao_${Date.now()}`;
+      const userInfo: KakaoUser = {
+        user_id: userId,
+        name: kakaoUserInfo.kakao_account.name,
+        email: kakaoUserInfo.kakao_account.email,
+        phone: kakaoUserInfo.kakao_account.phone_number,
+        signup_type: 'kakao',
+        profile_image: kakaoUserInfo.properties.profile_image
+      };
+
+      // Users 테이블에 사용자 정보 저장
       await pool.promise().query(
-        'INSERT INTO Users (user_id, email, name, kakao_id, signup_type) VALUES (?, ?, ?, ?, ?)',
-        [userId, email, nickname, kakaoId, 'kakao']
+        `INSERT INTO Users 
+        (user_id, name, email, phone, signup_type, profile_image) 
+        VALUES (?, ?, ?, ?, ?, ?)`,
+        [userInfo.user_id, userInfo.name, userInfo.email, userInfo.phone, userInfo.signup_type, userInfo.profile_image]
       );
 
-      return {
-        id: userId,
-        email,
-        nickname,
-        signup_type: 'kakao'
-      };
+      // UserAuth 테이블에 카카오 인증 정보 저장
+      await pool.promise().query(
+        `INSERT INTO UserAuth 
+        (user_id, auth_type) 
+        VALUES (?, ?)`,
+        [userInfo.user_id, 'kakao']
+      );
+
+      return userInfo;
     } catch (error) {
       console.error('사용자 저장/조회 실패:', error);
-      throw new Error('사용자 처리 중 오류가 발생했습니다.');
+      throw error;
     }
   }
 
@@ -99,7 +117,7 @@ export class Auth {
           try {
             const email = profile._json?.kakao_account?.email;
             const nickname = profile.displayName;
-            const user = await Auth.saveOrGetUser(Number(profile.id), email || '', nickname);
+            const user = await Auth.saveOrGetUser(profile);
             done(null, user);
           } catch (error) {
             done(error as Error);
@@ -130,7 +148,7 @@ export class Auth {
     return { accessToken, refreshToken };
   }
 
-  static async handleKakaoCallback(code: string): Promise<{ tokens: any; user: any }> {
+  static async handleKakaoCallback(code: string) {
     try {
       // 카카오 토큰 받기
       const tokenResponse = await axios.post(
@@ -157,25 +175,30 @@ export class Auth {
         }
       });
 
-      const kakaoId = userResponse.data.id;
-      const email = userResponse.data.kakao_account?.email;
-      const nickname = userResponse.data.properties?.nickname;
+      const kakaoUserInfo = userResponse.data;
 
       // 사용자 저장 또는 조회
-      const user = await Auth.saveOrGetUser(kakaoId, email, nickname);
+      const user = await Auth.saveOrGetUser(kakaoUserInfo);
 
       // JWT 토큰 생성
       const tokens = Auth.generateTokens({
-        id: user.id,
+        id: user.user_id,
         email: user.email,
-        nickname: user.nickname,
+        nickname: user.name,
         signup_type: 'kakao'
       });
 
-      return { tokens, user };
+      return {
+        token: tokens.accessToken,
+        user: {
+          id: user.user_id,
+          email: user.email,
+          name: user.name
+        }
+      };
     } catch (error) {
-      console.error('카카오 로그인 처리 실패:', error);
-      throw new Error('카카오 로그인 처리 중 오류가 발생했습니다.');
+      console.error('카카오 로그인 에러:', error);
+      throw error;
     }
   }
 

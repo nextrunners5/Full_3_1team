@@ -7,8 +7,17 @@ interface SignupData {
   phone: string;
 }
 
+export const kakaoLogin = async (code: string) => {
+  const response = await axiosInstance.post('/api/auth/kakao/callback', { code });
+  const token = response.data.token.replace(/^Bearer\s+/g, '');
+  localStorage.setItem('token', token);
+  return response.data;
+};
+
 export const login = async (email: string, password: string) => {
   const response = await axiosInstance.post('/api/auth/login', { email, password });
+  const token = response.data.token.replace(/^Bearer\s+/g, '');
+  localStorage.setItem('token', token);
   return response.data;
 };
 

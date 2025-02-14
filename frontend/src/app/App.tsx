@@ -43,6 +43,7 @@ function App() {
       <Route path="/oauth/callback/kakao" element={<KakaoCallback />} />
       <Route path="/MDashBoard" element={<MDashBoard />} />
       <Route path="/MProduct" element={<MProduct />} />
+      <Route path="/mypage" element={<MyPage />} />
     </Routes>
   );
 }

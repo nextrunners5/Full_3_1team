@@ -1,10 +1,15 @@
 import { Request } from 'express';
 
-export interface User {
+// JWT 토큰에서 추출되는 최소한의 사용자 정보 타입
+export interface TokenUser {
   user_id: string;
+  email: string;
+}
+
+// 전체 사용자 정보 타입
+export interface User extends TokenUser {
   kakao_id?: number;
   name: string;
-  email: string;
   phone?: string;
   signup_type: 'local' | 'kakao' | 'naver' | 'google';
   is_active: boolean;
@@ -14,18 +19,15 @@ export interface User {
   point: number;
 }
 
+// 인증된 요청에서 사용할 타입
 export interface AuthenticatedRequest extends Request {
-  user?: {
-    user_id: string;
-  };
+  user?: TokenUser;
 }
 
 declare global {
   namespace Express {
     interface Request {
-      user?: {
-        user_id: string;
-      };
+      user?: TokenUser;
     }
   }
 } 

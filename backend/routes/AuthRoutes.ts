@@ -3,6 +3,7 @@ import { Auth } from '../feature/auth/domains/Auth';  // Auth 도메인 import
 import passport from 'passport';
 import { RowDataPacket } from 'mysql2';
 import pool from '../config/dbConfig';
+import { authenticateToken } from '../middlewares/AuthMiddleware';  // 경로 수정
 
 const router = express.Router();
 

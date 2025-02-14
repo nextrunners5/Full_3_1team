@@ -7,14 +7,20 @@
 // }
 
 export interface Payment {
-  id?: number;
-  paymentKey: string;
-  orderId: string;
-  amount: number;
-  status: 'READY' | 'IN_PROGRESS' | 'SUCCESS' | 'FAILED' | 'CANCELED';
-  paymentData?: any;
-  createdAt?: Date;
-  updatedAt?: Date;
+  payment_id?: number;
+  order_id: string;
+  payment_key: string;
+  payment_type: number;
+  order_name: string;
+  payment_method: string;
+  final_price: number;
+  balance_amount: number;
+  discount_price: number;
+  currency: string;
+  payment_status: string;
+  requested_at: Date;
+  approved_at?: Date;
+  mid?: string;
 }
 
 export class Payments {
@@ -26,5 +32,18 @@ export class Payments {
 
   getPayment(): Payment {
     return this.payment;
+  }
+
+  // 결제 상태 검증
+  validateStatus(): boolean {
+    const validStatuses = [
+      'PAYMENT_READY',
+      'PAYMENT_IN_PROGRESS',
+      'PAYMENT_COMPLETED',
+      'PAYMENT_CANCELED',
+      'PAYMENT_FAILED',
+      'PAYMENT_PARTIAL_CANCELED'
+    ];
+    return validStatuses.includes(this.payment.payment_status);
   }
 }

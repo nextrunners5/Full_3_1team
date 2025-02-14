@@ -33,4 +33,30 @@ export class PaymentsController {
       });
     }
   }
+
+  async cancelPayment(req: Request, res: Response) {
+    try {
+      const { paymentKey, cancelReason } = req.body;
+
+      if (!paymentKey || !cancelReason) {
+        return res.status(400).json({
+          success: false,
+          message: '필수 파라미터가 누락되었습니다.'
+        });
+      }
+
+      const result = await PaymentsService.cancelPayment(paymentKey, cancelReason);
+
+      res.json({
+        success: true,
+        data: result
+      });
+    } catch (error: any) {
+      res.status(400).json({
+        success: false,
+        message: error.response?.data?.message || '결제 취소에 실패했습니다.',
+        error: error.response?.data || error.message
+      });
+    }
+  }
 }

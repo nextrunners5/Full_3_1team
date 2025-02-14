@@ -1,60 +1,37 @@
-import { useEffect, useRef } from 'react';
+import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from '../../shared/axios/axios';
 
 const KakaoCallback = () => {
   const navigate = useNavigate();
-  const isProcessingRef = useRef(false);
 
   useEffect(() => {
     const processKakaoLogin = async () => {
-      if (isProcessingRef.current) return;
-      isProcessingRef.current = true;
-
+      const code = new URL(window.location.href).searchParams.get('code');
+      
       try {
-        const code = new URL(window.location.href).searchParams.get('code');
-        
-        if (!code) {
-          throw new Error('인증 코드가 없습니다.');
-        }
-
-        console.log('카카오 인증 코드:', code);
-
         const response = await axios.post('/api/auth/kakao/callback', { code });
-
-        if (response.data.success) {
-          localStorage.setItem('token', response.data.token);
-          localStorage.setItem('user', JSON.stringify(response.data.user));
-          navigate('/main');  // MainPage로 리다이렉트
+        console.log('카카오 로그인 응답:', response.data);
+        
+        if (response.data.token) {
+          localStorage.setItem('token', `Bearer ${response.data.token}`);
+          if (response.data.user) {
+            localStorage.setItem('user', JSON.stringify(response.data.user));
+          }
+          navigate('/');
         } else {
-          throw new Error(response.data.message || '카카오 로그인 실패');
+          throw new Error('토큰이 없습니다.');
         }
-      } catch (error: any) {
-        console.error('카카오 로그인 처리 실패:', 
-          error.response?.data?.message || error.message);
+      } catch (error) {
+        console.error('카카오 로그인 실패:', error);
         navigate('/login');
-      } finally {
-        isProcessingRef.current = false;
       }
     };
 
     processKakaoLogin();
-
-    return () => {
-      isProcessingRef.current = true;
-    };
   }, [navigate]);
 
-  return (
-    <div style={{ 
-      display: 'flex', 
-      justifyContent: 'center', 
-      alignItems: 'center', 
-      height: '100vh' 
-    }}>
-      카카오 로그인 처리 중...
-    </div>
-  );
+  return <div>카카오 로그인 처리 중...</div>;
 };
 
 export default KakaoCallback; 
