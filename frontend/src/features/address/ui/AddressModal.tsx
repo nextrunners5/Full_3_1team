@@ -14,20 +14,31 @@ interface AddressFormData {
 
 interface AddressModalProps {
   onClose: () => void;
-  onSubmit: (addressData: AddressFormData) => void;
+  onSubmit: (data: AddressFormData) => Promise<void>;
+  onDelete?: (addressId: string | number) => Promise<void>;
+  initialData?: Address | null;
+  isEditing?: boolean;
 }
 
-const AddressModal: React.FC<AddressModalProps> = ({ onClose, onSubmit }) => {
+const AddressModal: React.FC<AddressModalProps> = ({
+  onClose,
+  onSubmit,
+  onDelete,
+  initialData,
+  isEditing
+}) => {
   const [showAddressSearch, setShowAddressSearch] = useState(false);
-  const [formData, setFormData] = useState<AddressFormData>({
-    address_name: '',
-    recipient_name: '',
-    recipient_phone: '',
-    address: '',
-    detailed_address: '',
-    postal_code: '',
-    is_default: false
-  });
+  const [formData, setFormData] = useState<AddressFormData>(
+    initialData || {
+      address_name: '',
+      recipient_name: '',
+      recipient_phone: '',
+      address: '',
+      detailed_address: '',
+      postal_code: '',
+      is_default: false
+    }
+  );
 
   const handleAddressComplete = (data: { address: string; zonecode: string }) => {
     setFormData(prev => ({
@@ -38,19 +49,10 @@ const AddressModal: React.FC<AddressModalProps> = ({ onClose, onSubmit }) => {
     setShowAddressSearch(false);
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    try {
-      if (!formData.address_name || !formData.recipient_name || !formData.recipient_phone || !formData.address) {
-        alert('필수 정보를 모두 입력해주세요.');
-        return;
-      }
-
-      onSubmit(formData);
+  const handleDelete = async () => {
+    if (initialData?.address_id && onDelete) {
+      await onDelete(initialData.address_id);
       onClose();
-    } catch (error) {
-      console.error('배송지 저장 실패:', error);
     }
   };
 
@@ -58,11 +60,14 @@ const AddressModal: React.FC<AddressModalProps> = ({ onClose, onSubmit }) => {
     <div className="address-modal-overlay">
       <div className="address-modal">
         <div className="address-modal-header">
-          <h3>새 배송지 추가</h3>
+          <h3>{isEditing ? '배송지 수정' : '새 배송지 추가'}</h3>
           <button onClick={onClose} className="close-button" aria-label="닫기">×</button>
         </div>
 
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={(e) => {
+          e.preventDefault();
+          onSubmit(formData);
+        }}>
           <div className="form-group">
             <label htmlFor="address_name">배송지명</label>
             <input
@@ -174,9 +179,16 @@ const AddressModal: React.FC<AddressModalProps> = ({ onClose, onSubmit }) => {
             <button type="button" onClick={onClose} className="cancel-button">
               취소
             </button>
-            <button type="submit" className="save-button">
-              저장
-            </button>
+            <div className="right-buttons">
+              {isEditing && (
+                <button type="button" onClick={handleDelete} className="delete-button">
+                  삭제
+                </button>
+              )}
+              <button type="submit" className="save-button">
+                {isEditing ? '수정' : '저장'}
+              </button>
+            </div>
           </div>
         </form>
 

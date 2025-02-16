@@ -17,6 +17,8 @@
   padding: 20px;
   width: 500px;
   max-width: 90%;
+  max-height: 90vh;
+  overflow-y: auto;
 }
 
 .address-modal-header {
@@ -50,10 +52,11 @@
 }
 
 .form-group input {
-  width: 100%;
+  width: calc(100% - 16px);
   padding: 8px;
   border: 1px solid #ddd;
   border-radius: 4px;
+  box-sizing: border-box;
 }
 
 .address-search-group {
@@ -65,13 +68,20 @@
   flex: 1;
 }
 
-.address-search-button {
+.address-search-button,
+.save-button {
   padding: 8px 16px;
   background-color: #3A5372;
   color: white;
   border: none;
   border-radius: 4px;
   cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.address-search-button:hover,
+.save-button:hover {
+  background-color: #2c405c;
 }
 
 .checkbox {
@@ -86,25 +96,61 @@
 
 .modal-buttons {
   display: flex;
-  justify-content: flex-end;
-  gap: 10px;
+  justify-content: space-between;
   margin-top: 20px;
 }
 
-.cancel-button,
-.save-button {
-  padding: 8px 24px;
-  border-radius: 4px;
-  cursor: pointer;
+.modal-buttons .right-buttons {
+  display: flex;
+  gap: 8px;
 }
 
 .cancel-button {
   background-color: #f5f5f5;
   border: 1px solid #ddd;
+  padding: 8px 24px;
+  border-radius: 4px;
+  cursor: pointer;
 }
 
-.save-button {
+.delete-button {
+  background-color: white;
+  border: 1px solid #dc3545;
+  color: #dc3545;
+  padding: 8px 24px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.delete-button:hover {
+  background-color: #dc3545;
+  color: white;
+}
+
+.modal-buttons .save-button {
+  padding: 8px 24px;
+  background-color: #3A5372 !important;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.modal-buttons .save-button:hover {
+  background-color: #2c405c !important;
+}
+
+.address-search-button {
+  padding: 8px 16px;
   background-color: #3A5372;
   color: white;
   border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.address-search-button:hover {
+  background-color: #2c405c;
 } 

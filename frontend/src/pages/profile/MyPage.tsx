@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { AiFillSetting } from "react-icons/ai"; 
-import { FaHeart, FaRegHeart, FaChevronDown, FaChevronUp, FaTrash, FaStar } from "react-icons/fa";
+import { FaHeart, FaRegHeart, FaChevronDown, FaChevronUp, FaTrash, FaStar, FaEdit } from "react-icons/fa";
 import './MyPage.css';
 import Header from "../../widgets/header/Header"; 
 import Footer from "../../widgets/footer/Footer";
@@ -17,6 +17,17 @@ interface UserProfile {
   name: string;
   email: string;
   phone: string;
+  signup_type: 'local' | 'kakao';
+}
+
+interface AddressFormData {
+  recipient_name: string;
+  recipient_phone: string;
+  address: string;
+  detailed_address: string;
+  postal_code: string;
+  address_name: string;
+  is_default: boolean;
 }
 
 const MyPage: React.FC = () => {
@@ -39,6 +50,7 @@ const MyPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [showAllAddresses, setShowAllAddresses] = useState(false);
+  const [editAddress, setEditAddress] = useState<Address | null>(null);
 
   const navigate = useNavigate();
 
@@ -78,9 +90,15 @@ const MyPage: React.FC = () => {
     const fetchUserProfile = async () => {
       try {
         const response = await axiosInstance.get('/api/users/profile');
-        setUserProfile(response.data);
+        console.log('프로필 조회 응답:', response.data);
+        
+        if (response.data.success) {
+          setUserProfile(response.data.user);
+        } else {
+          console.error('프로필 조회 실패:', response.data.message);
+        }
       } catch (error) {
-        console.error('사용자 정보 조회 실패:', error);
+        console.error('프로필 조회 실패:', error);
       } finally {
         setIsLoading(false);
       }
@@ -182,6 +200,12 @@ const MyPage: React.FC = () => {
     navigate('/profile/settings');
   };
 
+  // 배송지 수정 핸들러
+  const handleEditAddress = (address: Address) => {
+    setEditAddress(address);
+    setShowAddressModal(true);
+  };
+
   return (
     <div className="MP-my-page">
       <Header />
@@ -190,7 +214,11 @@ const MyPage: React.FC = () => {
         <div>
           {/* 프로필 카드 */}
           <div className="MP-card MP-profile-card">
-            <button className="MP-settings-icon">
+            <button 
+              className="MP-settings-icon"
+              aria-label="프로필 설정"
+              onClick={handleSettingsClick}
+            >
               <AiFillSetting />
             </button>
             <div className="MP-profile-info">
@@ -218,7 +246,10 @@ const MyPage: React.FC = () => {
               <h3>배송지 관리</h3>
               <button 
                 className="MP-add-address-btn"
-                onClick={() => setShowAddressModal(true)}
+                onClick={() => {
+                  setEditAddress(null);
+                  setShowAddressModal(true);
+                }}
               >
                 + 새 배송지 추가
               </button>
@@ -232,81 +263,72 @@ const MyPage: React.FC = () => {
               <div className="MP-addresses-container">
                 {/* 기본 배송지 */}
                 {defaultAddress && (
-                  <div className="MP-address-item default">
-                    <div className="MP-address-badge">
-                      <FaStar className="star-icon" /> 기본 배송지
-                    </div>
-                    <div className="MP-address-content">
+                  <div className="MP-address-item">
+                    <div className="MP-address-badge">기본 배송지</div>
+                    <div className="MP-address-info">
+                      <p className="MP-address-name">{defaultAddress.address_name}</p>
                       <p className="MP-recipient">{defaultAddress.recipient_name}</p>
-                      <p>{defaultAddress.address} {defaultAddress.detailed_address}</p>
-                      <p>{defaultAddress.postal_code}</p>
+                      <p className="MP-address">
+                        {defaultAddress.address} {defaultAddress.detailed_address}
+                      </p>
                       <p className="MP-phone">{defaultAddress.recipient_phone}</p>
                     </div>
-                    <button 
-                      className="MP-delete-btn"
-                      onClick={() => {
-                        console.log('삭제할 기본 배송지:', defaultAddress);
-                        console.log('삭제할 기본 배송지 ID:', defaultAddress.address_id);
-                        handleDeleteAddress(defaultAddress.address_id);
-                      }}
-                    >
-                      삭제
-                    </button>
+                    <div className="MP-address-actions">
+                      <button 
+                        className="MP-edit-btn"
+                        onClick={() => handleEditAddress(defaultAddress)}
+                      >
+                        <FaEdit /> 편집
+                      </button>
+                    </div>
                   </div>
                 )}
 
-                {/* 다른 배송지들 */}
+                {/* 다른 배송지 펼쳐보기 버튼 */}
                 {otherAddresses.length > 0 && (
-                  <>
-                    <div 
-                      className="MP-show-more"
-                      onClick={() => setShowAllAddresses(!showAllAddresses)}
-                    >
-                      {showAllAddresses ? (
-                        <>접기 <FaChevronUp /></>
-                      ) : (
-                        <>다른 배송지 {otherAddresses.length}개 더보기 <FaChevronDown /></>
-                      )}
-                    </div>
-
-                    {showAllAddresses && (
-                      <div className="MP-other-addresses">
-                        {otherAddresses.map((address) => (
-                          <div key={`address-${address.address_id}`} className="MP-address-item">
-                            <div className="MP-address-content">
-                              <p className="MP-recipient">{address.recipient_name}</p>
-                              <p>{address.address} {address.detailed_address}</p>
-                              <p>{address.postal_code}</p>
-                              <p className="MP-phone">{address.recipient_phone}</p>
-                            </div>
-                            <div className="MP-address-actions">
-                              <button
-                                className="MP-set-default-btn"
-                                onClick={() => {
-                                  console.log('기본 배송지로 설정할 주소:', address);
-                                  console.log('기본 배송지로 설정할 ID:', address.address_id);
-                                  handleSetDefaultAddress(address.address_id);
-                                }}
-                              >
-                                기본 배송지로 설정
-                              </button>
-                              <button 
-                                className="MP-delete-btn"
-                                onClick={() => {
-                                  console.log('삭제할 배송지:', address);
-                                  console.log('삭제할 배송지 ID:', address.address_id);
-                                  handleDeleteAddress(address.address_id);
-                                }}
-                              >
-                                삭제
-                              </button>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
+                  <button
+                    className="MP-toggle-addresses"
+                    onClick={() => setShowOtherAddresses(!showOtherAddresses)}
+                  >
+                    {showOtherAddresses ? (
+                      <>
+                        <FaChevronUp /> 접기
+                      </>
+                    ) : (
+                      <>
+                        <FaChevronDown /> 다른 배송지 {otherAddresses.length}개 보기
+                      </>
                     )}
-                  </>
+                  </button>
                 )}
+
+                {/* 다른 배송지 목록 */}
+                {showOtherAddresses && otherAddresses.map((address) => (
+                  <div key={address.address_id} className="MP-address-item">
+                    <div className="MP-address-info">
+                      <p className="MP-address-name">{address.address_name}</p>
+                      <p className="MP-recipient">{address.recipient_name}</p>
+                      <p className="MP-address">
+                        {address.address} {address.detailed_address}
+                      </p>
+                      <p className="MP-phone">{address.recipient_phone}</p>
+                    </div>
+                    <div className="MP-address-actions">
+                      <button
+                        className="MP-set-default-btn"
+                        onClick={() => handleSetDefaultAddress(address.address_id)}
+                      >
+                        기본 배송지로 설정
+                      </button>
+                      <button 
+                        className="MP-edit-btn"
+                        onClick={() => handleEditAddress(address)}
+                      >
+                        <FaEdit /> 편집
+                      </button>
+                    </div>
+                  </div>
+                ))}
               </div>
             )}
           </div>
@@ -320,6 +342,7 @@ const MyPage: React.FC = () => {
                   className="MP-select"
                   value={period}
                   onChange={(e) => setPeriod(e.target.value)}
+                  aria-label="주문 기간 선택"
                 >
                   <option value="1month">최근 1개월</option>
                   <option value="3month">최근 3개월</option>
@@ -329,6 +352,7 @@ const MyPage: React.FC = () => {
                   className="MP-select"
                   value={orderType}
                   onChange={(e) => setOrderType(e.target.value)}
+                  aria-label="주문 상태 선택"
                 >
                   <option value="all">전체 주문</option>
                   <option value="processing">처리중</option>
@@ -400,36 +424,6 @@ const MyPage: React.FC = () => {
               </tbody>
             </table>
           </div>
-        </div>
-
-        {/* 오른쪽 섹션 */}
-        <div>
-          {/* 멤버십 현황 */}
-          <div className="MP-card MP-membership-status">
-            <div className="MP-membership-header">
-              <h3>멤버십 현황</h3>
-              <button className="MP-membership-benefit-btn">멤버십 혜택</button>
-            </div>
-
-            <h2 className="MP-tier">SILVER</h2>
-            <p className="MP-current-tier">현재 등급</p>
-
-            <div className="MP-progress-info">
-              <span>현재 구매액</span>
-              <span>다음 등급까지</span>
-            </div>
-            <div className="MP-progress-bar">
-              <div className="MP-progress" style={{ width: "38%" }}></div>
-            </div>
-            <div className="MP-progress-values">
-              <span>₩75,000</span>
-              <span>₩125,000</span>
-            </div>
-            <div className="MP-point-area">
-              <p className="MP-point-label">포인트 적립금</p>
-              <p className="MP-point-value">15,000 P</p>
-            </div>
-          </div>
 
           {/* 쿠폰 카드 */}
           <div className="MP-card MP-coupon-card">
@@ -467,16 +461,21 @@ const MyPage: React.FC = () => {
             <button className="MP-wishlist-all-btn">전체보기</button>
           </div>
         </div>
+
+        {/* 모달 */}
+        {showAddressModal && (
+          <AddressModal
+            onClose={() => {
+              setShowAddressModal(false);
+              setEditAddress(null);
+            }}
+            onSubmit={handleAddAddress}
+            onDelete={handleDeleteAddress}
+            initialData={editAddress}
+            isEditing={!!editAddress}
+          />
+        )}
       </div>
-
-      {/* 모달 */}
-      {showAddressModal && (
-        <AddressModal
-          onClose={() => setShowAddressModal(false)}
-          onSubmit={handleAddAddress}
-        />
-      )}
-
       <Footer />
     </div>
   );

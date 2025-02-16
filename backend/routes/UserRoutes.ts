@@ -7,6 +7,8 @@ const router = express.Router();
 
 // 프로필 관련 라우트
 router.get('/users/profile', authenticateToken, asyncHandler(UserController.getProfile));
+router.put('/users/profile', authenticateToken, asyncHandler(UserController.updateProfile));
+router.put('/users/password', authenticateToken, asyncHandler(UserController.updatePassword));
 
 // 배송지 관련 라우트
 router.get('/addresses', authenticateToken, asyncHandler(UserController.getAddresses));

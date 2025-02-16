@@ -5,6 +5,7 @@ import { Request, Response, RequestHandler } from 'express';
 import pool from '../../../config/dbConfig';
 import { RowDataPacket } from 'mysql2';
 import { AuthenticatedRequest } from '../../auth/types/user';
+import bcrypt from 'bcrypt';
 
 interface Address extends RowDataPacket {
   address_id: number;
@@ -36,7 +37,7 @@ export class UserController {
 
       try {
         const [rows] = await connection.query<RowDataPacket[]>(
-          `SELECT user_id, name, email, phone 
+          `SELECT user_id, name, email, phone, signup_type 
            FROM Users 
            WHERE user_id = ?`,
           [authReq.user.user_id]
@@ -53,9 +54,12 @@ export class UserController {
         const userProfile = rows[0];
         res.json({
           success: true,
-          name: userProfile.name,
-          email: userProfile.email,
-          phone: userProfile.phone
+          user: {
+            name: userProfile.name,
+            email: userProfile.email,
+            phone: userProfile.phone,
+            signup_type: userProfile.signup_type
+          }
         });
 
       } finally {
@@ -365,6 +369,117 @@ export class UserController {
         success: false,
         message: '기본 배송지 설정에 실패했습니다.',
         error: error instanceof Error ? error.message : '알 수 없는 오류'
+      });
+    }
+  };
+
+  static updateProfile: RequestHandler = async (req: Request, res: Response) => {
+    try {
+      const authReq = req as AuthenticatedRequest;
+      const { name, phone } = req.body;
+
+      if (!authReq.user?.user_id) {
+        res.status(401).json({
+          success: false,
+          message: '인증된 사용자가 아닙니다.'
+        });
+        return;
+      }
+
+      const connection = await pool.promise().getConnection();
+
+      try {
+        await connection.query(
+          `UPDATE Users 
+           SET name = ?, phone = ?, updated_at = CURRENT_TIMESTAMP 
+           WHERE user_id = ?`,
+          [name, phone, authReq.user.user_id]
+        );
+
+        res.json({
+          success: true,
+          message: '프로필이 성공적으로 수정되었습니다.'
+        });
+
+      } finally {
+        connection.release();
+      }
+
+    } catch (error) {
+      console.error('프로필 수정 실패:', error);
+      res.status(500).json({
+        success: false,
+        message: '프로필 수정에 실패했습니다.'
+      });
+    }
+  };
+
+  static updatePassword: RequestHandler = async (req: Request, res: Response) => {
+    try {
+      const authReq = req as AuthenticatedRequest;
+      const { currentPassword, newPassword } = req.body;
+
+      if (!authReq.user?.user_id) {
+        res.status(401).json({
+          success: false,
+          message: '인증된 사용자가 아닙니다.'
+        });
+        return;
+      }
+
+      const connection = await pool.promise().getConnection();
+
+      try {
+        // 현재 비밀번호 확인
+        const [users] = await connection.query<RowDataPacket[]>(
+          'SELECT * FROM UserAuth WHERE user_id = ? AND auth_type = "local"',
+          [authReq.user.user_id]
+        );
+
+        const userAuth = users[0];
+        if (!userAuth) {
+          res.status(404).json({
+            success: false,
+            message: '사용자 인증 정보를 찾을 수 없습니다.'
+          });
+          return;
+        }
+
+        // 현재 비밀번호 검증
+        const isPasswordValid = await bcrypt.compare(currentPassword, userAuth.password);
+        if (!isPasswordValid) {
+          res.status(400).json({
+            success: false,
+            message: '현재 비밀번호가 일치하지 않습니다.'
+          });
+          return;
+        }
+
+        // 새 비밀번호 해시화
+        const hashedNewPassword = await bcrypt.hash(newPassword, 10);
+
+        // 비밀번호 업데이트
+        await connection.query(
+          `UPDATE UserAuth 
+           SET password = ?, updated_at = CURRENT_TIMESTAMP 
+           WHERE user_id = ? AND auth_type = "local"`,
+          [hashedNewPassword, authReq.user.user_id]
+        );
+
+        res.json({
+          success: true,
+          message: '비밀번호가 성공적으로 변경되었습니다.'
+        });
+
+      } finally {
+        connection.release();
+      }
+
+    } catch (error) {
+      console.error('비밀번호 변경 실패:', error);
+      res.status(500).json({
+        success: false,
+        message: '비밀번호 변경에 실패했습니다.'
       });
     }
   };

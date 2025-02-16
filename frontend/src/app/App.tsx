@@ -21,6 +21,7 @@ import MDashBoard from "../pages/manager/MDashBoard";
 import MProduct from "../pages/manager/MProduct";
 import About from "../pages/home/About";
 import Support from "../pages/home/Support";
+import ProfileSettings from "../pages/profile/ProfileSettings";
 
 function App() {
   return (
@@ -48,6 +49,7 @@ function App() {
       <Route path="/mypage" element={<MyPage />} />
       <Route path="/About" element={<About />} />
       <Route path="/Support" element={<Support />} />
+      <Route path="/profile/settings" element={<ProfileSettings />} />
     </Routes>
   );
 }
