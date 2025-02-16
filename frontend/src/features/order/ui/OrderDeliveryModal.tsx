@@ -1,11 +1,13 @@
 import "./OrderDeliveryModal.css"
 import React, { useEffect, useState } from "react";
 import { IoClose } from "react-icons/io5";
-import { UserAddressInfo } from "../model/OrderModel";
-import OrderDeliveryAddModal from "./OrderDeliveryAddModal";
-import OrderDeliveryUpdateModal from "./OrderDeliveryUpdateModal";
+import { UserAddressFormInfo, UserAddressInfo } from "../model/OrderModel";
+// import OrderDeliveryAddModal from "./OrderDeliveryAddModal";
+// import OrderDeliveryUpdateModal from "./OrderDeliveryUpdateModal";
 import { FaPlus } from "react-icons/fa6";
 import { BsPencilSquare } from "react-icons/bs";
+import AddressModal from "../../address/ui/AddressModal";
+import { fetchAddAddress } from "../api/Order";
 
 interface ModalProps {
   open: boolean;
@@ -13,9 +15,10 @@ interface ModalProps {
   header: string;
   userAddressDetails: UserAddressInfo[];
   onSelect: (address:UserAddressInfo) => void;
+  onNewAddress: (address: UserAddressInfo) => void;
 }
 
-const OrderDeliveryModal: React.FC<ModalProps> = ({open, close, header, userAddressDetails, onSelect}) => {
+const OrderDeliveryModal: React.FC<ModalProps> = ({open, close, header, userAddressDetails, onSelect, onNewAddress}) => {
   const [selectedAddress, setSelectedAddress] = useState<UserAddressInfo | null>(null);
   const [addModalOpen, setAddModalOpen] = useState<boolean>(false);
   const [updateModalOpen, setUpdateModalOpen] = useState<boolean>(false);
@@ -24,7 +27,8 @@ const OrderDeliveryModal: React.FC<ModalProps> = ({open, close, header, userAddr
     if(open){
       console.log("모달", userAddressDetails);
       // console.log("address_id", selectedAddress?.address_id);
-      const defaultAddress = userAddressDetails.find((addr) => addr.is_default === 1);
+      // setAddressList(userAddressDetails);
+      const defaultAddress = userAddressDetails.find((addr) => addr.is_default === true);
       if(defaultAddress) {
         setSelectedAddress(defaultAddress);
         console.log('선택된 주소', defaultAddress);
@@ -46,7 +50,42 @@ const OrderDeliveryModal: React.FC<ModalProps> = ({open, close, header, userAddr
   const openAddModal = () => {setAddModalOpen(true); };
   const closeAddModal = () => {setAddModalOpen(false); };
   const openUpdateModal = () => {setUpdateModalOpen(true); };
-  const closeUpdateModal = () => {setUpdateModalOpen(false); };
+  // const closeUpdateModal = () => {setUpdateModalOpen(false); };
+
+  const [addressList, setAddressList] = useState<UserAddressInfo[]>(userAddressDetails);
+  const handleSubmitAddress = async (addressData: UserAddressFormInfo) => {
+    console.log('저장된 주소 데이터', addressData);
+
+    const newAddress: UserAddressInfo = {
+      // address_id: Date.now(),  // 고유 ID 생성
+      address_name: addressData.address_name,
+      recipient_name: addressData.recipient_name,
+      recipient_phone: addressData.recipient_phone,
+      address: addressData.address,
+      detailed_address: addressData.detailed_address,
+      is_default: addressData.is_default,
+      postal_code: addressData.postal_code,
+    };
+    setAddressList((prev) => [...prev, newAddress])
+
+    try{
+      console.log('[프론트 newAddress]', newAddress);
+      const data = await fetchAddAddress(newAddress);
+      if (data && data.newAddress) {
+        onNewAddress(data.newaddress);
+        setAddressList((prev) => [...prev, data.newAddress]);
+        setSelectedAddress(data.newAddress);
+        setAddModalOpen(false);
+        console.log("addressList 데이터 값", addressList);
+      } else {
+        console.error("새 주소를 가져오는 데 실패했습니다.");
+      }
+    }catch(err){
+      console.error('[프론트]주소 저장 실패',err);
+    }
+
+  }
+
 
   return (
     <div className={open ? "openModal modal" : "modal"}>
@@ -62,8 +101,8 @@ const OrderDeliveryModal: React.FC<ModalProps> = ({open, close, header, userAddr
           <div className="orderAddressBody">
             <form className="orderAddressFormBody">
               {userAddressDetails.map((address, index) => (
-                <label className="orderDeliverySelectForm">
-                  <div className="formContainer" key={index}>
+                <label className="orderDeliverySelectForm"  key={index}>
+                  <div className="formContainer">
                     <div className="radioBox">
                       <input 
                         className='selectRadio' 
@@ -75,7 +114,7 @@ const OrderDeliveryModal: React.FC<ModalProps> = ({open, close, header, userAddr
                       />
                       <div className="defaultAddressContainer">
                         <span>{address.address_name}</span>
-                        {address.is_default === 1 && <div className="defaultMarker">기본배송지</div>}
+                        {address.is_default  && <div className="defaultMarker">기본배송지</div>}
                       </div>
                     </div>
                     <div className="selectDeliveryInfo">
@@ -91,14 +130,17 @@ const OrderDeliveryModal: React.FC<ModalProps> = ({open, close, header, userAddr
               <div className="addDelivery">
                 <FaPlus />
                 <div className="addDeliveryTitle" onClick={openAddModal}>새 배송지 추가</div>
-                <OrderDeliveryAddModal open={addModalOpen} close={closeAddModal} header="새 배송지 추가">
-                </OrderDeliveryAddModal>
+                {/* <OrderDeliveryAddModal open={addModalOpen} close={closeAddModal} header="새 배송지 추가">
+                </OrderDeliveryAddModal> */}
+                {addModalOpen && (
+                  <AddressModal onClose={closeAddModal} onSubmit={handleSubmitAddress}/>
+                )}
               </div>
               <div className="updateDelivery">
                 <BsPencilSquare />
                 <div className="updateDeliveryTitle" onClick={openUpdateModal}>선택 배송지 수정</div>
-                <OrderDeliveryUpdateModal open={updateModalOpen} close={closeUpdateModal} header="배송지 수정">
-                </OrderDeliveryUpdateModal>
+                {/* <OrderDeliveryUpdateModal open={updateModalOpen} close={closeUpdateModal} header="배송지 수정">
+                </OrderDeliveryUpdateModal> */}
               </div>
             </div>
           </div>

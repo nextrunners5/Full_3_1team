@@ -83,7 +83,7 @@ export const getUserDetailsAddress = async(userId: string) => {
                   FROM Users u 
                   JOIN UserAddresses ua ON u.user_id = ua.user_id 
                   WHERE u.user_id = ? 
-                  ORDER BY us.is_default DESC, ua.created_at ASC`;
+                  ORDER BY ua.is_default DESC, ua.created_at ASC`;
   try{
     const [res] = await pool.promise().query(query,[userId]);
     const rows = res as any[];

@@ -39,6 +39,70 @@ export class PaymentsRepo {
     try {
       await connection.beginTransaction();
 
+
+      // 1️⃣ order_id 존재 여부 확인
+      const [orderRows] = await connection.query<RowDataPacket[]>(
+        `SELECT order_id FROM Orders WHERE order_id = ? FOR UPDATE`,
+        [payment.order_id]
+      );
+      console.log("orderRows:", orderRows); // ✅ 로그 확인
+      console.log("orderRows[0].count:", orderRows[0].count); // ✅ 추가 로그
+
+      if (orderRows[0].count === 0) {
+        throw new Error(`Order ID ${payment.order_id} does not exist.`);
+      }
+
+      // 2️⃣ payment_key 중복 체크
+      const [paymentRows] = await connection.query<RowDataPacket[]>(
+        `SELECT COUNT(*) as count FROM Payment WHERE payment_key = ?`,
+        [payment.payment_key]
+      );
+
+      if (paymentRows[0].count > 0) {
+        throw new Error(`Payment key ${payment.payment_key} already exists.`);
+      }
+
+      let paymentMethod = payment.payment_method;
+      switch(payment.payment_method){
+        case "간편결제":
+          paymentMethod = "PM003";
+          break;
+        case "카드":
+          paymentMethod = "PM001";
+          break;
+      }
+
+      let paymentStatus = payment.payment_status;
+      switch(payment.payment_status){
+        case "READY":
+          paymentStatus = "PS001";
+          break;
+        case "IN_PROGRESS":
+          paymentStatus = "PS001";
+          break;
+        case "WAITING_FOR_DEPOSIT":
+          paymentStatus = "PS002";
+          break;
+        case "DONE":
+          paymentStatus = "PS003";
+          break;
+        case "CANCELED":
+          paymentStatus = "PS004";
+          break;
+        case "PARTIAL_CANCELED":
+          paymentStatus = "PS005";
+          break;
+        case "ABORTED":
+          paymentStatus = "PS006";
+          break;
+        case "EXPIRED":
+          paymentStatus = "PS007";
+          break;
+        case "PAYMENT_COMPLETED":
+          paymentStatus = "PS008";
+          break;
+      }
+
       const [result] = await connection.query<ResultSetHeader>(
         `INSERT INTO Payment 
         (order_id, payment_key, payment_type, order_name, payment_method, 
@@ -50,12 +114,14 @@ export class PaymentsRepo {
           payment.payment_key,
           payment.payment_type,
           payment.order_name,
-          payment.payment_method,
+          // payment.payment_method,
+          paymentMethod,
           payment.final_price,
           payment.balance_amount,
           payment.discount_price,
           payment.currency,
-          payment.payment_status,
+          // payment.payment_status,
+          paymentStatus,
           payment.requested_at,
           payment.approved_at,
           payment.mid
@@ -65,6 +131,7 @@ export class PaymentsRepo {
       await connection.commit();
       return result.insertId;
     } catch (error) {
+      console.error('payment error', error);
       await connection.rollback();
       throw error;
     } finally {

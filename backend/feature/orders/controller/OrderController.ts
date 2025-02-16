@@ -39,6 +39,7 @@ const getUserAddress = async(req: Request, res: Response) => {
   }
 };
 
+//사용자 주소
 const getUserDetailsAddress = async(req: Request, res: Response) => {
   const userId = req.params.userId as string;
   console.log('getUserDetailsAddress 백앤드 userId', userId);

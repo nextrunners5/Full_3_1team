@@ -16,14 +16,25 @@ export interface DeliveryForm{
 }
 
 export interface UserAddressInfo{
-  address_id: number;
-  user_id: string;
+  address_id?: number;
+  // user_id: string|null|undefined;
   address_name: string;
   recipient_name: string;
   address: string;
-  detailed_address: string;
+  detailed_address?: string;
   recipient_phone: string;
-  is_default: number;
+  is_default: boolean;
+  postal_code: string | undefined;
+}
+
+export interface UserAddressFormInfo {
+  address_name: string;
+  recipient_name: string;
+  recipient_phone: string;
+  address: string;
+  detailed_address?: string;
+  postal_code?: string;
+  is_default: boolean;
 }
 
 export interface OrderProducts{
@@ -44,6 +55,7 @@ export interface OrderState{
   totalPrice: number;
   order_id: string;
   user_id: string|null;
+  finalPrice: number;
 }
 
 // export interface UpdateOrderInfoPayload {
@@ -60,7 +72,7 @@ export interface OrderCouponPointProps{
 export interface OrderPriceProps{
   userId?: string | null | undefined;
   points: number;
-  // total_productPrice: number;
+  onFinalPriceChange: (finalPrice: number) => void;
 }
 
 export interface OrderShippingFee{

@@ -1,5 +1,5 @@
 import axiosInstance from "../../../shared/axios/axios";
-import { OrderProducts, OrderShippingFee, UserAddressInfo } from "../model/OrderModel";
+import { OrderProducts, OrderShippingFee, UserAddressFormInfo, UserAddressInfo } from "../model/OrderModel";
 
 //사용자 포인트 가져오기
 export const fetchUserPoints = async(userId: string | null | undefined) => {
@@ -22,6 +22,23 @@ export const fetchDeliveryMessage = async () => {
   }
 };
 
+//배송지 추가
+export const fetchAddAddress = async(addressData: UserAddressFormInfo) =>{
+  try{
+    console.log('[주문페이지] 새배송지 주소', addressData);
+    const response = await axiosInstance.post('/api/addresses', addressData);
+    if (response.status === 200) {
+      console.log('[주문페이지] 새 배송지를 추가했습니다.', response.data);
+      return response.data;
+    } else {
+      console.error('[서버 응답 오류]', response.status);
+      throw new Error('주소 추가에 실패했습니다.');
+    }
+  } catch(err){
+    console.error('[주문페이지] 배송지 추가 실패', err);
+  }
+};
+
 //배송지 정보 가져오기
 export const fetchAddress = async(userId: string | null | undefined) => {
   try{
@@ -39,6 +56,7 @@ export const fetchAddress = async(userId: string | null | undefined) => {
 //배송지 상세 리스트 정보 가져오기
 export const fetchDetailsAddress = async(userId: string | null | undefined) => {
   try{
+    console.log('주소 userId', userId);
     const response = await axiosInstance.get<UserAddressInfo[]>(`/api/orders/UserDetailsAddress/${userId}`);
     console.log("DetailsAddress response: ", response.data);
     return response.data;
@@ -88,6 +106,7 @@ export const fetchShippingFee = async(userId: string | null | undefined) => {
 
 export const fetchProcessPayment = async(order_id: string, final_price: number, selectedAddress: UserAddressInfo | null,  selectedMessage: string) => {
   try{
+    console.log('[프론트] OrderPay 요청 데이터', order_id, final_price, selectedAddress, selectedMessage)
     const response = await axiosInstance.post('/api/payments', {
       order_id,
       final_price,

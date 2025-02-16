@@ -6,6 +6,7 @@ const initialState: OrderState = {
   totalPrice: 0,
   order_id: '',
   user_id: null,
+  finalPrice: 0,
 }
 const orderSlice = createSlice({
   name: 'order',
@@ -21,13 +22,17 @@ const orderSlice = createSlice({
     setOrderUserId : (state, action: PayloadAction<string|null>) => {
       state.user_id = action.payload;
       console.log('redux 업데이트', action.payload);
+    },
+    setFinalPrice: (state, action: PayloadAction<number>) => {
+      state.finalPrice = action.payload
     }
   },
 });
 
-export const {updateOrderInfo, setOrderId, setOrderUserId} = orderSlice.actions;
+export const {updateOrderInfo, setOrderId, setOrderUserId, setFinalPrice} = orderSlice.actions;
 export default orderSlice.reducer;
 export const selectOrderInfo = (state: {order: OrderState}) => state.order.orderInfo;
 export const selectTotalPrice = (state: {order: OrderState}) => state.order.totalPrice;
 export const selectOrderId = (state: {order: OrderState}) => state.order.order_id;
 export const selectUserId = (state: {order: OrderState}) => state.order.user_id;
+export const selectFinalPrice = (state: {order: OrderState}) => state.order.finalPrice;

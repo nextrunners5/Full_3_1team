@@ -7,7 +7,7 @@ import { useSelector } from "react-redux";
 import { selectTotalPrice } from "../../../pages/order/orderRedux/slice";
 
 
-const OrderPrice: React.FC<OrderPriceProps> = ({userId,points}) => {
+const OrderPrice: React.FC<OrderPriceProps> = ({userId,points,onFinalPriceChange}) => {
   const [shippingFee, setShippingFee] = useState<OrderShippingFee>({shipping_fee: 0});
   const orderInfo = useSelector(selectTotalPrice);
   // const userId = useSelector((state:RootState) => state.order.user_id);
@@ -17,7 +17,12 @@ const OrderPrice: React.FC<OrderPriceProps> = ({userId,points}) => {
       try{
         const fee = await fetchShippingFee(userId);
         if(fee && fee.length > 0){
-          setShippingFee({ shipping_fee: Number(fee[0].shipping_fee.toString().replace(/,/g,'')) });
+          const feeValue = Number(fee[0].shipping_fee.toString().replace(/,/g, ''));
+          setShippingFee({ shipping_fee: feeValue });
+
+          // 최종 결제 금액 계산 후 부모로 전달
+          const finalPrice = orderInfo - points + feeValue;
+          onFinalPriceChange(finalPrice);
         }
         // console.log('배송비 가져오기 setShippingFee: ', shippingFee);
         // console.log('total', orderInfo);
@@ -26,7 +31,7 @@ const OrderPrice: React.FC<OrderPriceProps> = ({userId,points}) => {
       }
     };
     getShippingFee();
-  },[]);
+  },[userId, points, orderInfo]);
   
   return (
     <div>
@@ -50,7 +55,7 @@ const OrderPrice: React.FC<OrderPriceProps> = ({userId,points}) => {
       </div>
       <div className="orderFinalPriceContainer">
         <div className="orderFinalPriceTitle">최종 결제 금액</div>
-        <div className="orderFinalPrice">{(orderInfo - (points + shippingFee.shipping_fee)).toLocaleString()}원</div>
+        <div className="orderFinalPrice">{(orderInfo - points + shippingFee.shipping_fee).toLocaleString()}원</div>
       </div>
     </div>
   )
