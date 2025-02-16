@@ -51,15 +51,18 @@ const MainPage:React.FC = () => {
     <>
       <Header />
       <main className="mainContentMAIN">
-        <section 
-          className="heroSectionMAIN" 
-          style={{ backgroundImage: `url(${homeImage})` }}
-          onClick={() => navigate('/ProductList')}
+      <section 
+        className="heroSectionMAIN" 
+         style={{ backgroundImage: `url(${homeImage})` }}
+>
+      <button 
+        className="heroButtonMAIN" 
+        onClick={() => navigate('/ProductList')}
         >
-          <button className="heroButtonMAIN">SHOP NOW!</button>
-          <h1 className="heroTitleMAIN">A BRAND FOR PETS!</h1>
-        </section>
-
+         SHOP NOW!
+      </button>
+       <h1 className="heroTitleMAIN">A BRAND FOR PETS!</h1>
+      </section>
         <section className="sectionProductsMAIN">
           <div className="sectionTitleGroupMAIN">
             <button 
