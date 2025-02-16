@@ -11,9 +11,7 @@ export const getCart = async (req: Request, res: Response) => {
     if (!userId || userId === "null") {
       return res.status(400).json({ message: "유효하지 않은 userId입니다." });
     }
-
     const items = await cartService.getCart(userId);
-
     res.json(items);
   } catch (error) {
     res.status(500).json({ message: "장바구니 불러오기 실패", error });
@@ -23,18 +21,21 @@ export const getCart = async (req: Request, res: Response) => {
 // ✅ 장바구니에 상품 추가 API (`Cart` → `CartDetail`)
 export const addToCart = async (req: Request, res: Response) => {
   try {
-    console.log("🛒 장바구니 추가 요청 데이터:", req.body);
+      const { userId, shippingFee, productId, quantity, selectedSize, selectedColor } = req.body;
 
-    const { userId, shippingFee, productId, quantity, selectedSize, selectedColor } = req.body;
-
-    if (!userId || shippingFee === undefined || !productId || !quantity || !selectedSize || !selectedColor) {
+    if (!userId || !productId || !quantity) {
+      console.error("❌ 필수 데이터 누락! 요청 본문:", req.body); // 🚨 어떤 데이터가 빠졌는지 확인
       return res.status(400).json({ message: "필수 데이터가 누락되었습니다." });
     }
 
-    const cartId: number = await cartService.addToCart(userId, shippingFee, productId, quantity, selectedSize, selectedColor);
+    // ✅ `selectedColor`가 빈 값이라면 기본값("")로 처리
+    const color = selectedColor ?? "";
+    const size = selectedSize ?? "";
 
-    // ✅ 선택한 사이즈와 색상을 추가로 저장
-    await cartService.addToCartDetail(cartId, productId, quantity, selectedSize, selectedColor);
+    const fee = shippingFee ?? 0;
+
+    const cartId = await cartService.addToCart(userId, fee, productId, quantity, size, color);
+    console.log("✅ 장바구니 ID 확인:", cartId);
 
     res.status(201).json({ message: "장바구니에 추가되었습니다.", cartId });
   } catch (error) {
@@ -94,8 +95,7 @@ export const removeSelectedItems = async (req: Request, res: Response) => {
     const { cartItemIds } = req.body as { cartItemIds?: number[] }; // ✅ 여러 개의 장바구니 상세 ID (CartDetail 테이블의 `cart_item_id`)
     
     if (!cartItemIds || cartItemIds.length === 0) {
-        res.status(400).json({ message: "`cartItemIds`가 필요합니다."});
-        return;
+      return res.status(400).json({ message: "`cartItemIds`가 필요합니다."});;
     }
 
     await cartService.removeSelectedItems(cartItemIds);

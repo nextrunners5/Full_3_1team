@@ -25,21 +25,28 @@ export const getCart = async (userId: string) => {
     const [rows]: any = await pool.promise().query(query, [userId]);
     console.log("🛒 장바구니 데이터 조회:", rows);
   
-    // ✅ MongoDB에서 이미지 가져오기
+    // MongoDB에서 이미지( main_image, small_image 등 ) 조회
     const updatedCartItems = await Promise.all(
-      rows.map(async (item: any) => {
+      (rows as any[]).map(async (item) => {
+        // 1) MongoDB에서 product_id가 string으로 저장되었으므로 String(...) 변환
         const productImage = await ProductImage.findOne({
-          product_id: String(item.product_id), // ✅ MongoDB에서 String으로 검색
+          product_id: String(item.product_id),
         });
-  
+
         return {
           ...item,
-          main_image: productImage ? productImage.main_image : "https://via.placeholder.com/100",
-          small_image: productImage ? productImage.small_image : "https://via.placeholder.com/100",
+          // 2) main_image 필드에 MongoDB 이미지 연결
+          main_image: productImage
+            ? productImage.main_image
+            : "https://via.placeholder.com/100",
+          small_image: productImage
+            ? productImage.small_image
+            : "https://via.placeholder.com/100",
           detail_images: productImage ? productImage.detail_images : [],
         };
       })
     );
+
   
     console.log("🛒 최종 장바구니 데이터:", updatedCartItems);
     return updatedCartItems;
@@ -94,20 +101,29 @@ export const findCartItem = async (cartId: number, productId: string) => {
 };
 
 // ✅ 상품 추가 (`CartDetail` 테이블에 `cart_id` & `product_id` 추가)
-export const addToCartDetail = async (cartId: number, productId: string, quantity: number, selectedSize: string, selectedColor: string) => {
+export const addToCartDetail = async (
+  cartId: number,
+  productId: string,
+  quantity: number,
+  selectedSize: string,
+  selectedColor: string
+) => {
   const query = `
     INSERT INTO CartDetail (cart_id, product_id, quantity, selected_size, selected_color)
     VALUES (?, ?, ?, ?, ?)
-    ON DUPLICATE KEY UPDATE 
-      quantity = quantity + VALUES(quantity),
-      selected_size = VALUES(selected_size),
-      selected_color = VALUES(selected_color)`;
+    `;
+
+    // ON DUPLICATE KEY UPDATE
+    //   quantity = quantity + VALUES(quantity),
+    //   selected_size = VALUES(selected_size),
+    //   selected_color = VALUES(selected_color)
 
   try {
-    await pool.promise().query(query, [cartId, productId, quantity, selectedSize, selectedColor]);
-    console.log("✅ 상품 추가 완료:", { cartId, productId, quantity, selectedSize, selectedColor });
+    console.log(`🛠 CartDetail 추가 실행: cartId=${cartId}, productId=${productId}, quantity=${quantity}`);
+    const [result] = await pool.promise().query(query, [cartId, productId, quantity, selectedSize, selectedColor]);
+    console.log("✅ CartDetail 추가 결과:", result);
   } catch (error) {
-    console.error("❌ 상품 추가 실패:", error);
+    console.error("❌ CartDetail 추가 실패:", error);
     throw error;
   }
 };

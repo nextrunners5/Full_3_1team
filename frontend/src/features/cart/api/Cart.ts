@@ -1,12 +1,21 @@
 import axiosInstance from "../../../shared/axios/axios";
 
-// 백엔드 API 기본 URL 설정
 const API_URL = "http://localhost:3000/api/carts";
 
 // 장바구니에 아이템 추가
-export const addToCart = async (userId: string, productId: number, quantity: number) => {
+export const addToCart = async (
+  userId: string,
+  shippingFee: number,
+  productId: string,
+  quantity: number
+) => {
   try {
-    const response = await axiosInstance.post(API_URL, { userId, productId, quantity });
+    const response = await axiosInstance.post(API_URL, {
+      userId,
+      shippingFee,
+      productId,
+      quantity,
+    });
     return response.data;
   } catch (error) {
     console.error("장바구니 추가 실패:", error);
@@ -28,7 +37,9 @@ export const getCart = async (userId: string) => {
 // 장바구니 수량 증가
 export const increaseQuantity = async (cartItemId: number) => {
   try {
-    const response = await axiosInstance.put(`${API_URL}/${cartItemId}/increase`);
+    const response = await axiosInstance.put(
+      `${API_URL}/${cartItemId}/increase`
+    );
     return response.data;
   } catch (error) {
     console.error("수량 증가 실패:", error);
@@ -39,7 +50,9 @@ export const increaseQuantity = async (cartItemId: number) => {
 // 장바구니 수량 감소
 export const decreaseQuantity = async (cartItemId: number) => {
   try {
-    const response = await axiosInstance.put(`${API_URL}/${cartItemId}/decrease`);
+    const response = await axiosInstance.put(
+      `${API_URL}/${cartItemId}/decrease`
+    );
     return response.data;
   } catch (error) {
     console.error("수량 감소 실패:", error);
@@ -68,5 +81,16 @@ export const removeSelectedItems = async (cartItemIds: number[]) => {
   } catch (error) {
     console.error("선택한 아이템 삭제 실패:", error);
     throw error;
+  }
+};
+
+// 장바구니 상품 이미지 가져오기 (MongoDB)
+export const fetchCartProductImage = async (productId: string) => {
+  try {
+    const response = await axiosInstance.get(`/api/productImages/${productId}`);
+    return response.data.imageUrl;
+  } catch (error) {
+    console.error(`❌ 장바구니 상품 이미지 가져오기 실패 (상품 ID: ${productId})`, error);
+    return "https://placehold.co/300x300"; 
   }
 };
