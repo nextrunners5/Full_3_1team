@@ -212,7 +212,7 @@ const getOrderHistory = async (req: AuthenticatedRequest, res: Response) => {
         startDate.setMonth(today.getMonth() - 1);
     }
 
-    // 주문 목록 조회 쿼리 (첫 번째 상품만 표시)
+    // type 조건 제거하고 status_code 조건만 사용
     const query = `
       SELECT DISTINCT
         o.order_id,
@@ -231,7 +231,6 @@ const getOrderHistory = async (req: AuthenticatedRequest, res: Response) => {
       LEFT JOIN Common c ON o.status_id = c.status_code
       WHERE o.user_id = ?
       AND o.order_date BETWEEN ? AND ?
-      AND c.type = 'ORDER_STATUS'
       ORDER BY o.order_date DESC
     `;
 
