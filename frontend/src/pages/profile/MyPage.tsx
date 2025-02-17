@@ -50,10 +50,7 @@ interface OrderHistoryItem {
   total_amount: number;
   status_id: string;
   status_name: string;
-  main_image?: string;
   product_name: string;
-  quantity: number;
-  has_review: boolean;
 }
 
 const MyPage: React.FC = () => {
@@ -297,7 +294,6 @@ const MyPage: React.FC = () => {
     }
   };
 
-  // 기간이나 주문타입이 변경될 때마다 주문내역 새로 조회
   useEffect(() => {
     fetchOrderHistory();
   }, [period, orderType]);
@@ -307,7 +303,7 @@ const MyPage: React.FC = () => {
     if (isOrderLoading) {
       return (
         <tr>
-          <td colSpan={6}>주문내역을 불러오는 중...</td>
+          <td colSpan={5}>주문내역을 불러오는 중...</td>
         </tr>
       );
     }
@@ -315,7 +311,7 @@ const MyPage: React.FC = () => {
     if (!orderHistory.length) {
       return (
         <tr>
-          <td colSpan={6}>주문내역이 없습니다.</td>
+          <td colSpan={5}>주문내역이 없습니다.</td>
         </tr>
       );
     }
@@ -325,14 +321,8 @@ const MyPage: React.FC = () => {
         <td>{new Date(order.order_date).toLocaleDateString()}</td>
         <td>
           <div className="MP-order-product">
-            <img
-              src={order.main_image || pc60}
-              alt={order.product_name}
-              className="MP-product-image"
-            />
             <div>
               <p>{order.product_name}</p>
-              <p>수량: {order.quantity}개</p>
             </div>
           </div>
         </td>
@@ -347,16 +337,6 @@ const MyPage: React.FC = () => {
               onClick={() => handleCancelOrder(order.order_id)}
             >
               주문취소
-            </button>
-          )}
-        </td>
-        <td>
-          {order.status_id === "OS004" && !order.has_review && (
-            <button 
-              className="MP-review-btn"
-              onClick={() => handleWriteReview(order.order_id)}
-            >
-              리뷰작성
             </button>
           )}
         </td>
@@ -376,11 +356,6 @@ const MyPage: React.FC = () => {
     } catch (error) {
       console.error("주문 취소 실패:", error);
     }
-  };
-
-  // 리뷰 작성 페이지로 이동
-  const handleWriteReview = (orderId: string) => {
-    navigate(`/review/write/${orderId}`);
   };
 
   return (
@@ -567,7 +542,6 @@ const MyPage: React.FC = () => {
                   <th>주문금액</th>
                   <th>주문상태</th>
                   <th>취소</th>
-                  <th>리뷰</th>
                 </tr>
               </thead>
               <tbody>{renderOrderHistory()}</tbody>

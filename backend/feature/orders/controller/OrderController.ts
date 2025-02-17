@@ -212,6 +212,7 @@ const getOrderHistory = async (req: AuthenticatedRequest, res: Response) => {
         startDate.setMonth(today.getMonth() - 1);
     }
 
+    // 주문 목록 조회 쿼리 (첫 번째 상품만 표시)
     const query = `
       SELECT DISTINCT
         o.order_id,
@@ -219,14 +220,15 @@ const getOrderHistory = async (req: AuthenticatedRequest, res: Response) => {
         o.total_amount,
         o.status_id,
         c.description as status_name,
-        p.product_name,
-        oi.quantity,
-        CASE WHEN r.review_id IS NOT NULL THEN 1 ELSE 0 END as has_review
+        (
+          SELECT p.product_name 
+          FROM OrderItems oi2 
+          JOIN Products p ON oi2.product_id = p.product_id 
+          WHERE oi2.order_id = o.order_id 
+          LIMIT 1
+        ) as product_name
       FROM Orders o
-      LEFT JOIN OrderItems oi ON o.order_id = oi.order_id
-      LEFT JOIN Products p ON oi.product_id = p.product_id
       LEFT JOIN Common c ON o.status_id = c.status_code
-      LEFT JOIN Review r ON oi.order_item_id = r.order_item_id
       WHERE o.user_id = ?
       AND o.order_date BETWEEN ? AND ?
       AND c.type = 'ORDER_STATUS'
