@@ -277,10 +277,22 @@ const cancelOrder = async (req: AuthenticatedRequest, res: Response) => {
     }
 
     const order = (orderRows as any[])[0];
-    if (order.status_id !== 'OS001') { // 주문 준비중 상태가 아닌 경우
+    if (order.status_id !== 'OS001') {
       return res.status(400).json({
         success: false,
         message: '취소할 수 없는 주문 상태입니다.'
+      });
+    }
+
+    // Common 테이블에서 취소 상태 코드 확인
+    const [statusRows] = await pool.promise().query(
+      'SELECT status_code FROM Common WHERE status_code = "OS007"'
+    );
+
+    if (!(statusRows as any[])[0]) {
+      return res.status(500).json({
+        success: false,
+        message: '주문 취소 상태 코드가 존재하지 않습니다.'
       });
     }
 

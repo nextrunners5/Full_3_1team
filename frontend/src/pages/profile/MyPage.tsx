@@ -326,7 +326,7 @@ const MyPage: React.FC = () => {
             </div>
           </div>
         </td>
-        <td>{order.total_amount.toLocaleString()}원</td>
+        <td>{Number(order.total_amount).toLocaleString('ko-KR')}원</td>
         <td className={`MP-status MP-status-${order.status_id.toLowerCase()}`}>
           {order.status_name}
         </td>
