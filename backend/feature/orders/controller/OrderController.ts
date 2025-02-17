@@ -226,7 +226,7 @@ const getOrderHistory = async (req: AuthenticatedRequest, res: Response) => {
       LEFT JOIN OrderItems oi ON o.order_id = oi.order_id
       LEFT JOIN Products p ON oi.product_id = p.product_id
       LEFT JOIN Common c ON o.status_id = c.status_code
-      LEFT JOIN Reviews r ON oi.order_item_id = r.order_item_id
+      LEFT JOIN Review r ON oi.order_item_id = r.order_item_id
       WHERE o.user_id = ?
       AND o.order_date BETWEEN ? AND ?
       AND c.type = 'ORDER_STATUS'
