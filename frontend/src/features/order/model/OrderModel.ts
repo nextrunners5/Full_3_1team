@@ -56,6 +56,8 @@ export interface OrderState{
   order_id: string;
   user_id: string|null;
   finalPrice: number;
+  orderType: string;
+  selectedItems : number[];
 }
 
 // export interface UpdateOrderInfoPayload {

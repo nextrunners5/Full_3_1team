@@ -71,10 +71,18 @@ export const fetchDetailsAddress = async(userId: string | null | undefined) => {
 };
 
 //주문 제품 정보 가져오기
-export const fetchOrderProducts = async(userId: string | null | undefined) => {
+export const fetchOrderProducts = async(userId: string | null | undefined, orderType: string, selectedProductIds: number[], orderId: string) => {
   try{
-    console.log('[카카오] 주문 제품 정보', userId);
-    const response = await axiosInstance.get<OrderProducts[]>(`/api/orders/OrderProducts/${userId}`);
+    console.log('[카카오] 주문 제품 정보', userId, orderType,selectedProductIds, orderId);
+        // selectedProductIds가 비어있는지 확인
+        if (selectedProductIds.length === 0) {
+          console.error('선택된 상품 아이디가 없습니다.');
+          return;  // selectedProductIds가 비어있으면 함수 종료
+        }
+    const productIdsParam = selectedProductIds.join(","); // 예: 1,2,3
+        
+    const response = await axiosInstance.get<OrderProducts[]>(`/api/orders/OrderProducts/${userId}?type=${orderType}&orderId=${orderId}&productId=${productIdsParam}`);
+    console.log('Request URL:', response);
     console.log('orderProductInfo: ',  response.data);
     return response.data;
   } catch(err){

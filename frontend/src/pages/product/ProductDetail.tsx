@@ -6,6 +6,8 @@ import QnaModal from "../qna/QnaModal";
 import QnaList from "../qna/QnaList";
 import axiosInstance from "../../shared/axios/axios";
 import { createOrder, createCart } from "../../features/product/api/Product";
+import { useDispatch } from "react-redux";
+import { setOrderType } from "../order/orderRedux/slice";
 // import Review from "../review/Review";
 
 interface Product {
@@ -37,6 +39,7 @@ const ProductDetail: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const userId = localStorage.getItem("userId") || "guest";
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   console.log("요청된 product_id:", product_id);
 
@@ -85,6 +88,7 @@ const ProductDetail: React.FC = () => {
         
         setSelectedSize(productData.sizes && productData.sizes.length > 0 ? productData.sizes[0] : "");
         setSelectedColor(productData.colors && productData.colors.length > 0 ? productData.colors[0] : "");
+        dispatch(setOrderType('OT002')); //orderType상태관리
       } catch (error) {
         console.error("상품 데이터 가져오기 실패:", error);
         setError("잘못된 상품 정보입니다.");

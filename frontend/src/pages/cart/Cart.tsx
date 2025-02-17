@@ -6,6 +6,8 @@ import Header from "../../widgets/header/Header";
 import ProductCard from "../product/ProductCard";
 import Footer from "../../widgets/footer/Footer";
 import { useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { setOrderId, setOrderType, setSelectedItems } from "../order/orderRedux/slice";
 
 
 type CartItem = {
@@ -32,6 +34,8 @@ interface Product {
 }
 
 const CartPage = () => {
+  const dispatch = useDispatch();
+
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [productsToShow, setProductsToShow] = useState<Product[]>([]);
   const [bestProducts, setBestProducts] = useState<CartItem[]>([]);
@@ -67,6 +71,7 @@ const CartPage = () => {
         }));
 
         setCartItems(formattedItems);
+        dispatch(setOrderType('OT001')); //orderType상태관리
       } catch (error) {
         console.error("장바구니 불러오기 실패:", error);
         alert("장바구니 정보를 불러올 수 없습니다.");
@@ -119,6 +124,9 @@ const CartPage = () => {
         return;
       }
 
+      const selectedProductIds = selectedItems.map((item) => Number(item.productId));
+      dispatch(setSelectedItems(selectedProductIds));  // Redux 상태에 product_id 저장
+
     // 각 아이템별 금액 계산
     const orderTotalAmount = selectedItems.reduce(
       (acc, item) => acc + (item.origin_price * item.quantity),
@@ -151,11 +159,13 @@ const CartPage = () => {
         product_count: item.quantity,               // 주문 수량
         option_size: item.selected_size,
         option_color: item.selected_color,
-      }))
+      })),
     };
     console.log("orderData:", orderData);
 
       const response = await axiosInstance.post("/api/orders", orderData);
+
+      dispatch(setOrderId(response.data.orderId));
       alert(
         `주문이 성공적으로 완료되었습니다! 주문번호: ${response.data.orderId}`
       );

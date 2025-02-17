@@ -7,6 +7,8 @@ const initialState: OrderState = {
   order_id: '',
   user_id: null,
   finalPrice: 0,
+  orderType: '',
+  selectedItems: [],
 }
 const orderSlice = createSlice({
   name: 'order',
@@ -25,14 +27,22 @@ const orderSlice = createSlice({
     },
     setFinalPrice: (state, action: PayloadAction<number>) => {
       state.finalPrice = action.payload
+    },
+    setOrderType: (state, action: PayloadAction<string>) => {
+      state.orderType = action.payload;
+    },
+    setSelectedItems: (state, action: PayloadAction<number[]>)  => {
+      state.selectedItems = action.payload;
     }
   },
 });
 
-export const {updateOrderInfo, setOrderId, setOrderUserId, setFinalPrice} = orderSlice.actions;
+export const {updateOrderInfo, setOrderId, setOrderUserId, setFinalPrice, setOrderType, setSelectedItems} = orderSlice.actions;
 export default orderSlice.reducer;
 export const selectOrderInfo = (state: {order: OrderState}) => state.order.orderInfo;
 export const selectTotalPrice = (state: {order: OrderState}) => state.order.totalPrice;
 export const selectOrderId = (state: {order: OrderState}) => state.order.order_id;
 export const selectUserId = (state: {order: OrderState}) => state.order.user_id;
 export const selectFinalPrice = (state: {order: OrderState}) => state.order.finalPrice;
+export const selectOrderType = (state: {order:OrderState}) => state.order.orderType;
+export const selectItems = (state: {order:OrderState}) => state.order.selectedItems;

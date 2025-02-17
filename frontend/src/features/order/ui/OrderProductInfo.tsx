@@ -2,8 +2,9 @@ import { useEffect, useState } from "react";
 import "./OrderProductInfo.css"
 import { OrderProducts, OrderUser } from "../model/OrderModel";
 import {  fetchOrderProductImage, fetchOrderProducts } from "../api/Order";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { setOrderId, updateOrderInfo } from "../../../pages/order/orderRedux/slice";
+import { RootState } from "../../../pages/order/orderRedux/store";
 // import { RootState } from "../../../pages/order/orderRedux/store";
 
 const OrderProduct: React.FC<OrderUser> = ({userId}) => {
@@ -11,11 +12,14 @@ const OrderProduct: React.FC<OrderUser> = ({userId}) => {
   const dispatch = useDispatch();
   // const userId = useSelector((state:RootState) => state.order.user_id);
   const [orderProducts, setOrderProducts] = useState<OrderProducts[]>([]);
-
+  const orderType = useSelector((state:RootState) => state.order.orderType);
+  const selectedProductIds = useSelector((state: RootState) => state.order.selectedItems);
+  const orderId = useSelector((state:RootState) => state.order.order_id);
   useEffect(() => {
     const getOrderProduct = async () => {
       try{
-        const productInfo = await fetchOrderProducts(userId);
+        console.log("[프론트 상품]", orderId);
+        const productInfo = await fetchOrderProducts(userId,orderType,selectedProductIds, orderId);
         console.log('제품 정보 가져오기 성공:', productInfo);
         if(productInfo && productInfo.length > 0) {
           const transformedProduct = await Promise.all(productInfo.map(async (product) => {
