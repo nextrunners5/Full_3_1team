@@ -2,6 +2,8 @@
 //비즈니스 로직을 서비스 계층에 위임하고, 서비스로부터 받은 결과를 클라이언트에 반환합니다.
 import { Request, Response } from 'express';
 import { fetchUserPoints, fetchDeliveryMessage, fetchUserAddress, fetchUserDetailsAddress, fetchOrderProducts, fetchShippingFee, fetchOrderSingleProduct, fetchOrderCartProduct, fetchInsertDeliveryInfo, fetchUpdateOrderStatus, fetchOrderCartItem } from '../services/OrderService';
+import pool from '../../../config/dbConfig';
+import { AuthenticatedRequest } from '../../auth/types/user';
 
 const getUserPoints = async (req: Request, res: Response) => {
   const userId = req.params.userId as string;
@@ -169,9 +171,16 @@ const putOrderStatus = async(req: Request, res: Response) => {
   }
 }
 
-const getOrderHistory = async (req: Request, res: Response) => {
-  const userId = req.params.userId;
+const getOrderHistory = async (req: AuthenticatedRequest, res: Response) => {
+  const userId = req.user?.user_id; // authenticateToken 미들웨어를 통해 설정된 user_id 사용
   const period = req.query.period as string || '1month';
+
+  if (!userId) {
+    return res.status(401).json({
+      success: false,
+      message: '인증되지 않은 사용자입니다.'
+    });
+  }
 
   try {
     // 기간에 따른 날짜 계산
@@ -263,9 +272,16 @@ const getOrderHistory = async (req: Request, res: Response) => {
   }
 };
 
-const cancelOrder = async (req: Request, res: Response) => {
+const cancelOrder = async (req: AuthenticatedRequest, res: Response) => {
   const orderId = req.params.orderId;
-  const userId = req.user?.user_id; // 인증된 사용자 ID
+  const userId = req.user?.user_id;
+
+  if (!userId) {
+    return res.status(401).json({
+      success: false,
+      message: '인증되지 않은 사용자입니다.'
+    });
+  }
 
   try {
     // 주문 상태 확인
