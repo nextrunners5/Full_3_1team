@@ -279,18 +279,15 @@ const MyPage: React.FC = () => {
       });
 
       if (response.data.success) {
-        // 주문 타입에 따른 필터링
-        let filteredOrders = response.data.orders;
-        if (orderType !== 'all') {
-          filteredOrders = filteredOrders.filter((order: any) => {
-            if (orderType === 'processing') {
-              return ['OS001', 'OS002', 'OS003'].includes(order.status_id);
-            } else if (orderType === 'completed') {
-              return ['OS004', 'OS005', 'OS006'].includes(order.status_id);
-            }
-            return true;
-          });
-        }
+        const filteredOrders = response.data.orders.filter((order: OrderHistoryItem) => {
+          if (orderType === 'processing') {
+            return ['OS001', 'OS002', 'OS003'].includes(order.status_id);
+          } else if (orderType === 'completed') {
+            return ['OS004', 'OS005', 'OS006'].includes(order.status_id);
+          }
+          return true;
+        });
+        
         setOrderHistory(filteredOrders);
       }
     } catch (error) {

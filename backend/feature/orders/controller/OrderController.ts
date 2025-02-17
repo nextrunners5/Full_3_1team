@@ -186,30 +186,27 @@ const putOrderStatus = async(req: Request, res: Response) => {
 }
 
 const getOrderHistory = async (req: AuthenticatedRequest, res: Response) => {
-  const userId = req.user?.user_id; // authenticateToken 미들웨어를 통해 설정된 user_id 사용
-  const period = req.query.period as string || '1month';
-
-  if (!userId) {
-    return res.status(401).json({
-      success: false,
-      message: '인증되지 않은 사용자입니다.'
-    });
-  }
-
   try {
+    const userId = req.user?.user_id;
+    const period = req.query.period as string || '1month';
+
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        message: '인증되지 않은 사용자입니다.'
+      });
+    }
+
     // 기간에 따른 날짜 계산
     const today = new Date();
     let startDate = new Date();
     
     switch(period) {
-      case '3months':
+      case '3month':  // 프론트엔드와 일치하도록 수정
         startDate.setMonth(today.getMonth() - 3);
         break;
-      case '6months':
+      case '6month':  // 프론트엔드와 일치하도록 수정
         startDate.setMonth(today.getMonth() - 6);
-        break;
-      case '1year':
-        startDate.setFullYear(today.getFullYear() - 1);
         break;
       default: // 1month
         startDate.setMonth(today.getMonth() - 1);
@@ -218,19 +215,12 @@ const getOrderHistory = async (req: AuthenticatedRequest, res: Response) => {
     const query = `
       SELECT 
         o.order_id,
-        o.user_id,
         o.order_date,
         o.total_amount,
         o.status_id,
-        oi.order_item_id,
-        oi.product_id,
+        s.status_name,
         p.product_name,
         oi.quantity,
-        oi.price,
-        oi.selected_size,
-        oi.selected_color,
-        oi.order_status,
-        s.status_name,
         COALESCE(r.review_id, 0) as has_review
       FROM Orders o
       JOIN OrderItems oi ON o.order_id = oi.order_id
@@ -244,44 +234,18 @@ const getOrderHistory = async (req: AuthenticatedRequest, res: Response) => {
 
     const [rows] = await pool.promise().query(query, [userId, startDate, today]);
 
-    // 주문 데이터 구조화
-    const orders = new Map();
-    (rows as any[]).forEach(row => {
-      if (!orders.has(row.order_id)) {
-        orders.set(row.order_id, {
-          order_id: row.order_id,
-          user_id: row.user_id,
-          order_date: row.order_date,
-          total_amount: row.total_amount,
-          status_id: row.status_id,
-          status_name: row.status_name,
-          items: []
-        });
-      }
-      
-      const order = orders.get(row.order_id);
-      order.items.push({
-        order_item_id: row.order_item_id,
-        product_id: row.product_id,
-        product_name: row.product_name,
-        quantity: row.quantity,
-        price: row.price,
-        selected_size: row.selected_size,
-        selected_color: row.selected_color,
-        order_status: row.order_status,
-        has_review: Boolean(row.has_review)
-      });
-    });
-
+    // 주문 목록용 간단한 구조
     res.json({
       success: true,
-      orders: Array.from(orders.values())
+      orders: rows
     });
+
   } catch (err) {
     console.error('주문내역 조회 실패:', err);
     res.status(500).json({
       success: false,
-      message: '주문내역을 불러오는데 실패했습니다.'
+      message: '주문내역을 불러오는데 실패했습니다.',
+      error: err
     });
   }
 };
@@ -407,7 +371,7 @@ const getOrderDetail = async (req: AuthenticatedRequest, res: Response) => {
       });
     }
 
-    // 주문 데이터 구조화
+    // 주문 상세용 상세 구조 유지
     const orderData = {
       orderId: (rows as any[])[0].order_id,
       orderInfo: {
