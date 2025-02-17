@@ -3,7 +3,7 @@ import "./OrderDeliveryInfo.css"
 import OrderDeliveryModal from "./OrderDeliveryModal";
 import axiosInstance from "../../../shared/axios/axios";
 import {Common, DeliveryForm, OrderDeliveryInfoProps, UserAddressInfo} from "../model/OrderModel";
-import { fetchDeliveryMessage, fetchUserDetailsAddress } from "../api/Order";
+import { fetchDeliveryMessage, fetchUserAddress } from "../api/Order";
 
 const OrderDeliveryInfo: React.FC<OrderDeliveryInfoProps> = ({userId, onAddressSelect, onMessageSelect}) => {
 
@@ -17,7 +17,7 @@ const OrderDeliveryInfo: React.FC<OrderDeliveryInfoProps> = ({userId, onAddressS
   useEffect(() => {
     const getUserDetailsAddress = async () => {
       try {
-        const addressData = await fetchUserDetailsAddress(userId);
+        const addressData = await fetchUserAddress(userId);
         if (addressData && addressData.length > 0) {
           setUserAddressDetails(addressData);
           // 기본 배송지 찾기
