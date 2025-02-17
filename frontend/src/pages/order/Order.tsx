@@ -6,12 +6,15 @@ import "./Order.css"
 import { useSelector} from "react-redux";
 import { RootState } from "./orderRedux/store";
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 
 const Order: React.FC = () => {
   const userId = useSelector((state: RootState)=>state.order.user_id);
   const [selectedAddress, setSelectedAddress] = useState(null);
   const [selectedMessage, setSelectedMessage] = useState('');
+  const navigate = useNavigate();
+
   useEffect(() => {
     console.log('Order.tsx 아이디 변경 감지: ', userId);
   },[userId]);
@@ -23,6 +26,25 @@ const Order: React.FC = () => {
   const handleMessageChange = (message: any) => {
     setSelectedMessage(message);
   }
+
+  // 결제 성공 처리
+  const handlePaymentSuccess = async (response: any) => {
+    try {
+      // ... 결제 처리 로직 ...
+
+      if (response.data.success) {
+        // 결제 성공 시 주문 완료 페이지로 이동
+        navigate('/order/complete', { 
+          state: { 
+            orderId: response.data.orderId,
+            orderInfo: orderData 
+          } 
+        });
+      }
+    } catch (error) {
+      // ... 에러 처리 ...
+    }
+  };
 
   return (
     // <Provider store={orderStore}>

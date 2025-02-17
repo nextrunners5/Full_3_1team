@@ -342,6 +342,92 @@ const cancelOrder = async (req: AuthenticatedRequest, res: Response) => {
   }
 };
 
+const getOrderDetail = async (req: AuthenticatedRequest, res: Response) => {
+  const orderId = req.params.orderId;
+  const userId = req.user?.user_id;
+
+  if (!userId) {
+    return res.status(401).json({
+      success: false,
+      message: '인증되지 않은 사용자입니다.'
+    });
+  }
+
+  try {
+    const query = `
+      SELECT 
+        o.order_id,
+        o.user_id,
+        o.order_date,
+        o.total_amount,
+        o.status_id,
+        oi.order_item_id,
+        oi.product_id,
+        p.product_name,
+        oi.quantity,
+        oi.price,
+        oi.selected_size,
+        oi.selected_color,
+        oi.order_status,
+        s.status_name,
+        a.recipient_name,
+        a.address,
+        a.detailed_address,
+        a.recipient_phone,
+        d.delivery_message
+      FROM Orders o
+      JOIN OrderItems oi ON o.order_id = oi.order_id
+      JOIN Products p ON oi.product_id = p.product_id
+      JOIN OrderStatus s ON o.status_id = s.status_id
+      JOIN OrderDeliveryInfo d ON o.order_id = d.order_id
+      JOIN UserAddresses a ON d.address_id = a.address_id
+      WHERE o.order_id = ? AND o.user_id = ?
+    `;
+
+    const [rows] = await pool.promise().query(query, [orderId, userId]);
+
+    if (!(rows as any[])[0]) {
+      return res.status(404).json({
+        success: false,
+        message: '주문을 찾을 수 없습니다.'
+      });
+    }
+
+    // 주문 데이터 구조화
+    const orderData = {
+      orderId: (rows as any[])[0].order_id,
+      orderInfo: {
+        total_amount: (rows as any[])[0].total_amount,
+        items: (rows as any[]).map(row => ({
+          product_name: row.product_name,
+          quantity: row.quantity,
+          price: row.price,
+          selected_size: row.selected_size,
+          selected_color: row.selected_color
+        })),
+        delivery_info: {
+          recipient_name: (rows as any[])[0].recipient_name,
+          address: (rows as any[])[0].address,
+          detailed_address: (rows as any[])[0].detailed_address,
+          recipient_phone: (rows as any[])[0].recipient_phone,
+          delivery_message: (rows as any[])[0].delivery_message
+        }
+      }
+    };
+
+    res.json({
+      success: true,
+      order: orderData
+    });
+  } catch (err) {
+    console.error('주문 상세 조회 실패:', err);
+    res.status(500).json({
+      success: false,
+      message: '주문 정보를 불러오는데 실패했습니다.'
+    });
+  }
+};
+
 export default {
   getUserPoints,
   getDeliveryMessage,
@@ -353,5 +439,6 @@ export default {
   postOrderDeliveryInfo,
   putOrderStatus,
   getOrderHistory,
-  cancelOrder
+  cancelOrder,
+  getOrderDetail
 };

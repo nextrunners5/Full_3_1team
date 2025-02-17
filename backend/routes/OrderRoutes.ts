@@ -36,4 +36,11 @@ router.post(
   OrderController.cancelOrder as RequestHandler
 );
 
+// 주문 상세 조회
+router.get(
+  '/:orderId', 
+  authenticateToken as RequestHandler, 
+  OrderController.getOrderDetail as RequestHandler
+);
+
 export default router; // 생성한 라우터를 내보내기 합니다.
