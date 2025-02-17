@@ -9,7 +9,14 @@ router.get(`/UserAddress/:userId`, OrderController.getUserAddress);
 router.get(`/UserDetailsAddress/:userId`, OrderController.getUserDetailsAddress);
 router.get(`/OrderProducts/:userId`, OrderController.getOrderProducts);
 router.get(`/OrderShippingFee/:userId`, OrderController.getOrderShipping);
-router.post(`/`, OrderController.postOrderSingleProduct);
+// router.post(`/`, OrderController.postOrderSingleProduct);
+router.post(`/`, async (req, res) => {
+  try {
+    await OrderController.postOrderSingleProduct(req, res); // 비동기 함수 호출
+  } catch (error) {
+    res.status(500).json({ error: '서버 오류: 주문 처리 실패' });
+  }
+});
 router.put('/OrderInfoUpdate', OrderController.putOrderStatus);
 router.post('/OrderInfoUpdate', OrderController.postOrderDeliveryInfo);
 

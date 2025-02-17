@@ -98,7 +98,7 @@ const postOrderSingleProduct = async(req: Request, res: Response) => {
         statusId
       });
       console.log("orderProductInfo",orderId);
-      res.json(orderId);
+      return res.json(orderId);
     } else if (type === 'Cart') {
       // 카트에서 주문하기
       if (!Array.isArray(items) || items.length === 0) {
@@ -123,25 +123,25 @@ const postOrderSingleProduct = async(req: Request, res: Response) => {
         const { product_id, product_count, option_size, option_color, order_status } = item;
 
         const orderItemId = await fetchOrderCartItem({
-          orderId,  // 🟢 같은 orderId를 사용
+          orderId,  //같은 orderId를 사용
           productId: product_id,
           quantity: product_count,
           selectedSize: option_size,
           selectedColor: option_color,
-          statusId: order_status || "PENDING",  // 기본값 추가
+          statusId: order_status || "OS001",  // 기본값 추가
         });
 
         orderItemResults.push(orderItemId);
       }
 
       console.log("Cart Order Items:", orderItemResults);
-      res.json({ success: true, orderId, orderItems: orderItemResults });
+      return res.json({ success: true, orderId, orderItems: orderItemResults });
 
     } else {
       return res.status(400).json({ error: '잘못된 주문 유형입니다.' });
     }
   }catch(err){
-    res.status(500).json({error:'단일 상품 정보 저장 실패'});
+    return res.status(500).json({error:'단일 상품 정보 저장 실패'});
   }
 }
 
