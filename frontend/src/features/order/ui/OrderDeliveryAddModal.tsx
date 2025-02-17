@@ -1,127 +1,85 @@
 import "./OrderDeliveryModal.css"
-import React, { useState } from 'react';
+import React from "react";
 import { IoClose } from "react-icons/io5";
-import DaumPostcode from 'react-daum-postcode';
 import { Address } from '../../../features/address/model/Address';
-import axiosInstance from '../../../shared/axios/axios';
+import OrderDeliveryEditModal from './OrderDeliveryEditModal';
 
-interface ModalProps {
-  open: boolean;
-  close: () => void;
-  header: string;
-  // children: React.ReactNode;
-}
-
-interface OrderDeliveryAddModalProps {
+interface Props {
+  isOpen: boolean;
   onClose: () => void;
-  onSubmit: (address: Address) => void;
-  onDelete?: (addressId: string | number) => void;
-  initialData?: Address | null;
-  isEditing?: boolean;
+  onSelect: (address: Address) => void;
+  addresses: Address[];
+  onDelete: (addressId: string) => void;
 }
 
-const OrderDeliveryAddModal: React.FC<OrderDeliveryAddModalProps> = ({
+const OrderDeliveryAddModal: React.FC<Props> = ({
+  isOpen,
   onClose,
-  onSubmit,
-  onDelete,
-  initialData,
-  isEditing = false
+  onSelect,
+  addresses,
+  onDelete
 }) => {
-  const [addressData, setAddressData] = useState<Address>({
-    recipient_name: initialData?.recipient_name || '',
-    recipient_phone: initialData?.recipient_phone || '',
-    address: initialData?.address || '',
-    detailed_address: initialData?.detailed_address || '',
-    postal_code: initialData?.postal_code || '',
-    address_name: initialData?.address_name || '',
-    is_default: initialData?.is_default || false,
-    address_id: initialData?.address_id || ''
-  });
+  const [showEditModal, setShowEditModal] = React.useState(false);
+  const [editAddress, setEditAddress] = React.useState<Address | null>(null);
 
-  const [showPostcode, setShowPostcode] = useState(false);
+  if (!isOpen) return null;
 
-  const handleComplete = (data: any) => {
-    setAddressData(prev => ({
-      ...prev,
-      address: data.address,
-      postal_code: data.zonecode
-    }));
-    setShowPostcode(false);
+  const handleEdit = (address: Address) => {
+    setEditAddress(address);
+    setShowEditModal(true);
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      if (isEditing && initialData?.address_id) {
-        // 수정 모드
-        const response = await axiosInstance.put(
-          `/api/addresses/${initialData.address_id}`,
-          addressData
-        );
-        if (response.data.success) {
-          onSubmit(response.data.address);
-        }
-      } else {
-        // 새로운 주소 추가 모드
-        const response = await axiosInstance.post('/api/addresses', addressData);
-        if (response.data.success) {
-          onSubmit(response.data.address);
-        }
-      }
-      onClose();
-    } catch (error) {
-      console.error('배송지 저장 실패:', error);
-    }
-  };
-
-  const handleDelete = async () => {
-    if (onDelete && initialData?.address_id) {
-      await onDelete(initialData.address_id);
-      onClose();
-    }
+  const handleAddNew = () => {
+    setEditAddress(null);
+    setShowEditModal(true);
   };
 
   return (
-    <div className={open ? "openModal modal" : "modal"}>
-      {open ? (
-        <section className="modalSection">
-          <header className="modalHeader">
-            {header}
-            <button onClick={close} className="close">
-              <IoClose className="closeIcon"/>
-            </button>
-          </header>
-          <main className="modalMain">
-            <form onSubmit={handleSubmit}>
-              <div className="newAddress">
-                <input type="text" 
-                  name="address"/>
-                <button>주소 찾기</button>
+    <div className="modal-overlay">
+      <div className="modal-content">
+        <h2>배송지 선택</h2>
+        
+        {/* 배송지 목록 */}
+        <div className="address-list">
+          {addresses.map((address) => (
+            <div key={address.address_id} className="address-item">
+              {address.is_default && <span className="default-badge">기본 배송지</span>}
+              <div className="address-info">
+                <p className="address-name">{address.address_name}</p>
+                <p className="recipient">{address.recipient_name}</p>
+                <p className="address">
+                  {address.address} {address.detailed_address}
+                </p>
+                <p className="phone">{address.recipient_phone}</p>
               </div>
-              <div className="recipientContainer">
-                <div className="recipientTitle"></div>
-                <input type="text"
-                  className="recipientForm"/>
+              <div className="address-actions">
+                <button onClick={() => onSelect(address)}>선택</button>
+                <button onClick={() => handleEdit(address)}>수정</button>
+                {!address.is_default && (
+                  <button onClick={() => onDelete(address.address_id)}>삭제</button>
+                )}
               </div>
-              <div className="contactContainer">
-                <div className="contactTitle"></div>
-                <input type="text"
-                  className="contactForm"/>
-              </div>
-              <div className="contactContainer">
-                <div className="contactTitle"></div>
-                <input type="text"
-                  className="contactForm"/>
-              </div>
+            </div>
+          ))}
+        </div>
 
-            </form>
-          </main>
-          <footer className="modalFooter">
-            <button onClick={close} className="selectAddress">취소</button>
-            <button onClick={close} className="footerClose">저장</button>
-          </footer>
-        </section>
-      ):null}
+        {/* 새 배송지 추가 버튼 */}
+        <button className="add-address-btn" onClick={handleAddNew}>
+          + 새 배송지 추가
+        </button>
+
+        <button className="close-btn" onClick={onClose}>닫기</button>
+      </div>
+
+      {/* 배송지 추가/수정 모달 */}
+      {showEditModal && (
+        <OrderDeliveryEditModal
+          isOpen={showEditModal}
+          onClose={() => setShowEditModal(false)}
+          initialData={editAddress}
+          isEditing={!!editAddress}
+        />
+      )}
     </div>
   );
 }
