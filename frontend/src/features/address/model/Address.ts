@@ -1,11 +1,11 @@
 export interface Address {
-  address_id: number;
+  address_id?: string | number;
   user_id: string;
   address_name: string;
   recipient_name: string;
   recipient_phone: string;
   address: string;
-  detailed_address?: string;
+  detailed_address: string;
   postal_code: string;
   is_default: boolean;
   created_at?: Date;

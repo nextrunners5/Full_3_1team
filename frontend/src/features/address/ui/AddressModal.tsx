@@ -42,7 +42,11 @@ const AddressModal: React.FC<AddressModalProps> = ({
   );
 
   const handleAddressComplete = (data: { address: string; zonecode: string }) => {
-    console.log('주소 검색 결과:', data);
+    console.log('DaumPostcode 결과:', {
+      address: data.address,
+      zonecode: data.zonecode,
+      fullData: data
+    });
     setFormData(prev => ({
       ...prev,
       address: data.address,

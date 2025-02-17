@@ -82,6 +82,7 @@ const MyPage: React.FC = () => {
           const mappedAddr = {
             ...addr,
             detailed_address: addr.detailed_address || "",
+            postal_code: addr.postal_code || "",
           };
           console.log("매핑 후 주소 데이터:", mappedAddr);
           return mappedAddr;
@@ -216,6 +217,7 @@ const MyPage: React.FC = () => {
 
   // 배송지 수정 핸들러
   const handleEditAddress = (address: Address) => {
+    console.log("수정할 주소 데이터:", address);
     setEditAddress(address);
     setShowAddressModal(true);
   };
@@ -521,7 +523,11 @@ const MyPage: React.FC = () => {
             }}
             onSubmit={handleAddAddress}
             onDelete={handleDeleteAddress}
-            initialData={editAddress}
+            initialData={editAddress && {
+              ...editAddress,
+              detailed_address: editAddress.detailed_address || '',
+              postal_code: editAddress.postal_code || ''
+            }}
             isEditing={!!editAddress}
           />
         )}

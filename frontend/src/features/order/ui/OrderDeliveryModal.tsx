@@ -35,7 +35,17 @@ const OrderDeliveryModal: React.FC<ModalProps> = ({
   const [addressList, setAddressList] = useState<UserAddressInfo[]>([]);
   useEffect(() => {
     if(open){
-      console.log("모달", userAddressDetails);
+      console.log("배송지 목록 데이터:", {
+        userAddressDetails,
+        addressList
+      });
+      userAddressDetails.forEach(addr => {
+        console.log('배송지 상세:', {
+          name: addr.address_name,
+          postal: addr.postal_code,
+          full: addr.address
+        });
+      });
       // console.log("address_id", selectedAddress?.address_id);
       // setAddressList(userAddressDetails);
       const defaultAddress = userAddressDetails.find((addr) => addr.is_default === true);

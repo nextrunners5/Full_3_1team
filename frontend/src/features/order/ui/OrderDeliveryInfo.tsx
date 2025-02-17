@@ -21,7 +21,14 @@ const OrderDeliveryInfo: React.FC<OrderDeliveryInfoProps> = ({userId, addressCha
         console.log('🚀 getUserAddress 실행됨');
         console.log('프론트 주문 배송지 유저', userId);
         const addressDetails = await fetchDetailsAddress(userId);
-        console.log('주소 상세 데이터 가져오기 성공:', addressDetails);
+        console.log('주소 데이터 상세 확인:', JSON.stringify(addressDetails, null, 2));
+        addressDetails?.forEach(addr => {
+          console.log('각 주소의 우편번호:', {
+            address_name: addr.address_name,
+            postal_code: addr.postal_code,
+            full_address: addr.address
+          });
+        });
         
         if(addressDetails && Array.isArray(addressDetails) && addressDetails.length > 0){
           setUserAddressDetails(addressDetails);
@@ -38,7 +45,7 @@ const OrderDeliveryInfo: React.FC<OrderDeliveryInfoProps> = ({userId, addressCha
         }
         setIsLoading(false);
       } catch(err){
-        console.log('사용자의 주소 상세 정보를 가져오지 못했습니다.', err);
+        console.error('에러 상세:', err);
         setUserAddressDetails([]);
         setIsLoading(false);
       }
