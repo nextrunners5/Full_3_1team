@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import AddressSearch from '../../../shared/ui/AddressSearch';
+import { Address } from '../model/Address'
 import './AddressModal.css';
 
 interface AddressFormData {

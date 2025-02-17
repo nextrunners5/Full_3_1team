@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { Heart } from "lucide-react";
-
+import "./CSS/ProductCard.css"
 interface Product {
   product_id: number;
   product_name: string;
@@ -13,8 +13,8 @@ interface Product {
 
 interface ProductCardProps {
   product: Product;
-  isWishlisted: boolean;
-  toggleWishlist: (productId: number, productName: string) => void;
+  isWishlisted?: boolean;
+  toggleWishlist?: (productId: number, productName: string) => void;
 }
 
 const ProductCard: React.FC<ProductCardProps> = ({

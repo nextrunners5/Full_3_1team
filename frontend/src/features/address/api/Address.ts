@@ -11,8 +11,8 @@ export const addAddress = async (addressData: any): Promise<Address> => {
   return response.data;
 };
 
-export const updateAddress = async (id: number, address: Partial<Address>): Promise<Address> => {
-  const response = await axiosInstance.put(`/api/addresses/${id}`, address);
+export const updateAddress = async (addressId: number, addressData: any): Promise<Address> => {
+  const response = await axiosInstance.put(`/api/addresses/${addressId}`, addressData);
   return response.data;
 };
 

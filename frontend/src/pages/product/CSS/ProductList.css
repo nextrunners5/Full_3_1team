@@ -4,8 +4,14 @@
   justify-content: center;
   align-items: center;
   margin: 20px 0;
-  height: 200px;
-  background-color: cornflowerblue;
+  /* height: 200px; */
+  /* padding: 100px; */
+}
+
+.bannerSize{
+  width: 1440px;
+  height: auto;
+  
 }
 
 /* 정렬 컨트롤 */

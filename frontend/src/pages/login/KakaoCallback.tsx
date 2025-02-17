@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from '../../shared/axios/axios';
+import axiosInstance from '../../shared/axios/axios';
 import { useDispatch } from 'react-redux';
 import { setOrderUserId } from '../order/orderRedux/slice';
 
@@ -17,7 +17,7 @@ const KakaoCallback = () => {
       const code = new URL(window.location.href).searchParams.get('code');
       
       try {
-        const response = await axios.post('/api/auth/kakao/callback', { code });
+        const response = await axiosInstance.post('/api/auth/kakao/callback', { code });
         console.log('카카오 로그인 응답:', response.data);
 
         if (response.data.token) {

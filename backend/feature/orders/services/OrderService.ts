@@ -13,6 +13,8 @@ import {
   getUserAddress, 
   getUserDetailsAddress, 
   getUserPoints, 
+  insertCartOrder, 
+  insertCartOrderItems, 
   insertOrderDelivery, 
   // insertOrder,
   insertOrderItems,
@@ -128,20 +130,16 @@ export const fetchOrderCartProduct = async(orderData:any) => {
   try{
     const statusid = 'OS001';
     const orderType = 'OT001';
-    const {userId, productId, quantity, totalAmount, discountAmount, finalAmount, shippingFee, selectedSize, selectedColor, statusId} = orderData;
+    const {userId, totalAmount, discountAmount, finalAmount, shippingFee, statusId} = orderData;
     // const orderId = await insertOrder(userid, totalAmount, discountAmount, finalAmount, shippingFee, statusid, orderType);
-    const orderId = await insertOrderItems(
+    const orderId = await insertCartOrder(
       userId, 
       totalAmount, 
       discountAmount, 
       finalAmount, 
       shippingFee, 
       orderType, 
-      productId, 
       statusid,
-      quantity,
-      selectedSize,
-      selectedColor
     );
     console.log('orderID', orderId,typeof(orderId));
     if(!orderId){
@@ -155,9 +153,36 @@ export const fetchOrderCartProduct = async(orderData:any) => {
   }
 }
 
+export const fetchOrderCartItem = async(orderData: any) => {
+  try{
+    const statusid = 'OS001';
+    const {orderId, productId, quantity, selectedSize, selectedColor, statusId} = orderData;
+    // const orderId = await insertOrder(userid, totalAmount, discountAmount, finalAmount, shippingFee, statusid, orderType);
+    const orderItemsData = await insertCartOrderItems(
+      orderId,
+      productId, 
+      statusid,
+      quantity,
+      selectedSize,
+      selectedColor
+    );
+    console.log('orderID', orderItemsData,typeof(orderItemsData));
+    if(!orderItemsData){
+      throw new Error('order_id가 존재하지 않습니다.');
+    }
+    return orderItemsData;
+    // await insertOrderItems(orderId, productId, statusid,quantity,selectedSize,selectedColor);
+  } catch(err){
+    console.error('단일 상품 저장 실패', err);
+    throw err;
+  }
+}
+
 export const fetchInsertDeliveryInfo = async(orderId: string, selectedAddress: any, selectedMessage: string) => {
   try{
-    const deliveryInfo = await insertOrderDelivery(orderId, selectedAddress,selectedMessage);
+    console.log('selectedAddress 데이터', selectedAddress);
+    const combinedAddress = `${selectedAddress.address} ${selectedAddress.detailed_address}`;
+    const deliveryInfo = await insertOrderDelivery(orderId, combinedAddress,selectedMessage);
     console.log("주문 배송지 추가",deliveryInfo);
     return deliveryInfo;
   }catch(err){
@@ -165,9 +190,11 @@ export const fetchInsertDeliveryInfo = async(orderId: string, selectedAddress: a
   }
 }
 
-export const fetchUpdateOrderStatus = async(orderId: string) => {
+export const fetchUpdateOrderStatus = async(order: { order_id: string }) => {
   try{
-    const orderStatus = await updateOrderStatus(orderId);
+    const { order_id } = order;
+    console.log('[fetchUpdateOrderStatus', order_id);
+    const orderStatus = await updateOrderStatus(order_id);
     console.log("주문 상태 변경",orderStatus);
     return orderStatus;
   }catch(err){

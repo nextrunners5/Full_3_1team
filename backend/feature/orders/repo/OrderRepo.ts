@@ -244,18 +244,95 @@ export const insertOrderItems = async(userid: string, totalAmount:number, discou
   }
 }
 
-export const insertOrderDelivery = async(orderId: string, selectedAddress: any, selectedMessage: string) => {
-  console.log('[insertOrderDelivery]', orderId, selectedAddress, selectedMessage);
+export const insertCartOrder = async(userId: string, totalAmount: number, discountAmount: number, finalAmount: number, shippingFee: number, orderType: string, statusid: string) => {
+  console.log('[insertCartOrder]', userId, totalAmount, discountAmount, finalAmount, shippingFee, orderType, statusid);
+  try{
+    const createOrderId = () => {
+      const timestamp = Date.now().toString().slice(-6);
+      return `ODR${timestamp}`;
+    };
+    const orderId = createOrderId();
+    console.log('생성된 orderId', orderId);
+    
+    const orderQuery = `INSERT INTO Orders(order_id, user_id, status_id, total_amount, discount_amount, final_amount, shipping_fee, order_type) 
+                        VALUES(?,?,?,?,?,?,?,?)`;
+
+    console.log('Executing orderQuery:', orderQuery);
+    console.log('Query parameters:', [orderId, userId, statusid, totalAmount, discountAmount, finalAmount, shippingFee, orderType]);
+
+    const [orderInsertResult] = await pool.promise().query(orderQuery, [
+      orderId, 
+      userId, 
+      statusid, 
+      totalAmount, 
+      discountAmount,
+      finalAmount,
+      shippingFee,
+      orderType
+    ]);
+
+    return orderId;
+  }catch(err){
+    console.error('장바구니 상품을 Orders 테이블에 추가하지 못했습니다.', err);
+  }
+}
+
+export const insertCartOrderItems = async(orderId: string, productId: number, statusid: string, quantity: number, selectedSize: string, selectedColor: string) => {
+  console.log('[insertCartOrderItems] 데이터 값', orderId, productId, statusid, quantity, selectedSize, selectedColor);
+  try{
+    const createOrderItemId = () => {
+      const timestamp = Date.now().toString().slice(-6);
+      return `ODRI${timestamp}`;
+    };
+    const orderItemId = createOrderItemId();
+    console.log('generated orderItemId', orderItemId);
+    const orderItemsQuery = `INSERT INTO OrderItems(orderItems_id, order_id, product_id, order_status, product_count, option_size, option_color) 
+                              VALUES(?,?,?,?,?,?,?)`;
+    const [result] = await pool.promise().query(orderItemsQuery,[
+      orderItemId, 
+      orderId,
+      productId, 
+      statusid, 
+      quantity, 
+      selectedSize,
+      selectedColor 
+    ]);
+
+    return result;
+  } catch(err){
+    console.error("장바구니 상품을 OrderItems 테이블에 추가하지 못했습니다.", err);
+  }
+}
+
+export const insertOrderDelivery = async(orderId: string, combinedAddress: string, selectedMessage: string) => {
+  console.log('[insertOrderDelivery]', orderId, combinedAddress, selectedMessage);
+  const getMessageCode = (message: string): string => {
+    switch (message) {
+      case '부재시 경비실에 맡겨주세요':
+        return 'DM001';
+      case '문 앞에 놔주세요':
+        return 'DM002';
+      case '택배함에 놔주세요':
+        return 'DM003';
+      case '배송 전에 연락주세요':
+        return 'DM004';
+      default:
+        return 'DM001';  // 기본 메시지 코드
+    }
+  };
   try{
     const deliveryStatus = 'DS001'
+    
     const deliveryDate = new Date();
     deliveryDate.setDate(deliveryDate.getDate() + 2);
     const formattedDeliveryDate = deliveryDate.toISOString().slice(0, 19).replace("T", " ");
 
-    const deliveryQuery = 
-    `INSERT INTO Delivery(order_id, delivery_status, delivery_message, delivery_address, delivery_date)
-    VALUES(?,?,?,?,?);`
-    const [res] = await pool.promise().query(deliveryQuery,[orderId,deliveryStatus,selectedMessage,selectedAddress,formattedDeliveryDate]);
+    const messageCode = getMessageCode(selectedMessage);
+
+    const deliveryQuery = `
+    INSERT INTO Delivery(order_id, delivery_status, delivery_message, delivery_address, delivery_date)
+    VALUES(?,?,?,?,?)`;
+    const [res] = await pool.promise().query(deliveryQuery,[orderId,deliveryStatus,messageCode,combinedAddress,formattedDeliveryDate]);
 
     console.log('주문 배송지 정보가 추가되었습니다.');
   }catch(err){
@@ -263,21 +340,32 @@ export const insertOrderDelivery = async(orderId: string, selectedAddress: any, 
   }
 }
 
-export const updateOrderStatus = async(orderId: string) => {
+export const updateOrderStatus = async(orderId: string ) => {
+  // const {orderId} = order;
   console.log('[updateOrderStatus]', orderId);
+  console.log('[updateOrderStatus]', typeof(orderId));
+  
   try{
-    const deliveryStatus = 'DS001'
-    const deliveryDate = new Date();
-    deliveryDate.setDate(deliveryDate.getDate() + 2);
-    const formattedDeliveryDate = deliveryDate.toISOString().slice(0, 19).replace("T", " ");
+    const orderStatusQuery = `
+      UPDATE Orders 
+      SET status_id = 'OS002' 
+      WHERE order_id = ?`;
 
-    const deliveryQuery = 
-    `INSERT INTO Delivery(order_id, delivery_status, delivery_message, delivery_address, delivery_date)
-    VALUES(?,?,?,?,?);`
-    const [res] = await pool.promise().query(deliveryQuery,[orderId]);
+    const orderItemsStatusQuery = `
+      UPDATE OrderItems
+      SET order_status = 'OS002' 
+      WHERE order_id = ?`;
 
-    console.log('주문 배송지 정보가 추가되었습니다.');
+    await pool.promise().query(orderStatusQuery,[orderId]);
+    console.log('Orders 테이블의 주문 상태가 업데이트 되었습니다.');
+
+    await pool.promise().query(orderItemsStatusQuery,[orderId]);
+    console.log('OrderItems 테이블의 주문 상태가 업데이트 되었습니다.');
+
+    console.log('주문 상태가 업데이트 되었습니다.');
+
+    return orderId;
   }catch(err){
-    console.error('주문 배송지를 추가하지 못했습니다.', err);
+    console.error('주문 상태를 업데이트하지 못했습니다.', err);
   }
 }

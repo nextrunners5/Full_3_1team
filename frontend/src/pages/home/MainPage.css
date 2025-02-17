@@ -59,8 +59,9 @@ html, body {
 /* BEST PRODUCT / NEW PRODUCT 버튼 감싸는 영역 */
 .sectionTitleGroupMAIN {
   text-align: center;
-  margin-bottom: 50px;
+  margin-bottom: 25px;
   margin-top: 50px;
+  border-radius: 20px;
 }
 
 .productButtonMAIN {
@@ -88,8 +89,17 @@ html, body {
   display: flex;
   justify-content: center;
   gap: 60px; /* 상품 간 간격 확대 */
+  /* background-color: #6A8BB6; */
+  /* padding: 20px; */
+  /* border-radius: 5px; */
 }
-
+.productCardContainerMAIN .product-card {
+background-color: white;
+border-radius: 10px;
+box-shadow: 4px 4px 5px 0px rgba(0,0,0,0.41);
+-webkit-box-shadow: 4px 4px 5px 0px rgba(0,0,0,0.41);
+-moz-box-shadow: 4px 4px 5px 0px rgba(0,0,0,0.41);
+}
 /* 각 상품 카드 */
 .productCardMAIN {
   width: 300px;

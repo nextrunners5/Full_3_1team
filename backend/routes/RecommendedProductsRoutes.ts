@@ -1,6 +1,5 @@
-// RecommendedProductsRoutes.ts
 import express from "express";
-import { getRecommendedProducts } from "../feature/product/controllers/RecommendedProductsController";
+import { getRecommendedProducts } from "../feature/cart/Recommend/RecommendedProductController";
 
 const router = express.Router();
 

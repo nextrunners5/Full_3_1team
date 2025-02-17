@@ -18,7 +18,7 @@ import userRoutes from './routes/UserRoutes';
 import path from "path";
 import { errorHandler } from './middlewares/AuthMiddleware';
 import PaymentRoutes from './routes/PaymentRoutes';
-import { RecommendedProductsRoutes } from './routes/RecommendedProductsRoutes'
+import RecommendedProductsRoutes from './routes/RecommendedProductsRoutes'
 
 const app = express();
 const PORT = process.env.PORT || 3000;

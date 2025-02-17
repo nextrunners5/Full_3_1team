@@ -34,6 +34,11 @@ const OrderPay: React.FC<OrderPayProps> = ({userId, selectedAddress, selectedMes
 
 
   const handlePayment = async () => {
+    if (!selectedAddress) {
+      alert("주소를 선택해주세요.");
+      return;
+    }
+    
     setIsLoading(true);
     try {
       const tossPayments = await loadTossPayments(import.meta.env.VITE_TOSS_CLIENT_KEY);
@@ -41,18 +46,24 @@ const OrderPay: React.FC<OrderPayProps> = ({userId, selectedAddress, selectedMes
       // const finalPrice = totalPrice - points ;
       const final_price = finalPrice;
 
+      const encodedAddress = encodeURIComponent(JSON.stringify(selectedAddress));
+
       // 결제 요청
       await tossPayments.requestPayment("카드", {
         orderId: `${orderId}`,
         orderName: "구매 상품",
         amount: final_price,
         customerName: `${userId}`, // 실제 환경에서는 사용자 이름을 받아야 함
-        successUrl: `${window.location.origin}/payments/success`,
+        // successUrl: `${window.location.origin}/payments/success`,
+        successUrl: `${window.location.origin}/payments/success?orderId=${orderId}&address=${encodedAddress}&message=${encodeURIComponent(selectedMessage)}`,
         failUrl: `${window.location.origin}/payments/fail`,
+        
       });
 
       await fetchUpdateInfo(orderId);
+      console.log('fetchUpdateInfo 실행됨');
       await fetchInsertDelivery(orderId, selectedAddress, selectedMessage);
+      console.log('fetchInsertDelivery 실행됨');
 
     } catch (error) {
       console.error("결제 요청 실패:", error);

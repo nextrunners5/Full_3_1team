@@ -162,4 +162,67 @@ export class AddressController {
       res.status(500).json({ message: '기본 배송지 설정에 실패했습니다.' });
     }
   }
+
+  static async updateAddress(req: AuthenticatedRequest, res: Response) {
+    try {
+      const userId = req.user?.user_id;
+      const addressId = parseInt(req.params.id);
+
+      if (!userId) {
+        return res.status(401).json({ message: '인증된 사용자가 아닙니다.' });
+      }
+
+      const {
+        address_name,
+        recipient_name,
+        recipient_phone,
+        address,
+        detailed_address,
+        postal_code,
+        is_default
+      } = req.body;
+
+      const connection = await pool.promise().getConnection();
+      
+      try {
+        await connection.beginTransaction();
+
+        // 기본 배송지로 설정하는 경우, 다른 주소들의 기본 배송지 설정을 해제
+        if (is_default) {
+          await connection.query(
+            'UPDATE UserAddresses SET is_default = false WHERE user_id = ? AND address_id != ?',
+            [userId, addressId]
+          );
+        }
+
+        // 주소 정보 업데이트
+        const [result] = await connection.query(
+          `UPDATE UserAddresses 
+           SET address_name = ?, recipient_name = ?, recipient_phone = ?,
+               address = ?, detailed_address = ?, postal_code = ?, is_default = ?
+           WHERE address_id = ? AND user_id = ?`,
+          [address_name, recipient_name, recipient_phone, address, 
+           detailed_address, postal_code, is_default, addressId, userId]
+        );
+
+        await connection.commit();
+        res.json({
+          success: true,
+          message: '배송지가 수정되었습니다.'
+        });
+      } catch (error) {
+        await connection.rollback();
+        throw error;
+      } finally {
+        connection.release();
+      }
+    } catch (error) {
+      console.error('배송지 수정 실패:', error);
+      res.status(500).json({
+        success: false,
+        message: '배송지 수정에 실패했습니다.',
+        error: error instanceof Error ? error.message : '알 수 없는 오류'
+      });
+    }
+  }
 } 

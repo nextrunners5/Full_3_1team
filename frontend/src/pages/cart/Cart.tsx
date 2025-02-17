@@ -7,11 +7,13 @@ import ProductCard from "../product/ProductCard";
 import Footer from "../../widgets/footer/Footer";
 import { useNavigate } from "react-router-dom";
 
+
 type CartItem = {
   cartItemId: number;
   productId: string;
   name: string;
   price: number;
+  origin_price: number;
   quantity: number;
   selected_size: string;
   selected_color: string;
@@ -19,9 +21,21 @@ type CartItem = {
   selected?: boolean; // 선택 여부
 };
 
+interface Product {
+  product_id: number;
+  product_name: string;
+  origin_price: number;
+  discount_price : number;
+  final_price: number;
+  main_image: string;
+  small_image: string;
+}
+
 const CartPage = () => {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [productsToShow, setProductsToShow] = useState<Product[]>([]);
+  const [bestProducts, setBestProducts] = useState<CartItem[]>([]);
+  const [newProducts, setNewProducts] = useState<CartItem[]>([]);
   const [selectAll, setSelectAll] = useState(false);
   const [isChecked, setIsChecked] = useState(false);
 
@@ -39,13 +53,12 @@ const CartPage = () => {
 
         // 2) 장바구니 조회
         const response = await axiosInstance.get(`api/carts/${userId}`);
-
-        // 이미지 포함 데이터 변환
         const formattedItems = (response.data as any[]).map((item) => ({
           cartItemId: item.cart_item_id,
-          productId: item.product_id,
+          productId: String(item.product_id),
           name: item.name,
           price: item.final_price ?? 0, // NaN 방지
+          origin_price: item.origin_price ?? item.final_price,
           quantity: Number(item.quantity),
           selected_size: item.selected_size,
           selected_color: item.selected_color,
@@ -62,7 +75,7 @@ const CartPage = () => {
 
     const fetchRecommendedProducts = async () => {
       try {
-        const response = await axiosInstance.get("/api/recommended-products");
+        const response = await axiosInstance.get("/api/products/best");
         // 데이터 형식에 따라 아래와 같이 변환합니다.
         const formattedProducts = (response.data as any[]).map((product) => ({
           product_id: product.product_id,
@@ -82,6 +95,8 @@ const CartPage = () => {
     fetchCartItems();
     fetchRecommendedProducts();
   }, [navigate]);
+  
+  // const productsToShow = selectedCategory === "best" ? bestProducts : newProducts;
 
   // 주문하기
   const handleOrder = async () => {
@@ -104,33 +119,42 @@ const CartPage = () => {
         return;
       }
 
-      // 선택된 아이템들의 총 주문 금액 계산 (각 아이템의 price * quantity)
-  const orderTotalAmount = selectedItems.reduce(
-    (acc, item) => acc + item.price * item.quantity,
-    0
-  );
-  const discountAmount = 0; // 할인 금액이 없으면 0
-  const finalAmount = orderTotalAmount - discountAmount;
-  const shippingFee = 3000;
-  const orderType = "OT001";  // 주문 타입 (예시)
+    // 각 아이템별 금액 계산
+    const orderTotalAmount = selectedItems.reduce(
+      (acc, item) => acc + (item.origin_price * item.quantity),
+      0
+    );
+    const discountAmount = selectedItems.reduce(
+      (acc, item) => acc + ((item.origin_price - item.price) * item.quantity),
+      0
+    );
+    const finalAmount = selectedItems.reduce(
+      (acc, item) => acc + (item.price * item.quantity),
+      0
+    );
+    const shippingFee = 3000;
+    const orderType = "OT001"; // 주문 타입 예시
+    const statusId = "OS001";  // 주문 상태 예시
+    
+    const orderData = {
+      type: "Cart",
+      userId,
+      statusId, // Orders 테이블에 들어갈 주문 상태
+      totalAmount: orderTotalAmount,
+      discountAmount: discountAmount,
+      finalAmount: finalAmount,
+      shippingFee: shippingFee,
+      orderType: orderType,
+      items: selectedItems.map((item) => ({
+        product_id: String(item.productId),       // 반드시 문자열로 변환
+        order_status: statusId,                     // 주문 상태 (예: OS001)
+        product_count: item.quantity,               // 주문 수량
+        option_size: item.selected_size,
+        option_color: item.selected_color,
+      }))
+    };
+    console.log("orderData:", orderData);
 
-  const orderData = {
-    type: "Cart",
-    userId,
-    totalAmount: orderTotalAmount,
-    discountAmount: discountAmount,
-    finalAmount: finalAmount,
-    shippingFee: shippingFee,
-    orderType: orderType,
-  
-    items: selectedItems.map((item) => ({
-      productId: item.productId,
-      quantity: item.quantity,
-      selectedSize: item.selected_size,
-      selectedColor: item.selected_color,
-      // 개별 아이템 별 금액 정보가 필요하다면 추가 가능
-    }))
-  };
       const response = await axiosInstance.post("/api/orders", orderData);
       alert(
         `주문이 성공적으로 완료되었습니다! 주문번호: ${response.data.orderId}`
@@ -241,9 +265,7 @@ const CartPage = () => {
   };
 
   // 총 금액 계산
-  const totalAmount = cartItems.reduce((total, item) => {
-    return total + item.price * item.quantity;
-  }, 0);
+  const totalAmount = cartItems.reduce((total, item) => total + item.price * item.quantity, 0);
 
   // 약관동의
   const handleCheckboxChange = (event: React.ChangeEvent<HTMLInputElement>) => {

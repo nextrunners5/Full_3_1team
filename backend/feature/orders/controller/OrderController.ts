@@ -1,7 +1,7 @@
 //컨트롤러는 사용자로부터의 요청을 받아서 처리하고, 적절한 응답을 반환하는 역할을 합니다. 
 //비즈니스 로직을 서비스 계층에 위임하고, 서비스로부터 받은 결과를 클라이언트에 반환합니다.
 import { Request, Response } from 'express';
-import { fetchUserPoints, fetchDeliveryMessage, fetchUserAddress, fetchUserDetailsAddress, fetchOrderProducts, fetchShippingFee, fetchOrderSingleProduct, fetchOrderCartProduct, fetchInsertDeliveryInfo, fetchUpdateOrderStatus } from '../services/OrderService';
+import { fetchUserPoints, fetchDeliveryMessage, fetchUserAddress, fetchUserDetailsAddress, fetchOrderProducts, fetchShippingFee, fetchOrderSingleProduct, fetchOrderCartProduct, fetchInsertDeliveryInfo, fetchUpdateOrderStatus, fetchOrderCartItem } from '../services/OrderService';
 
 const getUserPoints = async (req: Request, res: Response) => {
   const userId = req.params.userId as string;
@@ -78,12 +78,13 @@ const getOrderShipping = async(req: Request, res: Response) => {
 };
 
 const postOrderSingleProduct = async(req: Request, res: Response) => {
-  const {type, userId, productId, quantity, totalAmount, discountAmount, finalAmount, shippingFee, selectedSize, selectedColor, statusId} = req.body;
+  const {type, userId, totalAmount, discountAmount, finalAmount, shippingFee, statusId, items} = req.body;
   console.log('single Information', req.body);
   console.log('[백앤드] 상품데이터 유저아이디',userId);
   console.log('single Information', totalAmount, discountAmount);
   try{
     if(type === 'Single'){
+      const {productId, quantity, selectedSize, selectedColor} = req.body;
       const orderId = await fetchOrderSingleProduct({
         userId, 
         productId, 
@@ -97,25 +98,50 @@ const postOrderSingleProduct = async(req: Request, res: Response) => {
         statusId
       });
       console.log("orderProductInfo",orderId);
-      res.json(orderId);
-    } else{
+      return res.json(orderId);
+    } else if (type === 'Cart') {
+      // 카트에서 주문하기
+      if (!Array.isArray(items) || items.length === 0) {
+        return res.status(400).json({ error: '장바구니에 상품이 없습니다.' });
+      }
+
+      //하나의 orderId 생성
       const orderId = await fetchOrderCartProduct({
-        userId, 
-        productId, 
-        quantity, 
-        totalAmount, 
-        discountAmount, 
-        finalAmount, 
-        shippingFee, 
-        selectedSize, 
-        selectedColor, 
-        statusId
+        userId,
+        totalAmount,
+        discountAmount,
+        finalAmount,
+        shippingFee,
+        statusId,
       });
-      console.log("orderProductInfo",orderId);
-      res.json(orderId);
+
+      console.log("Cart Order Created, Order ID:", orderId);
+
+      //생성된 orderId를 사용하여 각 상품을 저장
+      const orderItemResults = [];
+      for (const item of items) {
+        const { product_id, product_count, option_size, option_color, order_status } = item;
+
+        const orderItemId = await fetchOrderCartItem({
+          orderId,  //같은 orderId를 사용
+          productId: product_id,
+          quantity: product_count,
+          selectedSize: option_size,
+          selectedColor: option_color,
+          statusId: order_status || "OS001",  // 기본값 추가
+        });
+
+        orderItemResults.push(orderItemId);
+      }
+
+      console.log("Cart Order Items:", orderItemResults);
+      return res.json({ success: true, orderId, orderItems: orderItemResults });
+
+    } else {
+      return res.status(400).json({ error: '잘못된 주문 유형입니다.' });
     }
   }catch(err){
-    res.status(500).json({error:'단일 상품 정보 저장 실패'});
+    return res.status(500).json({error:'단일 상품 정보 저장 실패'});
   }
 }
 
@@ -132,10 +158,10 @@ const postOrderDeliveryInfo = async(req: Request, res: Response) => {
 }
 
 const putOrderStatus = async(req: Request, res: Response) => {
-  const {orderId} = req.body;
+  const {order_id} = req.body;
   console.log('putOrderStatus', req.body);
   try{
-    const result = await fetchUpdateOrderStatus(req.body);
+    const result = await fetchUpdateOrderStatus({order_id});
     console.log('putOrderStatus result', result);
     res.json(result);
   } catch(err){

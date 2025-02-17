@@ -5,6 +5,7 @@ import Header from '../../widgets/header/Header';
 import Footer from '../../widgets/footer/Footer';
 import ProductCard from '../product/ProductCard';
 
+
 import homeImage from '../../assets/Home.jpg';
 import aboutImage from '../../assets/Home2.jpg';
 import bumImage from '../../assets/bum.jpg';
