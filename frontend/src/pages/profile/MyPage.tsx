@@ -44,6 +44,18 @@ interface AddressFormData {
   is_default: boolean;
 }
 
+interface OrderHistoryItem {
+  order_id: string;
+  order_date: string;
+  total_amount: number;
+  status_id: string;
+  status_name: string;
+  main_image?: string;
+  product_name: string;
+  quantity: number;
+  has_review: boolean;
+}
+
 const MyPage: React.FC = () => {
   const [period, setPeriod] = useState("1month");
   const [orderType, setOrderType] = useState("all");
@@ -64,7 +76,7 @@ const MyPage: React.FC = () => {
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [showAllAddresses, setShowAllAddresses] = useState(false);
   const [editAddress, setEditAddress] = useState<Address | null>(null);
-  const [orderHistory, setOrderHistory] = useState([]);
+  const [orderHistory, setOrderHistory] = useState<OrderHistoryItem[]>([]);
   const [isOrderLoading, setIsOrderLoading] = useState(true);
 
   const navigate = useNavigate();
@@ -261,35 +273,39 @@ const MyPage: React.FC = () => {
   // 주문내역 조회
   const fetchOrderHistory = async () => {
     try {
-      const userId = localStorage.getItem("userId");
-      if (!userId) {
-        throw new Error("사용자 ID가 없습니다.");
-      }
-
       setIsOrderLoading(true);
-      const response = await axiosInstance.get(
-        `/api/orders/history/${userId}`,
-        {
-          params: { period },
-        }
-      );
+      const response = await axiosInstance.get('/api/orders/history', {
+        params: { period }
+      });
 
       if (response.data.success) {
-        setOrderHistory(response.data.orders);
+        // 주문 타입에 따른 필터링
+        let filteredOrders = response.data.orders;
+        if (orderType !== 'all') {
+          filteredOrders = filteredOrders.filter((order: any) => {
+            if (orderType === 'processing') {
+              return ['OS001', 'OS002', 'OS003'].includes(order.status_id);
+            } else if (orderType === 'completed') {
+              return ['OS004', 'OS005', 'OS006'].includes(order.status_id);
+            }
+            return true;
+          });
+        }
+        setOrderHistory(filteredOrders);
       }
     } catch (error) {
-      console.error("주문내역 조회 실패:", error);
+      console.error('주문내역 조회 실패:', error);
     } finally {
       setIsOrderLoading(false);
     }
   };
 
-  // period가 변경될 때마다 주문내역 새로 조회
+  // 기간이나 주문타입이 변경될 때마다 주문내역 새로 조회
   useEffect(() => {
     fetchOrderHistory();
-  }, [period]);
+  }, [period, orderType]);
 
-  // 주문내역 테이블 렌더링
+  // 주문내역 렌더링
   const renderOrderHistory = () => {
     if (isOrderLoading) {
       return (
@@ -299,7 +315,7 @@ const MyPage: React.FC = () => {
       );
     }
 
-    if (!orderHistory || orderHistory.length === 0) {
+    if (!orderHistory.length) {
       return (
         <tr>
           <td colSpan={6}>주문내역이 없습니다.</td>
@@ -307,7 +323,7 @@ const MyPage: React.FC = () => {
       );
     }
 
-    return orderHistory.map((order: any) => (
+    return orderHistory.map((order: OrderHistoryItem) => (
       <tr key={order.order_id}>
         <td>{new Date(order.order_date).toLocaleDateString()}</td>
         <td>
@@ -329,7 +345,7 @@ const MyPage: React.FC = () => {
         </td>
         <td>
           {order.status_id === "OS001" && (
-            <button
+            <button 
               className="MP-cancel-btn"
               onClick={() => handleCancelOrder(order.order_id)}
             >
@@ -338,8 +354,8 @@ const MyPage: React.FC = () => {
           )}
         </td>
         <td>
-          {order.status_id === "OS003" && !order.has_review && (
-            <button
+          {order.status_id === "OS004" && !order.has_review && (
+            <button 
               className="MP-review-btn"
               onClick={() => handleWriteReview(order.order_id)}
             >
