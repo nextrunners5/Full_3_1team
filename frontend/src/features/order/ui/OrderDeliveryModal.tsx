@@ -7,7 +7,7 @@ import { UserAddressFormInfo, UserAddressInfo } from "../model/OrderModel";
 import { FaPlus } from "react-icons/fa6";
 import { BsPencilSquare } from "react-icons/bs";
 import AddressModal from "../../address/ui/AddressModal";
-import { fetchAddAddress, updateAddress } from "../api/Order";
+import { fetchAddAddress, updateAddress, setDefaultAddress } from "../api/Order";
 
 interface ModalProps {
   open: boolean;
@@ -73,6 +73,22 @@ const OrderDeliveryModal: React.FC<ModalProps> = ({
     setUpdateModalOpen(false);
   };
 
+  const handleSetDefaultAddress = async (addressId: number) => {
+    try {
+      const response = await setDefaultAddress(addressId);
+      if (response.success) {
+        // 현재 목록에서 모든 주소의 is_default를 false로 설정
+        const updatedAddresses = addressList.map(addr => ({
+          ...addr,
+          is_default: addr.address_id === addressId
+        }));
+        setAddressList(updatedAddresses);
+      }
+    } catch (error) {
+      console.error('기본 배송지 설정 실패:', error);
+    }
+  };
+
   const handleSubmitAddress = async (addressData: UserAddressFormInfo) => {
     console.log('저장된 주소 데이터', addressData);
     if (!addressData.address_name || addressData.address_name === "0") {
@@ -81,16 +97,24 @@ const OrderDeliveryModal: React.FC<ModalProps> = ({
     }
 
     const newAddress: UserAddressInfo = {
-      // address_id: Date.now(),  // 고유 ID 생성
       address_name: addressData.address_name,
       recipient_name: addressData.recipient_name,
       recipient_phone: addressData.recipient_phone,
       address: addressData.address,
-      detailed_address: addressData.detailed_address,
+      detailed_address: addressData.detailed_address || '',
       is_default: addressData.is_default || false,
-      postal_code: addressData.postal_code || "",
+      postal_code: addressData.postal_code || '',
     };
     setAddressList((prev) => [...prev, newAddress])
+
+    if (addressData.is_default) {
+      // 새 주소가 기본 배송지로 설정되는 경우
+      const updatedAddresses = addressList.map(addr => ({
+        ...addr,
+        is_default: false
+      }));
+      setAddressList(updatedAddresses);
+    }
 
     try{
       console.log('[프론트 newAddress]', newAddress);
@@ -169,7 +193,9 @@ const OrderDeliveryModal: React.FC<ModalProps> = ({
                     </div>
                     <div className="selectDeliveryInfo">
                       <div className="deliveryName">{address.recipient_name}</div>
-                      <div className="deliveryDetail">{address.address}{address.detailed_address}</div>
+                      <div className="deliveryDetail">
+                        {address.address}{address.detailed_address ? ` ${address.detailed_address}` : ''}
+                      </div>
                       <div className="deliveryPhone">{address.recipient_phone}</div>
                     </div>
                   </div>

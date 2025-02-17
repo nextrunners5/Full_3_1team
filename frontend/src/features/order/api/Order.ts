@@ -155,3 +155,14 @@ export const updateAddress = async (addressId: number, addressData: UserAddressF
   }
 };
 
+// 기본 배송지 설정 API 추가
+export const setDefaultAddress = async (addressId: number) => {
+  try {
+    const response = await axiosInstance.put(`/api/addresses/${addressId}/default`);
+    return response.data;
+  } catch (error) {
+    console.error('기본 배송지 설정 실패:', error);
+    throw error;
+  }
+};
+

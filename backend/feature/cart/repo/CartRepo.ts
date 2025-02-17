@@ -33,13 +33,22 @@ export const getCart = async (userId: string) => {
           product_id: String(item.product_id),
         });
 
+        let mainImageUrl = "https://via.placeholder.com/100";
+        if (productImage && productImage.main_image) {
+          mainImageUrl = productImage.main_image;
+          if (!mainImageUrl.startsWith("http")) {
+            // 상대경로라면, 예시로 baseURL을 http://localhost:3000 으로 붙여줌 (환경변수 활용 가능)
+            const baseURL = process.env.BASE_URL || "http://localhost:3000";
+            mainImageUrl = mainImageUrl.startsWith("/")
+              ? `${baseURL}${mainImageUrl}`
+              : `${baseURL}/${mainImageUrl}`;
+          }
+        }
+        
         return {
           ...item,
-          // 2) main_image 필드에 MongoDB 이미지 연결
-          main_image: productImage
-            ? productImage.main_image
-            : "https://via.placeholder.com/100",
-          small_image: productImage
+          main_image: mainImageUrl,
+          small_image: productImage && productImage.small_image
             ? productImage.small_image
             : "https://via.placeholder.com/100",
           detail_images: productImage ? productImage.detail_images : [],
