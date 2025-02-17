@@ -54,6 +54,18 @@ const MyPage: React.FC = () => {
 
   const navigate = useNavigate();
 
+  // 컴포넌트 마운트 시 로그인 상태 체크
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      // 로그인되지 않은 경우 로그인 페이지로 리다이렉트
+      navigate('/login', { 
+        // 로그인 후 다시 마이페이지로 돌아올 수 있도록 state에 리다이렉트 경로 저장
+        state: { from: '/MyPage' } 
+      });
+    }
+  }, [navigate]);
+
   // 배송지 목록 조회
   const fetchAddresses = async () => {
     try {
