@@ -146,13 +146,25 @@ const MyPage: React.FC = () => {
   // 배송지 추가 핸들러
   const handleAddAddress = async (addressData: AddressFormData) => {
     try {
-      const response = await axiosInstance.post('/api/addresses', addressData);
-      if (response.data.success) {
-        fetchAddresses();  // 배송지 목록 새로고침
-        setShowAddressModal(false);
+      if (editAddress) {
+        // 수정 모드
+        const response = await axiosInstance.put(`/api/addresses/${editAddress.address_id}`, addressData);
+        if (response.data.success) {
+          fetchAddresses();  // 배송지 목록 새로고침
+          setShowAddressModal(false);
+          setEditAddress(null);
+        }
+      } else {
+        // 새로운 주소 추가 모드
+        const response = await axiosInstance.post('/api/addresses', addressData);
+        if (response.data.success) {
+          fetchAddresses();  // 배송지 목록 새로고침
+          setShowAddressModal(false);
+        }
       }
     } catch (error) {
-      console.error('배송지 추가 실패:', error);
+      console.error('배송지 저장 실패:', error);
+      // 에러 처리 로직 추가
     }
   };
 

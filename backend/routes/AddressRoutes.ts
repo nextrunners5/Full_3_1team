@@ -54,4 +54,7 @@ router.post('/', authenticateToken as RequestHandler, asyncHandler(AddressContro
 router.delete('/:id', authenticateToken as RequestHandler, asyncHandler(AddressController.deleteAddress));
 router.put('/:id/default', authenticateToken as RequestHandler, asyncHandler(AddressController.setDefaultAddress));
 
+// 주소 수정 라우트 추가
+router.put('/:id', authenticateToken as RequestHandler, asyncHandler(AddressController.updateAddress));
+
 export default router; 
