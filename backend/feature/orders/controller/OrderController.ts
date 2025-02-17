@@ -169,6 +169,163 @@ const putOrderStatus = async(req: Request, res: Response) => {
   }
 }
 
+const getOrderHistory = async (req: Request, res: Response) => {
+  const userId = req.params.userId;
+  const period = req.query.period as string || '1month';
+
+  try {
+    // 기간에 따른 날짜 계산
+    const today = new Date();
+    let startDate = new Date();
+    
+    switch(period) {
+      case '3months':
+        startDate.setMonth(today.getMonth() - 3);
+        break;
+      case '6months':
+        startDate.setMonth(today.getMonth() - 6);
+        break;
+      case '1year':
+        startDate.setFullYear(today.getFullYear() - 1);
+        break;
+      default: // 1month
+        startDate.setMonth(today.getMonth() - 1);
+    }
+
+    const query = `
+      SELECT 
+        o.order_id,
+        o.user_id,
+        o.order_date,
+        o.total_amount,
+        o.status_id,
+        oi.order_item_id,
+        oi.product_id,
+        p.product_name,
+        oi.quantity,
+        oi.price,
+        oi.selected_size,
+        oi.selected_color,
+        oi.order_status,
+        s.status_name,
+        COALESCE(r.review_id, 0) as has_review
+      FROM Orders o
+      JOIN OrderItems oi ON o.order_id = oi.order_id
+      JOIN Products p ON oi.product_id = p.product_id
+      JOIN OrderStatus s ON o.status_id = s.status_id
+      LEFT JOIN Reviews r ON oi.order_item_id = r.order_item_id
+      WHERE o.user_id = ?
+      AND o.order_date BETWEEN ? AND ?
+      ORDER BY o.order_date DESC
+    `;
+
+    const [rows] = await pool.promise().query(query, [userId, startDate, today]);
+
+    // 주문 데이터 구조화
+    const orders = new Map();
+    (rows as any[]).forEach(row => {
+      if (!orders.has(row.order_id)) {
+        orders.set(row.order_id, {
+          order_id: row.order_id,
+          user_id: row.user_id,
+          order_date: row.order_date,
+          total_amount: row.total_amount,
+          status_id: row.status_id,
+          status_name: row.status_name,
+          items: []
+        });
+      }
+      
+      const order = orders.get(row.order_id);
+      order.items.push({
+        order_item_id: row.order_item_id,
+        product_id: row.product_id,
+        product_name: row.product_name,
+        quantity: row.quantity,
+        price: row.price,
+        selected_size: row.selected_size,
+        selected_color: row.selected_color,
+        order_status: row.order_status,
+        has_review: Boolean(row.has_review)
+      });
+    });
+
+    res.json({
+      success: true,
+      orders: Array.from(orders.values())
+    });
+  } catch (err) {
+    console.error('주문내역 조회 실패:', err);
+    res.status(500).json({
+      success: false,
+      message: '주문내역을 불러오는데 실패했습니다.'
+    });
+  }
+};
+
+const cancelOrder = async (req: Request, res: Response) => {
+  const orderId = req.params.orderId;
+  const userId = req.user?.user_id; // 인증된 사용자 ID
+
+  try {
+    // 주문 상태 확인
+    const [orderRows] = await pool.promise().query(
+      'SELECT status_id FROM Orders WHERE order_id = ? AND user_id = ?',
+      [orderId, userId]
+    );
+
+    if (!(orderRows as any[])[0]) {
+      return res.status(404).json({
+        success: false,
+        message: '주문을 찾을 수 없습니다.'
+      });
+    }
+
+    const order = (orderRows as any[])[0];
+    if (order.status_id !== 'OS001') { // 주문 준비중 상태가 아닌 경우
+      return res.status(400).json({
+        success: false,
+        message: '취소할 수 없는 주문 상태입니다.'
+      });
+    }
+
+    // 트랜잭션 시작
+    const connection = await pool.promise().getConnection();
+    await connection.beginTransaction();
+
+    try {
+      // 주문 상태 변경
+      await connection.query(
+        'UPDATE Orders SET status_id = "OS007" WHERE order_id = ?',
+        [orderId]
+      );
+
+      // 주문 아이템 상태 변경
+      await connection.query(
+        'UPDATE OrderItems SET order_status = "OS007" WHERE order_id = ?',
+        [orderId]
+      );
+
+      await connection.commit();
+      res.json({
+        success: true,
+        message: '주문이 취소되었습니다.'
+      });
+    } catch (error) {
+      await connection.rollback();
+      throw error;
+    } finally {
+      connection.release();
+    }
+  } catch (err) {
+    console.error('주문 취소 실패:', err);
+    res.status(500).json({
+      success: false,
+      message: '주문 취소에 실패했습니다.'
+    });
+  }
+};
+
 export default {
   getUserPoints,
   getDeliveryMessage,
@@ -179,4 +336,6 @@ export default {
   postOrderSingleProduct,
   postOrderDeliveryInfo,
   putOrderStatus,
+  getOrderHistory,
+  cancelOrder
 };

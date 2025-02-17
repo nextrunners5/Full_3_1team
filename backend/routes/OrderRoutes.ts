@@ -1,5 +1,6 @@
 import express from 'express'; // express 모듈을 임포트합니다.
 import OrderController from "../feature/orders/controller/OrderController"; // OrderController 모듈을 임포트합니다.
+import { authenticateToken } from '../middlewares/AuthMiddleware';
 
 const router = express.Router(); // express.Router()를 사용하여 라우터를 생성합니다.
 
@@ -19,5 +20,11 @@ router.post(`/`, async (req, res) => {
 });
 router.put('/OrderInfoUpdate', OrderController.putOrderStatus);
 router.post('/OrderInfoUpdate', OrderController.postOrderDeliveryInfo);
+
+// 주문내역 조회
+router.get('/history/:userId', authenticateToken, OrderController.getOrderHistory);
+
+// 주문 취소
+router.post('/:orderId/cancel', authenticateToken, OrderController.cancelOrder);
 
 export default router; // 생성한 라우터를 내보내기 합니다.

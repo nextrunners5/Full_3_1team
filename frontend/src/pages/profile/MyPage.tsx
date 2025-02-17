@@ -51,6 +51,8 @@ const MyPage: React.FC = () => {
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [showAllAddresses, setShowAllAddresses] = useState(false);
   const [editAddress, setEditAddress] = useState<Address | null>(null);
+  const [orderHistory, setOrderHistory] = useState([]);
+  const [isOrderLoading, setIsOrderLoading] = useState(true);
 
   const navigate = useNavigate();
 
@@ -230,6 +232,113 @@ const MyPage: React.FC = () => {
     setShowAddressModal(true);
   };
 
+  // 주문내역 조회
+  const fetchOrderHistory = async () => {
+    try {
+      const userId = localStorage.getItem('userId');
+      if (!userId) {
+        throw new Error('사용자 ID가 없습니다.');
+      }
+
+      setIsOrderLoading(true);
+      const response = await axiosInstance.get(`/api/orders/history/${userId}`, {
+        params: { period }
+      });
+
+      if (response.data.success) {
+        setOrderHistory(response.data.orders);
+      }
+    } catch (error) {
+      console.error('주문내역 조회 실패:', error);
+    } finally {
+      setIsOrderLoading(false);
+    }
+  };
+
+  // period가 변경될 때마다 주문내역 새로 조회
+  useEffect(() => {
+    fetchOrderHistory();
+  }, [period]);
+
+  // 주문내역 테이블 렌더링
+  const renderOrderHistory = () => {
+    if (isOrderLoading) {
+      return (
+        <tr>
+          <td colSpan={6}>주문내역을 불러오는 중...</td>
+        </tr>
+      );
+    }
+
+    if (!orderHistory || orderHistory.length === 0) {
+      return (
+        <tr>
+          <td colSpan={6}>주문내역이 없습니다.</td>
+        </tr>
+      );
+    }
+
+    return orderHistory.map((order: any) => (
+      <tr key={order.order_id}>
+        <td>{new Date(order.order_date).toLocaleDateString()}</td>
+        <td>
+          <div className="MP-order-product">
+            <img
+              src={order.main_image || pc60}
+              alt={order.product_name}
+              className="MP-product-image"
+            />
+            <div>
+              <p>{order.product_name}</p>
+              <p>수량: {order.quantity}개</p>
+            </div>
+          </div>
+        </td>
+        <td>{order.total_amount.toLocaleString()}원</td>
+        <td className={`MP-status MP-status-${order.status_id.toLowerCase()}`}>
+          {order.status_name}
+        </td>
+        <td>
+          {order.status_id === 'OS001' && (
+            <button 
+              className="MP-cancel-btn"
+              onClick={() => handleCancelOrder(order.order_id)}
+            >
+              주문취소
+            </button>
+          )}
+        </td>
+        <td>
+          {order.status_id === 'OS003' && !order.has_review && (
+            <button 
+              className="MP-review-btn"
+              onClick={() => handleWriteReview(order.order_id)}
+            >
+              리뷰작성
+            </button>
+          )}
+        </td>
+      </tr>
+    ));
+  };
+
+  // 주문 취소 핸들러
+  const handleCancelOrder = async (orderId: string) => {
+    try {
+      const response = await axiosInstance.post(`/api/orders/${orderId}/cancel`);
+      if (response.data.success) {
+        fetchOrderHistory(); // 주문내역 새로고침
+      }
+    } catch (error) {
+      console.error('주문 취소 실패:', error);
+    }
+  };
+
+  // 리뷰 작성 페이지로 이동
+  const handleWriteReview = (orderId: string) => {
+    navigate(`/review/write/${orderId}`);
+  };
+
   return (
     <div className="MP-my-page">
       <Header />
@@ -397,54 +506,7 @@ const MyPage: React.FC = () => {
                 </tr>
               </thead>
               <tbody>
-                <tr>
-                  <td>2024.02.15</td>
-                  <td>
-                    <div className="MP-order-product">
-                      {/* ⬇ 60px 이미지를 pc60로 변경 */}
-                      <img
-                        src={pc60}
-                        alt="Placeholder Product"
-                        className="MP-product-image"
-                      />
-                      <div>
-                        <p>프리미엄 강아지 사료 3kg</p>
-                        <p>수량: 1개</p>
-                      </div>
-                    </div>
-                  </td>
-                  <td>45,000원</td>
-                  <td className="MP-status MP-status-completed">배송완료</td>
-                  <td>
-                    <button className="MP-cancel-btn">주문취소</button>
-                  </td>
-                  <td>
-                    <button className="MP-review-btn">리뷰작성</button>
-                  </td>
-                </tr>
-                <tr>
-                  <td>2024.02.15</td>
-                  <td>
-                    <div className="MP-order-product">
-                      {/* ⬇ 동일하게 pc60 이미지 사용 */}
-                      <img
-                        src={pc60}
-                        alt="Placeholder Product"
-                        className="MP-product-image"
-                      />
-                      <div>
-                        <p>프리미엄 강아지 사료 3kg</p>
-                        <p>수량: 1개</p>
-                      </div>
-                    </div>
-                  </td>
-                  <td>45,000원</td>
-                  <td className="MP-status MP-status-preparing">배송준비중</td>
-                  <td>
-                    <button className="MP-cancel-btn">주문취소</button>
-                  </td>
-                  <td></td>
-                </tr>
+                {renderOrderHistory()}
               </tbody>
             </table>
           </div>
