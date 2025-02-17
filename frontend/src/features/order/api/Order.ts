@@ -1,5 +1,5 @@
 import axiosInstance from "../../../shared/axios/axios";
-import { OrderProducts, OrderShippingFee, UserAddressFormInfo, UserAddressInfo, UserPoint } from "../model/OrderModel";
+import { OrderProducts, OrderShippingFee, UserAddressFormInfo, UserAddressInfo } from "../model/OrderModel";
 
 //사용자 포인트 가져오기
 export const fetchUserPoints = async(userId: string | null | undefined) => {
@@ -143,29 +143,4 @@ export const fetchInsertDelivery = async(order_id: string, selectedAddress: User
     console.error('결제 요청 실패', err);
   }
 }
-
-// 사용자 배송지 상세 정보 조회
-export const fetchUserDetailsAddress = async (userId: string): Promise<UserAddressInfo[]> => {
-  try {
-    const response = await axiosInstance.get(`/api/orders/address/details/${userId}`);
-    return response.data;
-  } catch (error) {
-    console.error('배송지 상세 정보 조회 실패:', error);
-    throw error;
-  }
-};
-
-export {
-  fetchUserPoints,
-  fetchDeliveryMessage,
-  fetchOrderProducts,
-  fetchOrderProductImage,
-  fetchShippingFee,
-  fetchOrderSingleProduct,
-  fetchOrderCartProduct,
-  fetchInsertDelivery,
-  fetchUpdateInfo,
-  fetchAddAddress,
-  fetchUserDetailsAddress
-};
 
