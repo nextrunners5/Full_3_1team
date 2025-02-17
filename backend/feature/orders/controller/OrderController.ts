@@ -162,7 +162,7 @@ const postOrderSingleProduct = async(req: Request, res: Response) => {
 }
 
 const postOrderDeliveryInfo = async(req: Request, res: Response) => {
-  const {orderId, selectedAddress, selectedMessage} = req.body;
+  const {order_id, selectedAddress, selectedMessage} = req.body;
   console.log('orderInfoUpdate', req.body);
   try{
     const result = await fetchInsertDeliveryInfo(orderId, selectedAddress, selectedMessage);

@@ -19,30 +19,30 @@ const Order: React.FC = () => {
     console.log('Order.tsx 아이디 변경 감지: ', userId);
   },[userId]);
 
-  const handleAddressChange = (address: any) => {
+  const handleAddressChange = (address: Address) => {
     setSelectedAddress(address);
   }
 
-  const handleMessageChange = (message: any) => {
+  const handleMessageChange = (message: string) => {
     setSelectedMessage(message);
   }
 
   // 결제 성공 처리
-  const handlePaymentSuccess = async (response: any) => {
+  const handlePaymentSuccess = async (response: PaymentResponse) => {
     try {
-      // ... 결제 처리 로직 ...
-
-      if (response.data.success) {
-        // 결제 성공 시 주문 완료 페이지로 이동
-        navigate('/order/complete', { 
-          state: { 
-            orderId: response.data.orderId,
-            orderInfo: orderData 
-          } 
-        });
-      }
+      const orderData = {
+        // 주문 정보 구조 정의
+        // ...
+      };
+      
+      navigate('/order/complete', {
+        state: { 
+          orderId: response.data.orderId,
+          orderInfo: orderData 
+        } 
+      });
     } catch (error) {
-      // ... 에러 처리 ...
+      console.error('Payment processing failed:', error);
     }
   };
 

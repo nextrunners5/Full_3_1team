@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import Header from '../../widgets/header/Header';
 import Footer from '../../widgets/footer/Footer';
 import './OrderComplete.css';
-import axiosInstance from '../../services/axiosInstance';
+import axiosInstance from '../../shared/axios/axios';
 
 interface OrderCompleteState {
   orderId: string;
