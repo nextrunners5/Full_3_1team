@@ -22,29 +22,32 @@ const OrderDeliveryInfo: React.FC<OrderDeliveryInfoProps> = ({userId, addressCha
         console.log('프론트 주문 배송지 유저', userId);
         const addressDetails = await fetchDetailsAddress(userId);
         console.log('주소 상세 데이터 가져오기 성공:', addressDetails);
-        if(addressDetails && addressDetails.length > 0){
-          
+        
+        if(addressDetails && Array.isArray(addressDetails) && addressDetails.length > 0){
           setUserAddressDetails(addressDetails);
 
-          const defaultAddress = addressDetails.find(addr => !!addr.is_default)
+          const defaultAddress = addressDetails.find(addr => addr.is_default);
           if(defaultAddress){
             console.log('origin default address', defaultAddress);
             setSelectedAddress(defaultAddress);
             addressChange(defaultAddress);
             console.log('Selected default address', defaultAddress);
-          } else {
-            console.log('default address not found', defaultAddress);
           }
+        } else {
+          setUserAddressDetails([]);
         }
         setIsLoading(false);
-        console.log('상세 주소:', addressDetails);
       } catch(err){
         console.log('사용자의 주소 상세 정보를 가져오지 못했습니다.', err);
+        setUserAddressDetails([]);
         setIsLoading(false);
       }
     };
-    getUserAddress();
-  },[]);
+    
+    if (userId) {
+      getUserAddress();
+    }
+  },[userId]);
 
   useEffect(() => {
     console.log('Selected address changed:', selectedAddress);
@@ -133,7 +136,7 @@ const OrderDeliveryInfo: React.FC<OrderDeliveryInfoProps> = ({userId, addressCha
                 open={modalOpen} 
                 close={closeModal} 
                 header="배송지 선택" 
-                userAddressDetails={userAddressDetails}  
+                userAddressDetails={userAddressDetails || []}
                 onSelect={handleAddressChange}
                 onNewAddress={handleNewAddress}
                 onUpdateAddress={handleUpdateAddress}
