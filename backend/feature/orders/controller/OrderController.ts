@@ -165,7 +165,7 @@ const postOrderDeliveryInfo = async(req: Request, res: Response) => {
   const {order_id, selectedAddress, selectedMessage} = req.body;
   console.log('orderInfoUpdate', req.body);
   try{
-    const result = await fetchInsertDeliveryInfo(orderId, selectedAddress, selectedMessage);
+    const result = await fetchInsertDeliveryInfo(order_id, selectedAddress, selectedMessage);
     console.log('orderInfoUpdate result', result);
     res.json(result);
   } catch(err){
