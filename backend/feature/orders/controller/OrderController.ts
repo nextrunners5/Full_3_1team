@@ -202,18 +202,19 @@ const getOrderHistory = async (req: AuthenticatedRequest, res: Response) => {
     let startDate = new Date();
     
     switch(period) {
-      case '3month':  // 프론트엔드와 일치하도록 수정
+      case '3month':
         startDate.setMonth(today.getMonth() - 3);
         break;
-      case '6month':  // 프론트엔드와 일치하도록 수정
+      case '6month':
         startDate.setMonth(today.getMonth() - 6);
         break;
       default: // 1month
         startDate.setMonth(today.getMonth() - 1);
     }
 
+    // 쿼리 수정: LEFT JOIN으로 변경하여 리뷰가 없는 주문도 조회되도록
     const query = `
-      SELECT 
+      SELECT DISTINCT
         o.order_id,
         o.order_date,
         o.total_amount,
@@ -221,11 +222,11 @@ const getOrderHistory = async (req: AuthenticatedRequest, res: Response) => {
         s.status_name,
         p.product_name,
         oi.quantity,
-        COALESCE(r.review_id, 0) as has_review
+        CASE WHEN r.review_id IS NOT NULL THEN 1 ELSE 0 END as has_review
       FROM Orders o
-      JOIN OrderItems oi ON o.order_id = oi.order_id
-      JOIN Products p ON oi.product_id = p.product_id
-      JOIN OrderStatus s ON o.status_id = s.status_id
+      LEFT JOIN OrderItems oi ON o.order_id = oi.order_id
+      LEFT JOIN Products p ON oi.product_id = p.product_id
+      LEFT JOIN OrderStatus s ON o.status_id = s.status_id
       LEFT JOIN Reviews r ON oi.order_item_id = r.order_item_id
       WHERE o.user_id = ?
       AND o.order_date BETWEEN ? AND ?
@@ -234,7 +235,6 @@ const getOrderHistory = async (req: AuthenticatedRequest, res: Response) => {
 
     const [rows] = await pool.promise().query(query, [userId, startDate, today]);
 
-    // 주문 목록용 간단한 구조
     res.json({
       success: true,
       orders: rows
@@ -245,7 +245,7 @@ const getOrderHistory = async (req: AuthenticatedRequest, res: Response) => {
     res.status(500).json({
       success: false,
       message: '주문내역을 불러오는데 실패했습니다.',
-      error: err
+      error: err instanceof Error ? err.message : String(err)
     });
   }
 };
