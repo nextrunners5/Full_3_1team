@@ -286,7 +286,7 @@ const cancelOrder = async (req: AuthenticatedRequest, res: Response) => {
 
     // Common 테이블에서 취소 상태 코드 확인
     const [statusRows] = await pool.promise().query(
-      'SELECT status_code FROM Common WHERE status_code = "OS007"'
+      'SELECT status_code FROM Common WHERE status_code = "OS004"'
     );
 
     if (!(statusRows as any[])[0]) {
@@ -303,13 +303,13 @@ const cancelOrder = async (req: AuthenticatedRequest, res: Response) => {
     try {
       // 주문 상태 변경
       await connection.query(
-        'UPDATE Orders SET status_id = "OS007" WHERE order_id = ?',
+        'UPDATE Orders SET status_id = "OS004" WHERE order_id = ?',
         [orderId]
       );
 
       // 주문 아이템 상태 변경
       await connection.query(
-        'UPDATE OrderItems SET order_status = "OS007" WHERE order_id = ?',
+        'UPDATE OrderItems SET order_status = "OS004" WHERE order_id = ?',
         [orderId]
       );
 
