@@ -1,10 +1,8 @@
 import { useEffect, useState } from "react";
 import axiosInstance from "../../shared/axios/axios";
+import { useNavigate } from "react-router-dom";
+import "../product/CSS/ProductCard.css"
 import ProductCard from "../product/ProductCard";
-import "./CSS/WishList.css";
-import Header from "../../widgets/header/Header";
-import Footer from "../../widgets/footer/Footer";
-import ProductToggle from "../product/ProductToggle";
 
 interface Product {
   product_id: number;
@@ -16,43 +14,47 @@ interface Product {
   small_image: string;
 }
 
-const WishList: React.FC = () => {
+const MyPageWishlist: React.FC = () => {
   const [wishlist, setWishlist] = useState<number[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
-  const userId = localStorage.getItem("userId") !== null ? localStorage.getItem("userId") : "guest";
-  const [sortOption, setSortOption] = useState<string>("recommended");
+  const [lastLikedProduct, setLastLikedProduct] = useState<Product | null>(null);
+  const userId = localStorage.getItem("userId") || "guest";
+  const navigate = useNavigate();
 
-  console.log("현재 로그인된 userId:", userId);
-  
   useEffect(() => {
     const fetchWishlist = async () => {
       try {
         let storedWishlist: number[] = [];
+
         if (userId === "guest") {
           storedWishlist = JSON.parse(localStorage.getItem("wishlist") || "[]");
         } else {
-          const response = await axiosInstance.get(
-            `/api/wishlist?userId=${userId}`
-          );
+
+          const response = await axiosInstance.get(`/api/wishlist?userId=${userId}`);
           storedWishlist = response.data.wishlist;
         }
-  
+
         console.log("위시리스트 상품 ID 목록:", storedWishlist);
-  
         setWishlist(storedWishlist);
-  
+
         if (storedWishlist.length > 0) {
           const productResponse = await axiosInstance.get(
             `/api/productImages?ids=${storedWishlist.join(",")}&userId=${userId}`
           );
-  
-          console.log(" 상품 데이터 응답:", productResponse.data);
-  
-          const filteredProducts = productResponse.data.filter(
+          
+          console.log("상품 데이터 응답:", productResponse.data);
+
+          let filteredProducts = productResponse.data.filter(
             (product: Product) => storedWishlist.includes(product.product_id)
           );
-  
-          setProducts(filteredProducts);
+
+          if (lastLikedProduct) {
+            filteredProducts = productResponse.data.filter(
+              (p: Product) => p.product_id !== lastLikedProduct?.product_id
+            );
+          }
+
+          setProducts(filteredProducts.slice(0, 2));
         } else {
           setProducts([]);
         }
@@ -60,20 +62,18 @@ const WishList: React.FC = () => {
         console.error("위시리스트 불러오기 실패:", error);
       }
     };
-  
+
     fetchWishlist();
-  }, [userId]);
-  
+  }, [userId, lastLikedProduct]);
+
+  const toggleWishlist = (product: Product) => {
+    setWishlist((prev) => prev.filter((id) => id !== product.product_id));
+    setLastLikedProduct(product);
+  };
+
   return (
-    <>
-    <Header/>
-    <div className="wishlist-page">
-      <div className="title-togle">
-      <h2>위시리스트</h2>
-      <div className="togle-size">
-      <ProductToggle sortOption={sortOption} setSortOption={setSortOption} />
-      </div>
-      </div>
+    <div className="wishlist-container">
+      <h3 className="mypage-wishlist-title">위시리스트</h3>
       <div className="products">
         {products.length === 0 ? (
           <p>위시리스트에 등록된 상품이 없습니다.</p>
@@ -83,19 +83,16 @@ const WishList: React.FC = () => {
               key={product.product_id}
               product={product}
               isWishlisted={wishlist.includes(product.product_id)}
-              toggleWishlist={() =>
-                setWishlist((prev) =>
-                  prev.filter((id) => id !== product.product_id)
-                )
-              }
+              toggleWishlist={() => toggleWishlist(product)}
             />
           ))
         )}
       </div>
+      <button className="wishlist-all-btn" onClick={() => navigate("/wishlist")}>
+        전체보기
+      </button>
     </div>
-    <Footer/>
-    </>
   );
 };
 
-export default WishList;
+export default MyPageWishlist;

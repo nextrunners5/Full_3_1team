@@ -1,23 +1,37 @@
 import React, { useState, useEffect } from "react";
-import { AiFillSetting } from "react-icons/ai"; 
-import { FaHeart, FaRegHeart, FaChevronDown, FaChevronUp, FaTrash, FaStar, FaEdit } from "react-icons/fa";
-import './MyPage.css';
-import Header from "../../widgets/header/Header"; 
+import { AiFillSetting } from "react-icons/ai";
+import {
+  FaHeart,
+  FaRegHeart,
+  FaChevronDown,
+  FaChevronUp,
+  FaTrash,
+  FaStar,
+  FaEdit,
+} from "react-icons/fa";
+import "./MyPage.css";
+import Header from "../../widgets/header/Header";
 import Footer from "../../widgets/footer/Footer";
-import pc60 from '../../assets/pc60.jpg';
-import pc200 from '../../assets/pc200.jpg';
+import pc60 from "../../assets/pc60.jpg";
+import pc200 from "../../assets/pc200.jpg";
 import AddressSearch from "../../shared/ui/AddressSearch";
-import { getAddresses, addAddress, deleteAddress, setDefaultAddress } from "../../features/address/api/Address";
+import {
+  getAddresses,
+  addAddress,
+  deleteAddress,
+  setDefaultAddress,
+} from "../../features/address/api/Address";
 import type { Address } from "../../features/address/model/Address";
-import AddressModal from '../../features/address/ui/AddressModal';
-import { useNavigate } from 'react-router-dom';
+import AddressModal from "../../features/address/ui/AddressModal";
+import { useNavigate } from "react-router-dom";
 import axiosInstance from "../../shared/axios/axios";
+import MyPageWishlist from "../wishlist/MyPageWish";
 
 interface UserProfile {
   name: string;
   email: string;
   phone: string;
-  signup_type: 'local' | 'kakao';
+  signup_type: "local" | "kakao";
 }
 
 interface AddressFormData {
@@ -34,17 +48,16 @@ const MyPage: React.FC = () => {
   const [period, setPeriod] = useState("1month");
   const [orderType, setOrderType] = useState("all");
 
-
   const [showOtherAddresses, setShowOtherAddresses] = useState(false);
   const [isLiked, setIsLiked] = useState(true);
   const [showAddressSearch, setShowAddressSearch] = useState(false);
   const [addresses, setAddresses] = useState<Address[]>([]);
   const [newAddress, setNewAddress] = useState({
-    recipient_name: '',
-    recipient_phone: '',
-    detailed_address: '',
-    address_name: '',
-    is_default: false
+    recipient_name: "",
+    recipient_phone: "",
+    detailed_address: "",
+    address_name: "",
+    is_default: false,
   });
   const [showAddressModal, setShowAddressModal] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -58,12 +71,12 @@ const MyPage: React.FC = () => {
 
   // 컴포넌트 마운트 시 로그인 상태 체크
   useEffect(() => {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem("token");
     if (!token) {
       // 로그인되지 않은 경우 로그인 페이지로 리다이렉트
-      navigate('/login', { 
+      navigate("/login", {
         // 로그인 후 다시 마이페이지로 돌아올 수 있도록 state에 리다이렉트 경로 저장
-        state: { from: '/MyPage' } 
+        state: { from: "/MyPage" },
       });
     }
   }, [navigate]);
@@ -71,25 +84,25 @@ const MyPage: React.FC = () => {
   // 배송지 목록 조회
   const fetchAddresses = async () => {
     try {
-      const response = await axiosInstance.get('/api/addresses');
-      console.log('서버 응답 원본:', response.data.addresses);
-      
+      const response = await axiosInstance.get("/api/addresses");
+      console.log("서버 응답 원본:", response.data.addresses);
+
       if (response.data.success) {
         const mappedAddresses = response.data.addresses.map((addr: any) => {
-          console.log('매핑 전 주소 데이터:', addr);
+          console.log("매핑 전 주소 데이터:", addr);
           const mappedAddr = {
             ...addr,
-            detailed_address: addr.detailed_address || '',
+            detailed_address: addr.detailed_address || "",
           };
-          console.log('매핑 후 주소 데이터:', mappedAddr);
+          console.log("매핑 후 주소 데이터:", mappedAddr);
           return mappedAddr;
         });
-        
-        console.log('최종 매핑된 주소 목록:', mappedAddresses);
+
+        console.log("최종 매핑된 주소 목록:", mappedAddresses);
         setAddresses(mappedAddresses);
       }
     } catch (error) {
-      console.error('배송지 조회 실패:', error);
+      console.error("배송지 조회 실패:", error);
     } finally {
       setIsLoading(false);
     }
@@ -103,16 +116,16 @@ const MyPage: React.FC = () => {
   useEffect(() => {
     const fetchUserProfile = async () => {
       try {
-        const response = await axiosInstance.get('/api/users/profile');
-        console.log('프로필 조회 응답:', response.data);
-        
+        const response = await axiosInstance.get("/api/users/profile");
+        console.log("프로필 조회 응답:", response.data);
+
         if (response.data.success) {
           setUserProfile(response.data.user);
         } else {
-          console.error('프로필 조회 실패:', response.data.message);
+          console.error("프로필 조회 실패:", response.data.message);
         }
       } catch (error) {
-        console.error('프로필 조회 실패:', error);
+        console.error("프로필 조회 실패:", error);
       } finally {
         setIsLoading(false);
       }
@@ -122,7 +135,10 @@ const MyPage: React.FC = () => {
   }, []);
 
   // 주소 검색 완료 핸들러
-  const handleAddressComplete = async (data: { address: string; zonecode: string }) => {
+  const handleAddressComplete = async (data: {
+    address: string;
+    zonecode: string;
+  }) => {
     try {
       const addressData = {
         ...newAddress,
@@ -134,14 +150,14 @@ const MyPage: React.FC = () => {
       setAddresses([...addresses, response]);
       setShowAddressSearch(false);
       setNewAddress({
-        recipient_name: '',
-        recipient_phone: '',
-        detailed_address: '',
-        address_name: '',
-        is_default: false
+        recipient_name: "",
+        recipient_phone: "",
+        detailed_address: "",
+        address_name: "",
+        is_default: false,
       });
     } catch (error) {
-      console.error('배송지 추가 실패:', error);
+      console.error("배송지 추가 실패:", error);
     }
   };
 
@@ -150,80 +166,90 @@ const MyPage: React.FC = () => {
     try {
       if (editAddress) {
         // 수정 모드
-        const response = await axiosInstance.put(`/api/addresses/${editAddress.address_id}`, addressData);
+        const response = await axiosInstance.put(
+          `/api/addresses/${editAddress.address_id}`,
+          addressData
+        );
         if (response.data.success) {
-          fetchAddresses();  // 배송지 목록 새로고침
+          fetchAddresses(); // 배송지 목록 새로고침
           setShowAddressModal(false);
           setEditAddress(null);
         }
       } else {
         // 새로운 주소 추가 모드
-        const response = await axiosInstance.post('/api/addresses', addressData);
+        const response = await axiosInstance.post(
+          "/api/addresses",
+          addressData
+        );
         if (response.data.success) {
-          fetchAddresses();  // 배송지 목록 새로고침
+          fetchAddresses(); // 배송지 목록 새로고침
           setShowAddressModal(false);
         }
       }
     } catch (error) {
-      console.error('배송지 저장 실패:', error);
+      console.error("배송지 저장 실패:", error);
       // 에러 처리 로직 추가
     }
   };
 
   // 배송지 삭제 핸들러
   const handleDeleteAddress = async (addressId: string | number) => {
-    console.log('삭제 시도할 배송지 ID:', addressId);
-    
+    console.log("삭제 시도할 배송지 ID:", addressId);
+
     if (!addressId) {
-      console.error('주소 ID가 없습니다');
+      console.error("주소 ID가 없습니다");
       return;
     }
 
     try {
-      const response = await axiosInstance.delete(`/api/addresses/${addressId}`);
-      console.log('삭제 응답:', response.data);
-      
+      const response = await axiosInstance.delete(
+        `/api/addresses/${addressId}`
+      );
+      console.log("삭제 응답:", response.data);
+
       if (response.data.success) {
         fetchAddresses();
       }
     } catch (error) {
-      console.error('배송지 삭제 실패:', error);
+      console.error("배송지 삭제 실패:", error);
     }
   };
 
   // 기본 배송지 설정 핸들러
   const handleSetDefaultAddress = async (addressId: string | number) => {
     if (!addressId) {
-      console.error('주소 ID가 없습니다');
+      console.error("주소 ID가 없습니다");
       return;
     }
 
     try {
-      const response = await axiosInstance.put(`/api/addresses/${addressId}/default`);
-      
+      const response = await axiosInstance.put(
+        `/api/addresses/${addressId}/default`
+      );
+
       if (response.data.success) {
         // 성공적으로 설정된 경우에만 목록 새로고침
         fetchAddresses();
       }
     } catch (error) {
-      console.error('기본 배송지 설정 실패:', error);
+      console.error("기본 배송지 설정 실패:", error);
     }
   };
 
   // 로그아웃 핸들러
   const handleLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    navigate('/');
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    navigate("/");
   };
 
   // 기본 배송지와 나머지 배송지 분리
-  const defaultAddress = addresses.find(addr => addr.is_default);
-  const otherAddresses = addresses.filter(addr => !addr.is_default);
+  const defaultAddress = addresses.find((addr) => addr.is_default);
+  const otherAddresses = addresses.filter((addr) => !addr.is_default);
 
   const handleSettingsClick = () => {
     // 프로필 설정 페이지로 이동
-    navigate('/profile/settings');
+    navigate("/profile/settings");
   };
 
   // 배송지 수정 핸들러
@@ -235,21 +261,24 @@ const MyPage: React.FC = () => {
   // 주문내역 조회
   const fetchOrderHistory = async () => {
     try {
-      const userId = localStorage.getItem('userId');
+      const userId = localStorage.getItem("userId");
       if (!userId) {
-        throw new Error('사용자 ID가 없습니다.');
+        throw new Error("사용자 ID가 없습니다.");
       }
 
       setIsOrderLoading(true);
-      const response = await axiosInstance.get(`/api/orders/history/${userId}`, {
-        params: { period }
-      });
+      const response = await axiosInstance.get(
+        `/api/orders/history/${userId}`,
+        {
+          params: { period },
+        }
+      );
 
       if (response.data.success) {
         setOrderHistory(response.data.orders);
       }
     } catch (error) {
-      console.error('주문내역 조회 실패:', error);
+      console.error("주문내역 조회 실패:", error);
     } finally {
       setIsOrderLoading(false);
     }
@@ -299,8 +328,8 @@ const MyPage: React.FC = () => {
           {order.status_name}
         </td>
         <td>
-          {order.status_id === 'OS001' && (
-            <button 
+          {order.status_id === "OS001" && (
+            <button
               className="MP-cancel-btn"
               onClick={() => handleCancelOrder(order.order_id)}
             >
@@ -309,8 +338,8 @@ const MyPage: React.FC = () => {
           )}
         </td>
         <td>
-          {order.status_id === 'OS003' && !order.has_review && (
-            <button 
+          {order.status_id === "OS003" && !order.has_review && (
+            <button
               className="MP-review-btn"
               onClick={() => handleWriteReview(order.order_id)}
             >
@@ -325,12 +354,14 @@ const MyPage: React.FC = () => {
   // 주문 취소 핸들러
   const handleCancelOrder = async (orderId: string) => {
     try {
-      const response = await axiosInstance.post(`/api/orders/${orderId}/cancel`);
+      const response = await axiosInstance.post(
+        `/api/orders/${orderId}/cancel`
+      );
       if (response.data.success) {
         fetchOrderHistory(); // 주문내역 새로고침
       }
     } catch (error) {
-      console.error('주문 취소 실패:', error);
+      console.error("주문 취소 실패:", error);
     }
   };
 
@@ -347,7 +378,7 @@ const MyPage: React.FC = () => {
         <div>
           {/* 프로필 카드 */}
           <div className="MP-card MP-profile-card">
-            <button 
+            <button
               className="MP-settings-icon"
               aria-label="프로필 설정"
               onClick={handleSettingsClick}
@@ -355,16 +386,24 @@ const MyPage: React.FC = () => {
               <AiFillSetting />
             </button>
             <div className="MP-profile-info">
-              <img src="https://via.placeholder.com/80" alt="Profile" className="MP-profile-picture" />
+              <img
+                src="https://via.placeholder.com/80"
+                alt="Profile"
+                className="MP-profile-picture"
+              />
               <div>
-                <p className="MP-name">{userProfile?.name || '사용자'}님</p>
+                <p className="MP-name">{userProfile?.name || "사용자"}님</p>
                 <p className="MP-contact">
                   <span className="MP-label">연락처</span>
-                  <span className="MP-contact-value">{userProfile?.phone || '-'}</span>
+                  <span className="MP-contact-value">
+                    {userProfile?.phone || "-"}
+                  </span>
                 </p>
                 <p className="MP-email">
                   <span className="MP-label">이메일</span>
-                  <span className="MP-contact-value">{userProfile?.email || '-'}</span>
+                  <span className="MP-contact-value">
+                    {userProfile?.email || "-"}
+                  </span>
                 </p>
               </div>
             </div>
@@ -377,7 +416,7 @@ const MyPage: React.FC = () => {
           <div className="MP-card">
             <div className="MP-address-header">
               <h3>배송지 관리</h3>
-              <button 
+              <button
                 className="MP-add-address-btn"
                 onClick={() => {
                   setEditAddress(null);
@@ -399,15 +438,22 @@ const MyPage: React.FC = () => {
                   <div className="MP-address-item">
                     <div className="MP-address-badge">기본 배송지</div>
                     <div className="MP-address-info">
-                      <p className="MP-address-name">{defaultAddress.address_name}</p>
-                      <p className="MP-recipient">{defaultAddress.recipient_name}</p>
-                      <p className="MP-address">
-                        {defaultAddress.address} {defaultAddress.detailed_address}
+                      <p className="MP-address-name">
+                        {defaultAddress.address_name}
                       </p>
-                      <p className="MP-phone">{defaultAddress.recipient_phone}</p>
+                      <p className="MP-recipient">
+                        {defaultAddress.recipient_name}
+                      </p>
+                      <p className="MP-address">
+                        {defaultAddress.address}{" "}
+                        {defaultAddress.detailed_address}
+                      </p>
+                      <p className="MP-phone">
+                        {defaultAddress.recipient_phone}
+                      </p>
                     </div>
                     <div className="MP-address-actions">
-                      <button 
+                      <button
                         className="MP-edit-btn"
                         onClick={() => handleEditAddress(defaultAddress)}
                       >
@@ -429,39 +475,45 @@ const MyPage: React.FC = () => {
                       </>
                     ) : (
                       <>
-                        <FaChevronDown /> 다른 배송지 {otherAddresses.length}개 보기
+                        <FaChevronDown /> 다른 배송지 {otherAddresses.length}개
+                        보기
                       </>
                     )}
                   </button>
                 )}
 
                 {/* 다른 배송지 목록 */}
-                {showOtherAddresses && otherAddresses.map((address) => (
-                  <div key={address.address_id} className="MP-address-item">
-                    <div className="MP-address-info">
-                      <p className="MP-address-name">{address.address_name}</p>
-                      <p className="MP-recipient">{address.recipient_name}</p>
-                      <p className="MP-address">
-                        {address.address} {address.detailed_address}
-                      </p>
-                      <p className="MP-phone">{address.recipient_phone}</p>
+                {showOtherAddresses &&
+                  otherAddresses.map((address) => (
+                    <div key={address.address_id} className="MP-address-item">
+                      <div className="MP-address-info">
+                        <p className="MP-address-name">
+                          {address.address_name}
+                        </p>
+                        <p className="MP-recipient">{address.recipient_name}</p>
+                        <p className="MP-address">
+                          {address.address} {address.detailed_address}
+                        </p>
+                        <p className="MP-phone">{address.recipient_phone}</p>
+                      </div>
+                      <div className="MP-address-actions">
+                        <button
+                          className="MP-set-default-btn"
+                          onClick={() =>
+                            handleSetDefaultAddress(address.address_id)
+                          }
+                        >
+                          기본 배송지로 설정
+                        </button>
+                        <button
+                          className="MP-edit-btn"
+                          onClick={() => handleEditAddress(address)}
+                        >
+                          <FaEdit /> 편집
+                        </button>
+                      </div>
                     </div>
-                    <div className="MP-address-actions">
-                      <button
-                        className="MP-set-default-btn"
-                        onClick={() => handleSetDefaultAddress(address.address_id)}
-                      >
-                        기본 배송지로 설정
-                      </button>
-                      <button 
-                        className="MP-edit-btn"
-                        onClick={() => handleEditAddress(address)}
-                      >
-                        <FaEdit /> 편집
-                      </button>
-                    </div>
-                  </div>
-                ))}
+                  ))}
               </div>
             )}
           </div>
@@ -505,9 +557,7 @@ const MyPage: React.FC = () => {
                   <th>리뷰</th>
                 </tr>
               </thead>
-              <tbody>
-                {renderOrderHistory()}
-              </tbody>
+              <tbody>{renderOrderHistory()}</tbody>
             </table>
           </div>
 
@@ -519,33 +569,7 @@ const MyPage: React.FC = () => {
           </div>
 
           {/* 위시리스트 */}
-          <div className="MP-card MP-wishlist">
-            <h3>위시리스트</h3>
-            <div className="MP-wishlist-content">
-              <div className="MP-wishlist-item">
-                <div className="MP-wishlist-image-container">
-                  {/* ⬇ 200px 이미지를 pc200로 변경 */}
-                  <img
-                    src={pc200}
-                    alt="Placeholder Wishlist Item"
-                    className="MP-wishlist-image"
-                  />
-                  <button
-                    className="MP-wishlist-heart-btn"
-                    onClick={() => setIsLiked(!isLiked)}
-                  >
-                    {isLiked ? (
-                      <FaHeart size={24} color="red" />
-                    ) : (
-                      <FaRegHeart size={24} color="red" />
-                    )}
-                  </button>
-                </div>
-                <p>프리미엄 강아지 사료 3kg</p>
-              </div>
-            </div>
-            <button className="MP-wishlist-all-btn">전체보기</button>
-          </div>
+          <MyPageWishlist />
         </div>
 
         {/* 모달 */}
