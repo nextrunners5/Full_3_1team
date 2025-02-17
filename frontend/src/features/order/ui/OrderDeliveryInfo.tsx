@@ -102,6 +102,16 @@ const OrderDeliveryInfo: React.FC<OrderDeliveryInfoProps> = ({userId, addressCha
     addressChange(newAddress);
   }
 
+  const handleUpdateAddress = (updatedAddress: UserAddressInfo) => {
+    setUserAddressDetails(prev => 
+      prev.map(addr => 
+        addr.address_id === updatedAddress.address_id ? updatedAddress : addr
+      )
+    );
+    setSelectedAddress(updatedAddress);
+    addressChange(updatedAddress);
+  };
+
   return (
     <div className="orderDeliveryContainer">
       <div className="orderDeliveryTitle">
@@ -123,9 +133,10 @@ const OrderDeliveryInfo: React.FC<OrderDeliveryInfoProps> = ({userId, addressCha
                 open={modalOpen} 
                 close={closeModal} 
                 header="배송지 선택" 
-                userAddressDetails = {userAddressDetails}  
+                userAddressDetails={userAddressDetails}  
                 onSelect={handleAddressChange}
                 onNewAddress={handleNewAddress}
+                onUpdateAddress={handleUpdateAddress}
                 />
             </div>
             {/* <div className="phoneNumber">{userAddress[0].recipient_phone}</div> */}
@@ -138,7 +149,12 @@ const OrderDeliveryInfo: React.FC<OrderDeliveryInfoProps> = ({userId, addressCha
         <div className="deliveryRequest">
           <div className="requestTitle">배송 요청사항</div>
           <div className="requestToggle">
-            <select name="messageStatus" value={messageForm.description} onChange={handleMessageChange}>
+            <select 
+              name="messageStatus" 
+              value={messageForm.description} 
+              onChange={handleMessageChange}
+              aria-label="배송 요청사항 선택"
+            >
               <option value="" className="optionText">배송 메시지를 선택해 주세요</option>
               {deliveryMessage.map((status) => (
                 <option key={status.status_code} value={status.description}>

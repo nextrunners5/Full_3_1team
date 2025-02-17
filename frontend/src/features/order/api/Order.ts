@@ -144,3 +144,14 @@ export const fetchInsertDelivery = async(order_id: string, selectedAddress: User
   }
 }
 
+// 배송지 수정 API 추가
+export const updateAddress = async (addressId: number, addressData: UserAddressFormInfo) => {
+  try {
+    const response = await axiosInstance.put(`/api/addresses/${addressId}`, addressData);
+    return response.data;
+  } catch (error) {
+    console.error('배송지 수정 실패:', error);
+    throw error;
+  }
+};
+

@@ -12,36 +12,18 @@ import {
 import "./MyPage.css";
 import Header from "../../widgets/header/Header";
 import Footer from "../../widgets/footer/Footer";
-import pc60 from "../../assets/pc60.jpg";
-import pc200 from "../../assets/pc200.jpg";
-import AddressSearch from "../../shared/ui/AddressSearch";
-import {
-  getAddresses,
-  addAddress,
-  deleteAddress,
-  setDefaultAddress,
-} from "../../features/address/api/Address";
 import type { Address } from "../../features/address/model/Address";
 import AddressModal from "../../features/address/ui/AddressModal";
 import { useNavigate } from "react-router-dom";
 import axiosInstance from "../../shared/axios/axios";
 import MyPageWishlist from "../wishlist/MyPageWish";
+import { AddressFormData } from "../../features/order/model/OrderModel";
 
 interface UserProfile {
   name: string;
   email: string;
   phone: string;
   signup_type: "local" | "kakao";
-}
-
-interface AddressFormData {
-  recipient_name: string;
-  recipient_phone: string;
-  address: string;
-  detailed_address: string;
-  postal_code: string;
-  address_name: string;
-  is_default: boolean;
 }
 
 interface OrderHistoryItem {
@@ -58,8 +40,6 @@ const MyPage: React.FC = () => {
   const [orderType, setOrderType] = useState("all");
 
   const [showOtherAddresses, setShowOtherAddresses] = useState(false);
-  const [isLiked, setIsLiked] = useState(true);
-  const [showAddressSearch, setShowAddressSearch] = useState(false);
   const [addresses, setAddresses] = useState<Address[]>([]);
   const [newAddress, setNewAddress] = useState({
     recipient_name: "",
@@ -142,33 +122,6 @@ const MyPage: React.FC = () => {
 
     fetchUserProfile();
   }, []);
-
-  // 주소 검색 완료 핸들러
-  const handleAddressComplete = async (data: {
-    address: string;
-    zonecode: string;
-  }) => {
-    try {
-      const addressData = {
-        ...newAddress,
-        address: data.address,
-        postal_code: data.zonecode,
-      };
-
-      const response = await addAddress(addressData);
-      setAddresses([...addresses, response]);
-      setShowAddressSearch(false);
-      setNewAddress({
-        recipient_name: "",
-        recipient_phone: "",
-        detailed_address: "",
-        address_name: "",
-        is_default: false,
-      });
-    } catch (error) {
-      console.error("배송지 추가 실패:", error);
-    }
-  };
 
   // 배송지 추가 핸들러
   const handleAddAddress = async (addressData: AddressFormData) => {

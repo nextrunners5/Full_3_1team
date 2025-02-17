@@ -7,11 +7,12 @@ import { useSelector} from "react-redux";
 import { RootState } from "./orderRedux/store";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { UserAddressInfo, PaymentResponse } from "../../features/order/model/OrderModel";
 
 
 const Order: React.FC = () => {
   const userId = useSelector((state: RootState)=>state.order.user_id);
-  const [selectedAddress, setSelectedAddress] = useState(null);
+  const [selectedAddress, setSelectedAddress] = useState<UserAddressInfo | null>(null);
   const [selectedMessage, setSelectedMessage] = useState('');
   const navigate = useNavigate();
 
@@ -19,7 +20,7 @@ const Order: React.FC = () => {
     console.log('Order.tsx 아이디 변경 감지: ', userId);
   },[userId]);
 
-  const handleAddressChange = (address: Address) => {
+  const handleAddressChange = (address: UserAddressInfo) => {
     setSelectedAddress(address);
   }
 
@@ -31,18 +32,18 @@ const Order: React.FC = () => {
   const handlePaymentSuccess = async (response: PaymentResponse) => {
     try {
       const orderData = {
-        // 주문 정보 구조 정의
-        // ...
+        orderId: response.orderId,
+        // ... 나머지 주문 정보
       };
       
       navigate('/order/complete', {
         state: { 
-          orderId: response.data.orderId,
+          orderId: response.orderId,
           orderInfo: orderData 
         } 
       });
     } catch (error) {
-      console.error('Payment processing failed:', error);
+      console.error('결제 처리 실패:', error);
     }
   };
 

@@ -7,21 +7,30 @@ import { UserAddressFormInfo, UserAddressInfo } from "../model/OrderModel";
 import { FaPlus } from "react-icons/fa6";
 import { BsPencilSquare } from "react-icons/bs";
 import AddressModal from "../../address/ui/AddressModal";
-import { fetchAddAddress } from "../api/Order";
+import { fetchAddAddress, updateAddress } from "../api/Order";
 
 interface ModalProps {
   open: boolean;
   close: () => void;
   header: string;
   userAddressDetails: UserAddressInfo[];
-  onSelect: (address:UserAddressInfo) => void;
+  onSelect: (address: UserAddressInfo) => void;
   onNewAddress: (address: UserAddressInfo) => void;
+  onUpdateAddress: (address: UserAddressInfo) => void;
 }
 
-const OrderDeliveryModal: React.FC<ModalProps> = ({open, close, header, userAddressDetails, onSelect, onNewAddress}) => {
+const OrderDeliveryModal: React.FC<ModalProps> = ({
+  open, 
+  close, 
+  header, 
+  userAddressDetails, 
+  onSelect, 
+  onNewAddress,
+  onUpdateAddress
+}) => {
   const [selectedAddress, setSelectedAddress] = useState<UserAddressInfo | null>(null);
   const [addModalOpen, setAddModalOpen] = useState<boolean>(false);
-  // const [ setUpdateModalOpen] = useState<boolean>(false);
+  const [updateModalOpen, setUpdateModalOpen] = useState<boolean>(false);
 
   const [addressList, setAddressList] = useState<UserAddressInfo[]>([]);
   useEffect(() => {
@@ -51,8 +60,18 @@ const OrderDeliveryModal: React.FC<ModalProps> = ({open, close, header, userAddr
 
   const openAddModal = () => {setAddModalOpen(true); };
   const closeAddModal = () => {setAddModalOpen(false); };
-  // const openUpdateModal = () => {setUpdateModalOpen(true); };
-  // const closeUpdateModal = () => {setUpdateModalOpen(false); };
+
+  const openUpdateModal = () => {
+    if (!selectedAddress) {
+      alert("수정할 배송지를 선택해주세요.");
+      return;
+    }
+    setUpdateModalOpen(true);
+  };
+
+  const closeUpdateModal = () => {
+    setUpdateModalOpen(false);
+  };
 
   const handleSubmitAddress = async (addressData: UserAddressFormInfo) => {
     console.log('저장된 주소 데이터', addressData);
@@ -93,6 +112,22 @@ const OrderDeliveryModal: React.FC<ModalProps> = ({open, close, header, userAddr
     }
   };
 
+  const handleUpdateAddress = async (addressData: UserAddressFormInfo) => {
+    try {
+      if (!selectedAddress?.address_id) {
+        throw new Error("선택된 배송지가 없습니다.");
+      }
+      const response = await updateAddress(selectedAddress.address_id, addressData);
+      if (response.success) {
+        onUpdateAddress(response.address);
+        setSelectedAddress(response.address);
+        setUpdateModalOpen(false);
+      }
+    } catch (error) {
+      console.error('배송지 수정 실패:', error);
+      alert('배송지 수정에 실패했습니다. 다시 시도해주세요.');
+    }
+  };
 
   return (
     <div className={open ? "openModal modal" : "modal"}>
@@ -100,7 +135,11 @@ const OrderDeliveryModal: React.FC<ModalProps> = ({open, close, header, userAddr
         <section className="modalSection">
           <header className="modalHeader">
             {header}
-            <button onClick={close} className="close">
+            <button 
+              onClick={close} 
+              className="close"
+              aria-label="모달 닫기"
+            >
               <IoClose className="closeIcon"/>
             </button>
           </header>
@@ -149,10 +188,19 @@ const OrderDeliveryModal: React.FC<ModalProps> = ({open, close, header, userAddr
               </div>
               <div className="updateDelivery">
                 <BsPencilSquare />
-                {/* <div className="updateDeliveryTitle" onClick={openUpdateModal}>선택 배송지 수정</div> */}
-                <div className="updateDeliveryTitle">선택 배송지 수정</div>
-                {/* <OrderDeliveryUpdateModal open={updateModalOpen} close={closeUpdateModal} header="배송지 수정">
-                </OrderDeliveryUpdateModal> */}
+                <div className="updateDeliveryTitle" onClick={openUpdateModal}>선택 배송지 수정</div>
+                {updateModalOpen && selectedAddress && (
+                  <AddressModal 
+                    onClose={closeUpdateModal}
+                    onSubmit={handleUpdateAddress}
+                    initialData={{
+                      ...selectedAddress,
+                      detailed_address: selectedAddress.detailed_address || '',
+                      postal_code: selectedAddress.postal_code || ''
+                    }}
+                    isEditing={true}
+                  />
+                )}
               </div>
             </div>
           </div>

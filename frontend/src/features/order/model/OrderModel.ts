@@ -97,3 +97,31 @@ export interface OrderPayProps{
   selectedAddress: UserAddressInfo | null;
   selectedMessage: string
 }
+
+export interface Address {
+  address_id?: string | number;
+  address_name: string;
+  recipient_name: string;
+  recipient_phone: string;
+  address: string;
+  detailed_address: string;
+  postal_code: string;
+  is_default: boolean;
+}
+
+export interface AddressFormData {
+  address_name: string;
+  recipient_name: string;
+  recipient_phone: string;
+  address: string;
+  detailed_address: string;
+  postal_code: string;
+  is_default: boolean;
+}
+
+export interface PaymentResponse {
+  orderId: string;
+  paymentKey: string;
+  amount: number;
+  status: string;
+}
