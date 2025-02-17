@@ -35,10 +35,7 @@ const OrderDeliveryModal: React.FC<ModalProps> = ({
   const [addressList, setAddressList] = useState<UserAddressInfo[]>([]);
   useEffect(() => {
     if(open){
-      console.log("배송지 목록 데이터:", {
-        userAddressDetails,
-        addressList
-      });
+      console.log("배송지 목록 데이터:", userAddressDetails);
       userAddressDetails.forEach(addr => {
         console.log('배송지 상세:', {
           name: addr.address_name,
@@ -46,14 +43,17 @@ const OrderDeliveryModal: React.FC<ModalProps> = ({
           full: addr.address
         });
       });
-      // console.log("address_id", selectedAddress?.address_id);
-      // setAddressList(userAddressDetails);
+
       const defaultAddress = userAddressDetails.find((addr) => addr.is_default === true);
       if(defaultAddress) {
         setSelectedAddress(defaultAddress);
-        console.log('선택된 주소', defaultAddress);
+        console.log('선택된 주소:', defaultAddress);
       }
-      setAddressList(userAddressDetails);
+      setAddressList(userAddressDetails.map(addr => ({
+        ...addr,
+        postal_code: addr.postal_code || '',  // 우편번호가 없는 경우 빈 문자열로
+        detailed_address: addr.detailed_address || ''  // 상세주소가 없는 경우 빈 문자열로
+      })));
     }
   },[open, userAddressDetails]);
 
