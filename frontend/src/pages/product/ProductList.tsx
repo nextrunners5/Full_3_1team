@@ -2,7 +2,10 @@ import { useEffect, useState } from "react";
 import axiosInstance from "../../shared/axios/axios";
 import ProductCard from "../product/ProductCard";
 import "./CSS/ProductList.css";
+import 배너 from"../../assets/배너.jpg"
 import ProductToggle from "./ProductToggle";
+import Footer from "../../widgets/footer/Footer"
+import Header from "../../widgets/header/Header"
 
 interface Product {
   product_id: number;
@@ -94,9 +97,12 @@ const ProductList: React.FC = () => {
   });
   
   return (
+    <>
+    <Header/>
     <div className="product-page">
+      
       <div className="banner-container">
-        <h1>배너</h1>
+        <img className="bannerSize" src={배너} alt="배너" />
       </div>
 
       <div className="controls-container">
@@ -115,6 +121,8 @@ const ProductList: React.FC = () => {
         ))}
       </div>
     </div>
+    <Footer/>
+    </>
   );
 };
 
