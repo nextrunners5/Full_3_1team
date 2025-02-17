@@ -18,6 +18,7 @@ import userRoutes from './routes/UserRoutes';
 import path from "path";
 import { errorHandler } from './middlewares/AuthMiddleware';
 import PaymentRoutes from './routes/PaymentRoutes';
+import { RecommendedProductsRoutes } from './routes/RecommendedProductsRoutes'
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -57,6 +58,8 @@ app.use("/api/orders", OrderRoutes);
 
 // 장바구니 라우터
 app.use("/api/carts", CartRoutes);
+// 추천상품 조회
+app.use("/api/recommended-products", RecommendedProductsRoutes);
 
 // 배송지 라우터 추가
 app.use("/api/addresses", addressRoutes);

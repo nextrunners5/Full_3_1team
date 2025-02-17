@@ -1,16 +1,15 @@
 import { useState, useEffect } from "react";
 import "./Cart.css";
 import Button from "../../shared/ui/button";
-import ProductCard from "../../widgets/product-card/ProductCard";
 import axiosInstance from "../../shared/axios/axios";
 import Header from "../../widgets/header/Header";
+import ProductCard from "../product/ProductCard";
 import Footer from "../../widgets/footer/Footer";
 import { useNavigate } from "react-router-dom";
 
-// 1) CartItem 타입 정의 (프론트에서 사용할 필드명)
 type CartItem = {
-  cartItemId: number;        // ← DB의 cart_item_id → 프론트에서 cartItemId
-  productId: string;         // ← DB의 product_id → 프론트에서 productId
+  cartItemId: number;
+  productId: string;
   name: string;
   price: number;
   quantity: number;
@@ -22,9 +21,10 @@ type CartItem = {
 
 const CartPage = () => {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
+  const [productsToShow, setProductsToShow] = useState<Product[]>([]);
   const [selectAll, setSelectAll] = useState(false);
   const [isChecked, setIsChecked] = useState(false);
-   
+
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -42,15 +42,15 @@ const CartPage = () => {
 
         // 이미지 포함 데이터 변환
         const formattedItems = (response.data as any[]).map((item) => ({
-            cartItemId: item.cart_item_id,
-            productId: item.product_id,
-            name: item.name,
-            price: item.final_price ?? 0,  // NaN 방지
-            quantity: Number(item.quantity),
-            selected_size: item.selected_size,
-            selected_color: item.selected_color,
-            main_image: item.main_image || "https://placehold.co/300x300",
-            selected: false
+          cartItemId: item.cart_item_id,
+          productId: item.product_id,
+          name: item.name,
+          price: item.final_price ?? 0, // NaN 방지
+          quantity: Number(item.quantity),
+          selected_size: item.selected_size,
+          selected_color: item.selected_color,
+          main_image: item.main_image || "https://placehold.co/300x300",
+          selected: false
         }));
 
         setCartItems(formattedItems);
@@ -60,7 +60,27 @@ const CartPage = () => {
       }
     };
 
+    const fetchRecommendedProducts = async () => {
+      try {
+        const response = await axiosInstance.get("/api/recommended-products");
+        // 데이터 형식에 따라 아래와 같이 변환합니다.
+        const formattedProducts = (response.data as any[]).map((product) => ({
+          product_id: product.product_id,
+          product_name: product.product_name,
+          origin_price: product.origin_price,
+          discount_price: product.discount_price,
+          final_price: product.final_price,
+          main_image: product.main_image || "https://placehold.co/300x300",
+          small_image: product.small_image || "https://placehold.co/150x150"
+        }));
+        setProductsToShow(formattedProducts);
+      } catch (error) {
+        console.error("추천 상품 불러오기 실패:", error);
+      }
+    };
+    
     fetchCartItems();
+    fetchRecommendedProducts();
   }, [navigate]);
 
   // 주문하기
@@ -84,23 +104,37 @@ const CartPage = () => {
         return;
       }
 
-      const orderData = {
-        type: "Cart",
-        userId,
-        items: selectedItems.map((item) => ({
-          // 3) 주문에도 productId 사용
-          productId: item.productId,
-          quantity: item.quantity,
-          totalAmount: item.price * item.quantity,
-          shippingFee: 3000,
-          selectedSize: item.selected_size,
-          selectedColor: item.selected_color,
-          statusId: "PENDING"
-        }))
-      };
+      // 선택된 아이템들의 총 주문 금액 계산 (각 아이템의 price * quantity)
+  const orderTotalAmount = selectedItems.reduce(
+    (acc, item) => acc + item.price * item.quantity,
+    0
+  );
+  const discountAmount = 0; // 할인 금액이 없으면 0
+  const finalAmount = orderTotalAmount - discountAmount;
+  const shippingFee = 3000;
+  const orderType = "OT001";  // 주문 타입 (예시)
 
+  const orderData = {
+    type: "Cart",
+    userId,
+    totalAmount: orderTotalAmount,
+    discountAmount: discountAmount,
+    finalAmount: finalAmount,
+    shippingFee: shippingFee,
+    orderType: orderType,
+  
+    items: selectedItems.map((item) => ({
+      productId: item.productId,
+      quantity: item.quantity,
+      selectedSize: item.selected_size,
+      selectedColor: item.selected_color,
+      // 개별 아이템 별 금액 정보가 필요하다면 추가 가능
+    }))
+  };
       const response = await axiosInstance.post("/api/orders", orderData);
-      alert(`주문이 성공적으로 완료되었습니다! 주문번호: ${response.data.orderId}`);
+      alert(
+        `주문이 성공적으로 완료되었습니다! 주문번호: ${response.data.orderId}`
+      );
       navigate("/order", { state: { orderData } });
     } catch (error) {
       console.error("주문 실패:", error);
@@ -167,7 +201,7 @@ const CartPage = () => {
       .filter((item) => item.selected)
       .map((item) => item.cartItemId);
 
-      console.log("삭제할 선택된 상품 ID들:", selectedIds); // ← 이 부분 확인
+    console.log("삭제할 선택된 상품 ID들:", selectedIds); // ← 이 부분 확인
 
     if (selectedIds.length === 0) {
       alert("삭제할 항목을 먼저 선택하세요.");
@@ -241,6 +275,7 @@ const CartPage = () => {
                     className="remove-selected"
                   />
                 </div>
+                <hr className="divider" />
                 {cartItems.map((item, index) => (
                   <div key={item.cartItemId || index} className="cart-item">
                     <input
@@ -251,8 +286,15 @@ const CartPage = () => {
                     <img src={item.main_image} alt={item.name} />
                     <div className="cart-item-details">
                       <p className="item-name">{item.name}</p>
-                      <p className="size">{item.selected_size}</p>
-                      <p className="color">{item.selected_color}</p>
+                      {(item.selected_size || item.selected_color) && (
+                        <p className="cart-item-selected">
+                          {item.selected_size &&
+                            `사이즈: ${item.selected_size}`}
+                          {item.selected_size && item.selected_color && " / "}
+                          {item.selected_color &&
+                            `색상: ${item.selected_color}`}
+                        </p>
+                      )}
                       <p className="item-price">
                         {Math.round(item.price ?? 0).toLocaleString()}원
                       </p>
@@ -323,22 +365,14 @@ const CartPage = () => {
         {/* 추천 상품 */}
         <section className="recommended-products">
           <h2>추천 상품</h2>
-          <div className="product-list">
-            <ProductCard
-              image="https://placeholderjs.com/100x100"
-              title="자동 급수기"
-              price="45,000원"
-            />
-            <ProductCard
-              image="https://placeholderjs.com/100x100"
-              title="높이조절 식기세트"
-              price="38,000원"
-            />
-            <ProductCard
-              image="https://placeholderjs.com/100x100"
-              title="프리미엄 이동가방"
-              price="126,000원"
-            />
+          <div className="productCardContainer">
+            {productsToShow.length > 0 ? (
+              productsToShow.map((product) => (
+                <ProductCard key={product.product_id} product={product} />
+              ))
+            ) : (
+              <p className="empty-cart">추천 상품이 없습니다.</p>
+            )}
           </div>
         </section>
       </div>

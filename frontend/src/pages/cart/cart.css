@@ -1,5 +1,5 @@
 .cart-page {
-    padding: 0 auto;
+    margin: 0 auto;
     padding: 20px;
     font-family: Arial, sans-serif;
     background-color: #f5f5f5;
@@ -28,11 +28,7 @@
     padding: 15px;
     border-radius: 8px;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    min-height: 300px; /* 설정해야할까 */
-  }
-
-  .cart-item-details {
-
+    min-height: 200px;
   }
   
   .select-all {
@@ -41,7 +37,7 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-  }
+    }
   
   .select-all label {
     display: flex;
@@ -54,16 +50,26 @@
     height: 16px;
     cursor: pointer;
   }
-  
+
+  .divider {
+    border: none;
+    height: 1px;
+    background-color: #ddd;
+    margin: 10px 0;
+  }
+
   .cart-item {
     display: flex;
     align-items: center;
     gap: 15px;
     margin-bottom: 20px;
     padding: 15px;
-    border: 1px solid #ddd;
     border-radius: 8px;
     background-color: #fff;
+  }
+
+  .cart-item input[type="checkbox"] {
+    margin-right: 5px; /* 원하는 간격 */
   }
 
   .empty-cart {
@@ -75,8 +81,8 @@
   }
   
   .cart-item img {
-    width: 80px;
-    height: 80px;
+    width: 100px;
+    height: 100px;
     object-fit: cover;
     border-radius: 8px;
   }
@@ -89,24 +95,51 @@
   }
   
   .item-name {
+    margin: 5px 0;
     font-size: 16px;
     font-weight: bold;
     color: #000;
   }
+
+  .cart-item-selected {
+    margin: 5px 0;
+    font-size: 14px;
+    color: #666; 
+  }
   
   .item-price {
+    margin: 5px 0;
     font-size: 14px;
     color: #555;
   }
   
   .item-quantity {
-    display: inline-flex;
+    display: flex;
     align-items: center;
     gap: 10px;
     }
+
+  .quantity-button {
+    width: 32px;
+    height: 32px;
+    border: 1px solid #ddd;
+    background-color: #f9f9f9;
+    cursor: pointer;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;            /* 버튼 텍스트 크기 */
+    line-height: 1;    
+    }
+
+  .quantity-button:hover {
+    background-color: #e6e6e6;
+  }
   
   .item-quantity input {
     width: 40px;
+    height: 40px;
     text-align: center;
     border: 1px solid #ddd;
     border-radius: 4px;
@@ -123,9 +156,39 @@
   }
   
   .remove-item:hover {
-    background-color: #d42d3b;
+    background-color: #1b2f6f;
+    color: #fff;
+  }
+
+  .remove-selected {
+    display: inline-block;
+    padding: 6px 12px;
+    border: 0px solid #ddd;
+    border-radius: 4px;
+    background-color: #ffffff;
+    
+    /* 텍스트 관련 */
+    color: #555;
+    font-size: 12px;
+    text-align: center;
+    text-decoration: none;
+    
+    /* 마우스 호버 시 커서 표시 */
+    cursor: pointer;
   }
   
+  .remove-selected:hover {
+    background-color: #eee;   /* 호버 시 밝게 */
+    border-color: #ccc;       /* 테두리 색도 약간 변화 */
+    color: #333;              /* 폰트 색 약간 진하게 */
+  }
+  
+  .remove-selected:active {
+    background-color: #ddd;   /* 클릭 시 더 진한 효과 */
+    border-color: #bbb;
+  }
+
+
   /* 요약 정보 스타일 */
   .cart-summary {
     flex: 1;
@@ -183,7 +246,7 @@
   }
   
   .order-button:hover {
-    background-color: #bfc6d3; 
+    background-color: #2b3f8f; 
     transform: translateY(-2px); 
   }
   
