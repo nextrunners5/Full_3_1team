@@ -7,8 +7,8 @@ import './Support.css';
 const Support: React.FC = () => {
   return (
     <>
+  <Header />
     <div className="support-container">
-      <Header />
       <div className="support-header">
         <h1>고객지원 센터에 오신 것을 환영합니다</h1>
         <p>반려동물과 함께하는 행복한 일상, PETOPIA가 도와드리겠습니다.</p>
