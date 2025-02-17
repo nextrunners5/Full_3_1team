@@ -1,24 +1,19 @@
-import React, { useState, useEffect } from 'react';
+import { useEffect, useState } from "react";
 import "./OrderDeliveryInfo.css"
-import OrderDeliveryAddModal from "./OrderDeliveryAddModal";
+import OrderDeliveryModal from "./OrderDeliveryModal";
 import axiosInstance from "../../../shared/axios/axios";
 import {Common, DeliveryForm, OrderDeliveryInfoProps, UserAddressInfo} from "../model/OrderModel";
 import { fetchDeliveryMessage, fetchDetailsAddress } from "../api/Order";
-import { Address } from '../../../features/address/model/Address';
 
-interface Props {
-  onAddressSelect: (address: Address) => void;
-  onMessageSelect: (message: string) => void;
-}
+const OrderDeliveryInfo: React.FC<OrderDeliveryInfoProps> = ({userId, addressChange, messageChange}) => {
 
-const OrderDeliveryInfo: React.FC<Props> = ({ onAddressSelect, onMessageSelect }) => {
   const [deliveryMessage, setDeliveryMessage] = useState<Common[]>([]);
   const [messageForm, setMessageForm] = useState<DeliveryForm>({delivery_message_id: 0, description: '배송 메시지를 선택해 주세요.'});
+  // const [userAddress, setUserAddress] = useState<UserAddressInfo[]>([]);
   const [userAddressDetails, setUserAddressDetails] = useState<UserAddressInfo[]>([]);
   const [selectedAddress, setSelectedAddress] = useState<UserAddressInfo|null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [showModal, setShowModal] = useState(false);
-  const [addresses, setAddresses] = useState<Address[]>([]);
+  const [modalOpen, setModalOpen] = useState<boolean>(false);
 
   useEffect(() => {
     const getUserAddress = async() => {
@@ -35,7 +30,7 @@ const OrderDeliveryInfo: React.FC<Props> = ({ onAddressSelect, onMessageSelect }
           if(defaultAddress){
             console.log('origin default address', defaultAddress);
             setSelectedAddress(defaultAddress);
-            onAddressSelect(defaultAddress);
+            addressChange(defaultAddress);
             console.log('Selected default address', defaultAddress);
           } else {
             console.log('default address not found', defaultAddress);
@@ -90,54 +85,22 @@ const OrderDeliveryInfo: React.FC<Props> = ({ onAddressSelect, onMessageSelect }
       description: value,
       [name] : value,
     }))
-    onMessageSelect(value);
+    messageChange(value);
   };
 
-  const handleAddressSelect = (address: UserAddressInfo) => {
+  const openModal = () => { setModalOpen(true); };
+  const closeModal = () => { setModalOpen(false); };
+
+  const handleAddressChange = (address: UserAddressInfo) => {
     setSelectedAddress(address);
-    onAddressSelect(address);
-    setShowModal(false);
+    addressChange(address);
   };
 
   const handleNewAddress = (newAddress: UserAddressInfo) => {
     setUserAddressDetails((prev) => [...prev, newAddress]);
     setSelectedAddress(newAddress);
-    onAddressSelect(newAddress);
+    addressChange(newAddress);
   }
-
-  // 배송지 목록 조회
-  const fetchAddresses = async () => {
-    try {
-      const response = await axiosInstance.get('/api/addresses');
-      if (response.data.success) {
-        setAddresses(response.data.addresses);
-        // 기본 배송지 자동 선택
-        const defaultAddress = response.data.addresses.find((addr: Address) => addr.is_default);
-        if (defaultAddress) {
-          setSelectedAddress(defaultAddress);
-          onAddressSelect(defaultAddress);
-        }
-      }
-    } catch (error) {
-      console.error('배송지 조회 실패:', error);
-    }
-  };
-
-  // 배송지 삭제
-  const handleDeleteAddress = async (addressId: string) => {
-    try {
-      const response = await axiosInstance.delete(`/api/addresses/${addressId}`);
-      if (response.data.success) {
-        fetchAddresses();
-      }
-    } catch (error) {
-      console.error('배송지 삭제 실패:', error);
-    }
-  };
-
-  useEffect(() => {
-    fetchAddresses();
-  }, []);
 
   return (
     <div className="orderDeliveryContainer">
@@ -150,11 +113,22 @@ const OrderDeliveryInfo: React.FC<Props> = ({ onAddressSelect, onMessageSelect }
             <div>로딩 중...</div>
           ) : selectedAddress ? (
           <div>
+            {/* <div className="recipient">{userAddress[0].recipient_name}</div> */}
             <div className="recipient">{selectedAddress.recipient_name}</div>
             <div className="addressBody">
-              <div className="address">{selectedAddress.address} {selectedAddress.detailed_address}</div>
-              <button className="deliveryChange" onClick={() => setShowModal(true)}>배송지 변경</button>
+              {/* <div className="address">{userAddress[0].address}</div> */}
+              <div className="address">{selectedAddress.address}</div>
+              <button className="deliveryChange" onClick={openModal}>배송지 변경</button>
+              <OrderDeliveryModal 
+                open={modalOpen} 
+                close={closeModal} 
+                header="배송지 선택" 
+                userAddressDetails = {userAddressDetails}  
+                onSelect={handleAddressChange}
+                onNewAddress={handleNewAddress}
+                />
             </div>
+            {/* <div className="phoneNumber">{userAddress[0].recipient_phone}</div> */}
             <div className="phoneNumber">{selectedAddress.recipient_phone}</div>
           </div>
           ) : (
@@ -175,13 +149,6 @@ const OrderDeliveryInfo: React.FC<Props> = ({ onAddressSelect, onMessageSelect }
           </div>
         </div>
       </div>
-      <OrderDeliveryAddModal
-        isOpen={showModal}
-        onClose={() => setShowModal(false)}
-        onSelect={handleAddressSelect}
-        addresses={addresses}
-        onDelete={handleDeleteAddress}
-      />
     </div>
   )
 }
