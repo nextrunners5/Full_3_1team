@@ -34,7 +34,8 @@ export const addToWishlist = async (
   res: Response
 ): Promise<void> => {
   const { userId, productId } = req.body;
-
+  console.log(`백엔드 - 사용자 ID: ${userId}, 상품 ID: ${productId}`);
+  
   try {
     await pool.promise().query(
       `INSERT INTO WishList (user_id, product_id, like_status) VALUES (?, ?, 1)
@@ -42,7 +43,7 @@ export const addToWishlist = async (
       [userId, productId]
     );
 
-    console.log(`위시리스트 추가됨: userId=${userId}, productId=${productId}`);
+    console.log(`프론트 - 위시리스트 추가됨: userId=${userId}, productId=${productId}`);
     res.status(201).json({ message: "위시리스트에 추가됨" });
   } catch (error) {
     console.error("위시리스트 추가 실패:", error);

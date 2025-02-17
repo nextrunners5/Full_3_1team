@@ -64,11 +64,11 @@ const ProductList: React.FC = () => {
         localStorage.setItem("wishlist", JSON.stringify(updatedWishlist));
       } else {
         if (wishlist.includes(productId)) {
-          await axiosInstance.delete(`/wishlist/${productId}`);
+          await axiosInstance.delete(`/api/wishlist/${productId}`);
           updatedWishlist = wishlist.filter((id) => id !== productId);
           alert(`${productName}이(가) 위시리스트에서 삭제되었습니다.`);
         } else {
-          await axiosInstance.post("/wishlist", { userId, productId });
+          await axiosInstance.post("/api/wishlist", { userId, productId });
           updatedWishlist = [...wishlist, productId];
           alert(`${productName}이(가) 위시리스트에 추가되었습니다!`);
         }

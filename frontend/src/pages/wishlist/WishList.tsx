@@ -16,8 +16,9 @@ interface Product {
 const WishList: React.FC = () => {
   const [wishlist, setWishlist] = useState<number[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
-  const userId = localStorage.getItem("userId") || "guest";
-
+  const userId = localStorage.getItem("userId") !== null ? localStorage.getItem("userId") : "guest";
+  console.log("현재 로그인된 userId:", userId);
+  
   useEffect(() => {
     const fetchWishlist = async () => {
       try {
