@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import FailModal from '../../shared/ui/FailModal';
-import axios from '../../shared/axios/axios';
+import axiosInstance from '../../shared/axios/axios';
 import "../login/Login.css";
 import { useDispatch } from 'react-redux';  // useDispatch 훅 임포트
 import { setOrderUserId } from '../order/orderRedux/slice';
@@ -40,7 +40,7 @@ const Login: React.FC = () => {
     setLoading(true);
 
     try {
-      const response = await axios.post('/api/auth/login', {
+      const response = await axiosInstance.post('/api/auth/login', {
         userId: form.username,
         password: form.password
       });

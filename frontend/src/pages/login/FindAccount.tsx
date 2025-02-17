@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from '../../shared/axios/axios';
+import axiosInstance from '../../shared/axios/axios';
 import FailModal from '../../shared/ui/FailModal';
 import './FindAccount.css';
 
@@ -59,7 +59,7 @@ const FindAccount: React.FC = () => {
 
     try {
       if (activeTab === "id") {
-        const response = await axios.post('/api/auth/find-userid', {
+        const response = await axiosInstance.post('/api/auth/find-userid', {
           name: formData.name,
           email: formData.email
         });
@@ -68,7 +68,7 @@ const FindAccount: React.FC = () => {
           setSuccessMessage(`찾은 아이디: ${response.data.userId}`);
         }
       } else {
-        const response = await axios.post('/api/auth/reset-password', {
+        const response = await axiosInstance.post('/api/auth/reset-password', {
           userId: formData.userId,
           name: formData.name,
           phone: formData.phone

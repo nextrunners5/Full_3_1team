@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from '../../shared/axios/axios';
+import axiosInstance from '../../shared/axios/axios';
 import FailModal from '../../shared/ui/FailModal';
 import './Signup.css';
 
@@ -101,7 +101,7 @@ const Signup: React.FC = () => {
         phone: form.phone,
       });
 
-      const response = await axios.post('/api/auth/signup', {
+      const response = await axiosInstance.post('/api/auth/signup', {
         userId: form.userId,
         email: form.email,
         password: form.password,
@@ -140,7 +140,7 @@ const Signup: React.FC = () => {
         return;
       }
 
-      const response = await axios.get(`/api/auth/check-userid/${form.userId}`);
+      const response = await axiosInstance.get(`/api/auth/check-userid/${form.userId}`);
       console.log('아이디 중복 체크 응답:', response.data); // 응답 확인용 로그
 
       if (response.data.success) {
@@ -164,7 +164,7 @@ const Signup: React.FC = () => {
 
   const checkEmailDuplicate = async () => {
     try {
-      const response = await axios.get(`/api/auth/check-email/${form.email}`);
+      const response = await axiosInstance.get(`/api/auth/check-email/${form.email}`);
       if (response.data.success) {
         setModalMessage('사용 가능한 이메일입니다.');
         setShowModal(true);
