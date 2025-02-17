@@ -57,9 +57,23 @@ const getUserDetailsAddress = async(req: Request, res: Response) => {
 
 const getOrderProducts = async(req: Request, res: Response) => {
   const userId = req.params.userId as string;
-  console.log('[getOrderProducts]유저아이디', userId);
+  const {type} = req.query;
+  const {orderId, productId} = req.query;
+  console.log('[getOrderProducts 쿼리]', req.query);
+  
+  let selectedProductId: number[] = [];
+
+  if (typeof productId === "string") {
+    // productId가 단일 문자열일 경우, 쉼표로 분리하여 숫자 배열로 변환
+    selectedProductId = productId.split(",").map(id => Number(id));
+  } else if (Array.isArray(productId)) {
+    // productId가 배열일 경우, 배열로 변환
+    selectedProductId = productId.map(id => Number(id));
+  }
+
+  console.log('[getOrderProducts] 유저아이디, 타입, 선택된 상품 아이디들:', userId, type, selectedProductId,orderId);
   try{
-    const orderProducts = await fetchOrderProducts(userId);
+    const orderProducts = await fetchOrderProducts(userId, type as string, selectedProductId,orderId as string);
     res.json(orderProducts);
     
     console.log('orderProducts: ', orderProducts);

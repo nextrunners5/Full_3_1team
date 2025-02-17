@@ -70,12 +70,18 @@ export const fetchUserDetailsAddress = async(userId: string) => {
   } 
 };
 
-export const fetchOrderProducts = async(userId: string) => {
+export const fetchOrderProducts = async(userId: string, type: string, selectedProductId: number[], orderId: string) => {
   try{
     // const orderProductsInfo = await getOrderSingleProducts('user123');
-    console.log('fetchOrderProducts]유저아이디', userId);
-    const orderProductsInfo = await getOrderSingleProducts(userId);
-    return orderProductsInfo;
+    console.log('fetchOrderProducts]유저아이디, 타입', userId, type, selectedProductId, orderId);
+    if(type === 'OT002'){
+      const orderProductsInfo = await getOrderSingleProducts(userId, type);
+      console.log
+      return orderProductsInfo;
+    } else{
+      const orderCartInfo = await getOrderProductItems(userId, type, selectedProductId, orderId);
+      return orderCartInfo;
+    }
   } catch(err){
     console.error('제품 정보를 가져오지 못했습니다.', err);
     throw err;

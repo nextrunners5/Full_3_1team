@@ -125,15 +125,15 @@ export const getShippingFee = async (userId: string): Promise<ShippingFee[]> => 
 };
 
 //주문하는 제품 정보 가져오기
-export const getOrderSingleProducts = async(userId: string) => {
+export const getOrderSingleProducts = async(userId: string, type: string) => {
   const singleProductQuery = `SELECT oi.product_count, p.product_id, p.product_name, o.final_amount, o.order_id, oi.option_color, oi.option_size
                               FROM Orders o
-                              JOIN OrderItems  oi ON o.order_id = oi.order_id
+                              JOIN OrderItems oi ON o.order_id = oi.order_id
                               JOIN Products p ON oi.product_id = p.product_id
-                              WHERE o.user_id = ? AND o.order_type = 'OT002' AND oi.product_id = p.product_id 
+                              WHERE o.user_id = ? AND o.order_type = ? AND oi.product_id = p.product_id 
                               ORDER BY o.order_date DESC LIMIT 1`;
   try{
-    const [res] = await pool.promise().query(singleProductQuery,[userId]);
+    const [res] = await pool.promise().query(singleProductQuery,[userId,type]);
     const rows = res as any[]; 
     if(rows.length > 0){
       for(let i = 0; i < rows.length; i++){
@@ -142,6 +142,7 @@ export const getOrderSingleProducts = async(userId: string) => {
         rows[i].final_price = Number(price);
         console.log('orderProducts price: ', price);
       }
+      console.log('orderSingle [row]', rows);
       return rows;
     }
   }catch(err){
@@ -149,14 +150,20 @@ export const getOrderSingleProducts = async(userId: string) => {
   }
 }
 
-export const getOrderProductItems = async (userId: string) => {
+export const getOrderProductItems = async (userId: string, type: string, selectedProductId: number[], orderId: string) => {
+  console.log('데이터', selectedProductId);
+  // const cartProductQuery = `SELECT oi.product_count, p.product_id, p.product_name, o.final_amount, o.order_id, oi.option_color, oi.option_size
+  //                           FROM Orders o
+  //                           JOIN OrderItems  oi ON o.order_id = oi.order_id
+  //                           JOIN Products p ON oi.product_id = p.product_id
+  //                           WHERE o.user_id = ? AND o.order_type = ?`;
   const cartProductQuery = `SELECT oi.product_count, p.product_id, p.product_name, o.final_amount, o.order_id, oi.option_color, oi.option_size
                             FROM Orders o
-                            JOIN OrderItems  oi ON o.order_id = oi.order_id
+                            JOIN OrderItems oi ON o.order_id = oi.order_id
                             JOIN Products p ON oi.product_id = p.product_id
-                            WHERE o.user_id = ? AND o.order_type = 'OT001'`;
+                            WHERE o.user_id = ? AND o.order_id = ? AND o.order_type = ? AND p.product_id IN (?)`;
   try{
-    const [res] = await pool.promise().query(cartProductQuery,[userId]);
+    const [res] = await pool.promise().query(cartProductQuery,[userId,orderId,type,selectedProductId]);
     const rows = res as any[]; 
     if(rows.length > 0){
       for(let i = 0; i < rows.length; i++){
@@ -165,6 +172,7 @@ export const getOrderProductItems = async (userId: string) => {
         rows[i].final_price = Number(price);
         console.log('orderProducts: ', price);
       }
+      console.log('orderCart [rows]', rows);
       return rows;
     }
 
