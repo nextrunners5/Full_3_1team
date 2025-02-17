@@ -212,24 +212,24 @@ const getOrderHistory = async (req: AuthenticatedRequest, res: Response) => {
         startDate.setMonth(today.getMonth() - 1);
     }
 
-    // 쿼리 수정: LEFT JOIN으로 변경하여 리뷰가 없는 주문도 조회되도록
     const query = `
       SELECT DISTINCT
         o.order_id,
         o.order_date,
         o.total_amount,
         o.status_id,
-        s.status_name,
+        c.description as status_name,
         p.product_name,
         oi.quantity,
         CASE WHEN r.review_id IS NOT NULL THEN 1 ELSE 0 END as has_review
       FROM Orders o
       LEFT JOIN OrderItems oi ON o.order_id = oi.order_id
       LEFT JOIN Products p ON oi.product_id = p.product_id
-      LEFT JOIN OrderStatus s ON o.status_id = s.status_id
+      LEFT JOIN Common c ON o.status_id = c.status_code
       LEFT JOIN Reviews r ON oi.order_item_id = r.order_item_id
       WHERE o.user_id = ?
       AND o.order_date BETWEEN ? AND ?
+      AND c.type = 'ORDER_STATUS'
       ORDER BY o.order_date DESC
     `;
 
