@@ -21,7 +21,7 @@ interface ModalProps {
 const OrderDeliveryModal: React.FC<ModalProps> = ({open, close, header, userAddressDetails, onSelect, onNewAddress}) => {
   const [selectedAddress, setSelectedAddress] = useState<UserAddressInfo | null>(null);
   const [addModalOpen, setAddModalOpen] = useState<boolean>(false);
-  const [updateModalOpen, setUpdateModalOpen] = useState<boolean>(false);
+  // const [ setUpdateModalOpen] = useState<boolean>(false);
 
   const [addressList, setAddressList] = useState<UserAddressInfo[]>([]);
   useEffect(() => {
@@ -51,7 +51,7 @@ const OrderDeliveryModal: React.FC<ModalProps> = ({open, close, header, userAddr
 
   const openAddModal = () => {setAddModalOpen(true); };
   const closeAddModal = () => {setAddModalOpen(false); };
-  const openUpdateModal = () => {setUpdateModalOpen(true); };
+  // const openUpdateModal = () => {setUpdateModalOpen(true); };
   // const closeUpdateModal = () => {setUpdateModalOpen(false); };
 
   const handleSubmitAddress = async (addressData: UserAddressFormInfo) => {
@@ -120,8 +120,12 @@ const OrderDeliveryModal: React.FC<ModalProps> = ({open, close, header, userAddr
                         onChange={() => handleAddressChange(address)}
                       />
                       <div className="defaultAddressContainer">
-                        <span>{address.address_name}</span>
-                        {address.is_default  && <div className="defaultMarker">기본배송지</div>}
+                        {address.is_default ? (
+                          <>
+                            <span>{address.address_name}</span>
+                            <div className="defaultMarker">기본배송지</div>
+                          </>
+                        ) : null}
                       </div>
                     </div>
                     <div className="selectDeliveryInfo">
@@ -145,7 +149,8 @@ const OrderDeliveryModal: React.FC<ModalProps> = ({open, close, header, userAddr
               </div>
               <div className="updateDelivery">
                 <BsPencilSquare />
-                <div className="updateDeliveryTitle" onClick={openUpdateModal}>선택 배송지 수정</div>
+                {/* <div className="updateDeliveryTitle" onClick={openUpdateModal}>선택 배송지 수정</div> */}
+                <div className="updateDeliveryTitle">선택 배송지 수정</div>
                 {/* <OrderDeliveryUpdateModal open={updateModalOpen} close={closeUpdateModal} header="배송지 수정">
                 </OrderDeliveryUpdateModal> */}
               </div>

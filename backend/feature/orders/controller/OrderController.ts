@@ -78,12 +78,13 @@ const getOrderShipping = async(req: Request, res: Response) => {
 };
 
 const postOrderSingleProduct = async(req: Request, res: Response) => {
-  const {type, userId, productId, quantity, totalAmount, discountAmount, finalAmount, shippingFee, selectedSize, selectedColor, statusId} = req.body;
+  const {type, userId, totalAmount, discountAmount, finalAmount, shippingFee, statusId, items} = req.body;
   console.log('single Information', req.body);
   console.log('[백앤드] 상품데이터 유저아이디',userId);
   console.log('single Information', totalAmount, discountAmount);
   try{
     if(type === 'Single'){
+      const {productId, quantity, selectedSize, selectedColor} = req.body;
       const orderId = await fetchOrderSingleProduct({
         userId, 
         productId, 
@@ -98,21 +99,46 @@ const postOrderSingleProduct = async(req: Request, res: Response) => {
       });
       console.log("orderProductInfo",orderId);
       res.json(orderId);
-    } else{
+    } else if (type === 'Cart') {
+      // 카트에서 주문하기
+      if (!Array.isArray(items) || items.length === 0) {
+        return res.status(400).json({ error: '장바구니에 상품이 없습니다.' });
+      }
+
+      // 🟢 1. 하나의 orderId 생성
       const orderId = await fetchOrderCartProduct({
-        userId, 
-        productId, 
-        quantity, 
-        totalAmount, 
-        discountAmount, 
-        finalAmount, 
-        shippingFee, 
-        selectedSize, 
-        selectedColor, 
-        statusId
+        userId,
+        totalAmount,
+        discountAmount,
+        finalAmount,
+        shippingFee,
+        statusId,
       });
-      console.log("orderProductInfo",orderId);
-      res.json(orderId);
+
+      console.log("Cart Order Created, Order ID:", orderId);
+
+      // 🟢 2. 생성된 orderId를 사용하여 각 상품을 저장
+      const orderItemResults = [];
+      for (const item of items) {
+        const { product_id, product_count, option_size, option_color, order_status } = item;
+
+        const orderItemId = await fetchOrderCartItem({
+          orderId,  // 🟢 같은 orderId를 사용
+          productId: product_id,
+          quantity: product_count,
+          selectedSize: option_size,
+          selectedColor: option_color,
+          statusId: order_status || "PENDING",  // 기본값 추가
+        });
+
+        orderItemResults.push(orderItemId);
+      }
+
+      console.log("Cart Order Items:", orderItemResults);
+      res.json({ success: true, orderId, orderItems: orderItemResults });
+
+    } else {
+      return res.status(400).json({ error: '잘못된 주문 유형입니다.' });
     }
   }catch(err){
     res.status(500).json({error:'단일 상품 정보 저장 실패'});
