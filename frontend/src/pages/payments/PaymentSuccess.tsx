@@ -1,6 +1,8 @@
 import React, { useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import axios from '../../shared/axios/axios';
+import { fetchInsertDelivery, fetchUpdateInfo } from '../../features/order/api/Order';
+import { UserAddressInfo } from '../../features/order/model/OrderModel';
 
 const PaymentSuccess: React.FC = () => {
   const location = useLocation();
@@ -12,6 +14,8 @@ const PaymentSuccess: React.FC = () => {
     const paymentKey = searchParams.get('paymentKey');
     const orderId = searchParams.get('orderId');
     const amount = searchParams.get('amount');
+    const address = searchParams.get('address');
+    const message = searchParams.get('message');
 
     const confirmPayment = async () => {
       // 이미 처리 중이면 중단
@@ -19,16 +23,27 @@ const PaymentSuccess: React.FC = () => {
       isProcessingRef.current = true;
 
       try {
-        const response = await axios.post('/api/payments/confirm', {
-          paymentKey,
-          orderId,
-          amount: Number(amount)
-        });
+        if (orderId && address && message) {
+          const response = await axios.post('/api/payments/confirm', {
+            paymentKey,
+            orderId,
+            amount: Number(amount)
+          });
 
-        if (response.data.success) {
-          // 결제 성공 처리
-          alert('결제가 완료되었습니다.');
-          navigate('/order/complete');
+          if (response.data.success) {
+            // 결제 성공 처리
+            await fetchUpdateInfo(orderId);
+            console.log('fetchUpdateInfo 실행됨');
+
+            // 주소 데이터를 JSON 문자열로 디코딩
+            const decodedAddress: UserAddressInfo = JSON.parse(decodeURIComponent(address));
+            console.log('[주문성공] oriderId', orderId);
+            await fetchInsertDelivery(orderId, decodedAddress, decodeURIComponent(message));
+            console.log('fetchInsertDelivery 실행됨');
+
+            alert('결제가 완료되었습니다.');
+            navigate('/order/complete');
+          }
         }
       } catch (error: any) {
         console.error('결제 승인 실패:', error);
@@ -38,10 +53,15 @@ const PaymentSuccess: React.FC = () => {
       }
     };
 
-    if (paymentKey && orderId && amount) {
-      confirmPayment();
-    }
-  }, [location.search, navigate]);  // 의존성 배열 명시
+  //   if (paymentKey && orderId && amount) {
+  //     confirmPayment();
+  //   }
+  // }, [location.search, navigate]);  // 의존성 배열 명시
+
+  if (paymentKey && orderId && amount && address && message) {
+    confirmPayment();
+  }
+}, [location.search, navigate]);
 
   return (
     <div className="payment-success">

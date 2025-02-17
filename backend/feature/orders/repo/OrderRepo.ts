@@ -244,18 +244,35 @@ export const insertOrderItems = async(userid: string, totalAmount:number, discou
   }
 }
 
-export const insertOrderDelivery = async(orderId: string, selectedAddress: any, selectedMessage: string) => {
-  console.log('[insertOrderDelivery]', orderId, selectedAddress, selectedMessage);
+export const insertOrderDelivery = async(orderId: string, combinedAddress: string, selectedMessage: string) => {
+  console.log('[insertOrderDelivery]', orderId, combinedAddress, selectedMessage);
+  const getMessageCode = (message: string): string => {
+    switch (message) {
+      case '부재시 경비실에 맡겨주세요':
+        return 'DM001';
+      case '문 앞에 놔주세요':
+        return 'DM002';
+      case '택배함에 놔주세요':
+        return 'DM003';
+      case '배송 전에 연락주세요':
+        return 'DM004';
+      default:
+        return 'DM001';  // 기본 메시지 코드
+    }
+  };
   try{
     const deliveryStatus = 'DS001'
+    
     const deliveryDate = new Date();
     deliveryDate.setDate(deliveryDate.getDate() + 2);
     const formattedDeliveryDate = deliveryDate.toISOString().slice(0, 19).replace("T", " ");
 
-    const deliveryQuery = 
-    `INSERT INTO Delivery(order_id, delivery_status, delivery_message, delivery_address, delivery_date)
-    VALUES(?,?,?,?,?);`
-    const [res] = await pool.promise().query(deliveryQuery,[orderId,deliveryStatus,selectedMessage,selectedAddress,formattedDeliveryDate]);
+    const messageCode = getMessageCode(selectedMessage);
+
+    const deliveryQuery = `
+    INSERT INTO Delivery(order_id, delivery_status, delivery_message, delivery_address, delivery_date)
+    VALUES(?,?,?,?,?)`;
+    const [res] = await pool.promise().query(deliveryQuery,[orderId,deliveryStatus,messageCode,combinedAddress,formattedDeliveryDate]);
 
     console.log('주문 배송지 정보가 추가되었습니다.');
   }catch(err){
@@ -263,21 +280,32 @@ export const insertOrderDelivery = async(orderId: string, selectedAddress: any, 
   }
 }
 
-export const updateOrderStatus = async(orderId: string) => {
+export const updateOrderStatus = async(orderId: string ) => {
+  // const {orderId} = order;
   console.log('[updateOrderStatus]', orderId);
+  console.log('[updateOrderStatus]', typeof(orderId));
+  
   try{
-    const deliveryStatus = 'DS001'
-    const deliveryDate = new Date();
-    deliveryDate.setDate(deliveryDate.getDate() + 2);
-    const formattedDeliveryDate = deliveryDate.toISOString().slice(0, 19).replace("T", " ");
+    const orderStatusQuery = `
+      UPDATE Orders 
+      SET status_id = 'OS002' 
+      WHERE order_id = ?`;
 
-    const deliveryQuery = 
-    `INSERT INTO Delivery(order_id, delivery_status, delivery_message, delivery_address, delivery_date)
-    VALUES(?,?,?,?,?);`
-    const [res] = await pool.promise().query(deliveryQuery,[orderId]);
+    const orderItemsStatusQuery = `
+      UPDATE OrderItems
+      SET order_status = 'OS002' 
+      WHERE order_id = ?`;
 
-    console.log('주문 배송지 정보가 추가되었습니다.');
+    await pool.promise().query(orderStatusQuery,[orderId]);
+    console.log('Orders 테이블의 주문 상태가 업데이트 되었습니다.');
+
+    await pool.promise().query(orderItemsStatusQuery,[orderId]);
+    console.log('OrderItems 테이블의 주문 상태가 업데이트 되었습니다.');
+
+    console.log('주문 상태가 업데이트 되었습니다.');
+
+    return orderId;
   }catch(err){
-    console.error('주문 배송지를 추가하지 못했습니다.', err);
+    console.error('주문 상태를 업데이트하지 못했습니다.', err);
   }
 }

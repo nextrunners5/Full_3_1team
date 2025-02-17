@@ -157,7 +157,9 @@ export const fetchOrderCartProduct = async(orderData:any) => {
 
 export const fetchInsertDeliveryInfo = async(orderId: string, selectedAddress: any, selectedMessage: string) => {
   try{
-    const deliveryInfo = await insertOrderDelivery(orderId, selectedAddress,selectedMessage);
+    console.log('selectedAddress 데이터', selectedAddress);
+    const combinedAddress = `${selectedAddress.address} ${selectedAddress.detailed_address}`;
+    const deliveryInfo = await insertOrderDelivery(orderId, combinedAddress,selectedMessage);
     console.log("주문 배송지 추가",deliveryInfo);
     return deliveryInfo;
   }catch(err){
@@ -165,9 +167,11 @@ export const fetchInsertDeliveryInfo = async(orderId: string, selectedAddress: a
   }
 }
 
-export const fetchUpdateOrderStatus = async(orderId: string) => {
+export const fetchUpdateOrderStatus = async(order: { order_id: string }) => {
   try{
-    const orderStatus = await updateOrderStatus(orderId);
+    const { order_id } = order;
+    console.log('[fetchUpdateOrderStatus', order_id);
+    const orderStatus = await updateOrderStatus(order_id);
     console.log("주문 상태 변경",orderStatus);
     return orderStatus;
   }catch(err){

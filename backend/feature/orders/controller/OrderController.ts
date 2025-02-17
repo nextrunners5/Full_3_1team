@@ -132,10 +132,10 @@ const postOrderDeliveryInfo = async(req: Request, res: Response) => {
 }
 
 const putOrderStatus = async(req: Request, res: Response) => {
-  const {orderId} = req.body;
+  const {order_id} = req.body;
   console.log('putOrderStatus', req.body);
   try{
-    const result = await fetchUpdateOrderStatus(req.body);
+    const result = await fetchUpdateOrderStatus({order_id});
     console.log('putOrderStatus result', result);
     res.json(result);
   } catch(err){
