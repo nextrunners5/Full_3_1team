@@ -83,7 +83,7 @@ export const getUserDetailsAddress = async(userId: string) => {
                   FROM Users u 
                   JOIN UserAddresses ua ON u.user_id = ua.user_id 
                   WHERE u.user_id = ? 
-                  ORDER BY ua.is_default DESC, ua.created_at ASC`;
+                  ORDER BY ua.is_default DESC, ua.created_at DESC`;
   try{
     const [res] = await pool.promise().query(query,[userId]);
     const rows = res as any[];
@@ -140,7 +140,7 @@ export const getOrderSingleProducts = async(userId: string) => {
         const finalPrice = rows[i].final_amount;
         const price = parseFloat(finalPrice).toFixed(0);
         rows[i].final_price = Number(price);
-        console.log('orderProducts: ', price);
+        console.log('orderProducts price: ', price);
       }
       return rows;
     }
@@ -241,5 +241,43 @@ export const insertOrderItems = async(userid: string, totalAmount:number, discou
     throw err;
   } finally{
     connection.release();
+  }
+}
+
+export const insertOrderDelivery = async(orderId: string, selectedAddress: any, selectedMessage: string) => {
+  console.log('[insertOrderDelivery]', orderId, selectedAddress, selectedMessage);
+  try{
+    const deliveryStatus = 'DS001'
+    const deliveryDate = new Date();
+    deliveryDate.setDate(deliveryDate.getDate() + 2);
+    const formattedDeliveryDate = deliveryDate.toISOString().slice(0, 19).replace("T", " ");
+
+    const deliveryQuery = 
+    `INSERT INTO Delivery(order_id, delivery_status, delivery_message, delivery_address, delivery_date)
+    VALUES(?,?,?,?,?);`
+    const [res] = await pool.promise().query(deliveryQuery,[orderId,deliveryStatus,selectedMessage,selectedAddress,formattedDeliveryDate]);
+
+    console.log('주문 배송지 정보가 추가되었습니다.');
+  }catch(err){
+    console.error('주문 배송지를 추가하지 못했습니다.', err);
+  }
+}
+
+export const updateOrderStatus = async(orderId: string) => {
+  console.log('[updateOrderStatus]', orderId);
+  try{
+    const deliveryStatus = 'DS001'
+    const deliveryDate = new Date();
+    deliveryDate.setDate(deliveryDate.getDate() + 2);
+    const formattedDeliveryDate = deliveryDate.toISOString().slice(0, 19).replace("T", " ");
+
+    const deliveryQuery = 
+    `INSERT INTO Delivery(order_id, delivery_status, delivery_message, delivery_address, delivery_date)
+    VALUES(?,?,?,?,?);`
+    const [res] = await pool.promise().query(deliveryQuery,[orderId]);
+
+    console.log('주문 배송지 정보가 추가되었습니다.');
+  }catch(err){
+    console.error('주문 배송지를 추가하지 못했습니다.', err);
   }
 }

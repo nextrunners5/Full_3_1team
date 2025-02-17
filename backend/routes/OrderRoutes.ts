@@ -10,5 +10,7 @@ router.get(`/UserDetailsAddress/:userId`, OrderController.getUserDetailsAddress)
 router.get(`/OrderProducts/:userId`, OrderController.getOrderProducts);
 router.get(`/OrderShippingFee/:userId`, OrderController.getOrderShipping);
 router.post(`/`, OrderController.postOrderSingleProduct);
+router.put('/OrderInfoUpdate', OrderController.putOrderStatus);
+router.post('/OrderInfoUpdate', OrderController.postOrderDeliveryInfo);
 
 export default router; // 생성한 라우터를 내보내기 합니다.

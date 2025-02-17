@@ -22,6 +22,10 @@
   /* 팝업이 열릴때 스르륵 열리는 효과 */
   animation: modal-show 0.3s;
   overflow: hidden;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  overflow: auto; /* 부모 요소가 스크롤 가능하도록 수정 */
 }
 .modalHeader {
   display: flex;
@@ -54,6 +58,8 @@
   padding: 16px 24px;
   border-bottom: 1px solid #dee2e6;
   border-top: 1px solid #dee2e6;
+  flex: 1; /* 본문 영역이 가변적 높이를 가지도록 설정 */
+  overflow-y: auto; /* 본문 스크롤 가능 */
 }
 .modalFooter {
   padding: 24px;

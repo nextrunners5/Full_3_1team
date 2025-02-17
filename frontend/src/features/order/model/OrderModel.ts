@@ -24,7 +24,7 @@ export interface UserAddressInfo{
   detailed_address?: string;
   recipient_phone: string;
   is_default: boolean;
-  postal_code: string | undefined;
+  postal_code?: string | undefined;
 }
 
 export interface UserAddressFormInfo {

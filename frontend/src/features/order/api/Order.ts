@@ -29,7 +29,12 @@ export const fetchAddAddress = async(addressData: UserAddressFormInfo) =>{
     const response = await axiosInstance.post('/api/addresses', addressData);
     if (response.status === 200) {
       console.log('[주문페이지] 새 배송지를 추가했습니다.', response.data);
-      return response.data;
+      // return response.data;
+      return {
+        success: response.data.success,
+        message: response.data.message,
+        newAddress: addressData  // 새 주소 데이터를 포함시킴
+      };
     } else {
       console.error('[서버 응답 오류]', response.status);
       throw new Error('주소 추가에 실패했습니다.');
@@ -68,6 +73,7 @@ export const fetchDetailsAddress = async(userId: string | null | undefined) => {
 //주문 제품 정보 가져오기
 export const fetchOrderProducts = async(userId: string | null | undefined) => {
   try{
+    console.log('[카카오] 주문 제품 정보', userId);
     const response = await axiosInstance.get<OrderProducts[]>(`/api/orders/OrderProducts/${userId}`);
     console.log('orderProductInfo: ',  response.data);
     return response.data;
@@ -104,12 +110,23 @@ export const fetchShippingFee = async(userId: string | null | undefined) => {
   }
 };
 
-export const fetchProcessPayment = async(order_id: string, final_price: number, selectedAddress: UserAddressInfo | null,  selectedMessage: string) => {
+export const fetchUpdateInfo = async(order_id: string) => {
   try{
-    console.log('[프론트] OrderPay 요청 데이터', order_id, final_price, selectedAddress, selectedMessage)
-    const response = await axiosInstance.post('/api/payments', {
+    console.log('[프론트] fetchUpdateInfo 요청 데이터', order_id);
+    const response = await axiosInstance.put('/api/orders/OrderInfoUpdate', {
+      order_id
+    });
+    return response.data;
+  } catch(err){
+    console.error('결제 요청 실패', err);
+  }
+}
+
+export const fetchInsertDelivery = async(order_id: string, selectedAddress: UserAddressInfo | null,  selectedMessage: string) => {
+  try{
+    console.log('[프론트] fetchInsertDelivery 요청 데이터', order_id, selectedAddress, selectedMessage)
+    const response = await axiosInstance.post('/api/orders/OrderInfoUpdate', {
       order_id,
-      final_price,
       selectedAddress,
       selectedMessage
     });

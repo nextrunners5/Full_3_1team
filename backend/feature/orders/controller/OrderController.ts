@@ -1,7 +1,7 @@
 //컨트롤러는 사용자로부터의 요청을 받아서 처리하고, 적절한 응답을 반환하는 역할을 합니다. 
 //비즈니스 로직을 서비스 계층에 위임하고, 서비스로부터 받은 결과를 클라이언트에 반환합니다.
 import { Request, Response } from 'express';
-import { fetchUserPoints, fetchDeliveryMessage, fetchUserAddress, fetchUserDetailsAddress, fetchOrderProducts, fetchShippingFee, fetchOrderSingleProduct, fetchOrderCartProduct } from '../services/OrderService';
+import { fetchUserPoints, fetchDeliveryMessage, fetchUserAddress, fetchUserDetailsAddress, fetchOrderProducts, fetchShippingFee, fetchOrderSingleProduct, fetchOrderCartProduct, fetchInsertDeliveryInfo, fetchUpdateOrderStatus } from '../services/OrderService';
 
 const getUserPoints = async (req: Request, res: Response) => {
   const userId = req.params.userId as string;
@@ -55,6 +55,7 @@ const getUserDetailsAddress = async(req: Request, res: Response) => {
 
 const getOrderProducts = async(req: Request, res: Response) => {
   const userId = req.params.userId as string;
+  console.log('[getOrderProducts]유저아이디', userId);
   try{
     const orderProducts = await fetchOrderProducts(userId);
     res.json(orderProducts);
@@ -118,6 +119,30 @@ const postOrderSingleProduct = async(req: Request, res: Response) => {
   }
 }
 
+const postOrderDeliveryInfo = async(req: Request, res: Response) => {
+  const {orderId, selectedAddress, selectedMessage} = req.body;
+  console.log('orderInfoUpdate', req.body);
+  try{
+    const result = await fetchInsertDeliveryInfo(orderId, selectedAddress, selectedMessage);
+    console.log('orderInfoUpdate result', result);
+    res.json(result);
+  } catch(err){
+    res.status(500).json({error: '주문 배송지 정보 수정 실패'});
+  }
+}
+
+const putOrderStatus = async(req: Request, res: Response) => {
+  const {orderId} = req.body;
+  console.log('putOrderStatus', req.body);
+  try{
+    const result = await fetchUpdateOrderStatus(req.body);
+    console.log('putOrderStatus result', result);
+    res.json(result);
+  } catch(err){
+    res.status(500).json({error: '주문 배송지 정보 수정 실패'});
+  }
+}
+
 export default {
   getUserPoints,
   getDeliveryMessage,
@@ -126,4 +151,6 @@ export default {
   getOrderProducts,
   getOrderShipping,
   postOrderSingleProduct,
+  postOrderDeliveryInfo,
+  putOrderStatus,
 };

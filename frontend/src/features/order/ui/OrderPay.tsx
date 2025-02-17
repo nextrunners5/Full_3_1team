@@ -3,8 +3,8 @@ import OrderCouponPoint from "./OrderCouponPoint";
 import "./OrderPay.css"
 import OrderPrice from "./OrderPrice";
 import { useSelector } from "react-redux";
-import { selectOrderId, selectTotalPrice } from "../../../pages/order/orderRedux/slice";
-import { fetchProcessPayment } from "../api/Order";
+import { selectOrderId } from "../../../pages/order/orderRedux/slice";
+import { fetchInsertDelivery, fetchUpdateInfo } from "../api/Order";
 // import { RootState } from "../../../pages/order/orderRedux/store";
 import { OrderPayProps } from "../model/OrderModel";
 import { loadTossPayments } from "@tosspayments/payment-sdk";
@@ -31,18 +31,7 @@ const OrderPay: React.FC<OrderPayProps> = ({userId, selectedAddress, selectedMes
     console.log('setFinalPrice', finalPrice);
   };
 
-  // const handlePaymentData = async() => {
-  //   try{
-  //     const finalPrice = totalPrice - points;
-  //     const response = await fetchProcessPayment(orderId, finalPrice, selectedAddress, selectedMessage);
-  //     console.log('response handlePayment', response.message);
-  //   } catch(err){
-  //     console.error('결제 에러',err);
-  //     alert('결제 요청 실패');
-  //   }
-  // }
 
-  
 
   const handlePayment = async () => {
     setIsLoading(true);
@@ -50,16 +39,20 @@ const OrderPay: React.FC<OrderPayProps> = ({userId, selectedAddress, selectedMes
       const tossPayments = await loadTossPayments(import.meta.env.VITE_TOSS_CLIENT_KEY);
 
       // const finalPrice = totalPrice - points ;
+      const final_price = finalPrice;
 
       // 결제 요청
       await tossPayments.requestPayment("카드", {
         orderId: `${orderId}`,
         orderName: "구매 상품",
-        amount: finalPrice,
+        amount: final_price,
         customerName: `${userId}`, // 실제 환경에서는 사용자 이름을 받아야 함
         successUrl: `${window.location.origin}/payments/success`,
         failUrl: `${window.location.origin}/payments/fail`,
       });
+
+      await fetchUpdateInfo(orderId);
+      await fetchInsertDelivery(orderId, selectedAddress, selectedMessage);
 
     } catch (error) {
       console.error("결제 요청 실패:", error);

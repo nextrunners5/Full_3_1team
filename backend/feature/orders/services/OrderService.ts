@@ -13,8 +13,10 @@ import {
   getUserAddress, 
   getUserDetailsAddress, 
   getUserPoints, 
+  insertOrderDelivery, 
   // insertOrder,
-  insertOrderItems, 
+  insertOrderItems,
+  updateOrderStatus, 
 } from "../repo/OrderRepo";
 
 export const fetchUserPoints = async(userId: string) => {
@@ -69,6 +71,7 @@ export const fetchUserDetailsAddress = async(userId: string) => {
 export const fetchOrderProducts = async(userId: string) => {
   try{
     // const orderProductsInfo = await getOrderSingleProducts('user123');
+    console.log('fetchOrderProducts]유저아이디', userId);
     const orderProductsInfo = await getOrderSingleProducts(userId);
     return orderProductsInfo;
   } catch(err){
@@ -149,5 +152,25 @@ export const fetchOrderCartProduct = async(orderData:any) => {
   } catch(err){
     console.error('단일 상품 저장 실패', err);
     throw err;
+  }
+}
+
+export const fetchInsertDeliveryInfo = async(orderId: string, selectedAddress: any, selectedMessage: string) => {
+  try{
+    const deliveryInfo = await insertOrderDelivery(orderId, selectedAddress,selectedMessage);
+    console.log("주문 배송지 추가",deliveryInfo);
+    return deliveryInfo;
+  }catch(err){
+    console.error('배송지 정보 추가 실패', err);
+  }
+}
+
+export const fetchUpdateOrderStatus = async(orderId: string) => {
+  try{
+    const orderStatus = await updateOrderStatus(orderId);
+    console.log("주문 상태 변경",orderStatus);
+    return orderStatus;
+  }catch(err){
+    console.error('주문 정보 업데이트 실패', err);
   }
 }

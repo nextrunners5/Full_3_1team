@@ -23,6 +23,7 @@ const OrderDeliveryModal: React.FC<ModalProps> = ({open, close, header, userAddr
   const [addModalOpen, setAddModalOpen] = useState<boolean>(false);
   const [updateModalOpen, setUpdateModalOpen] = useState<boolean>(false);
 
+  const [addressList, setAddressList] = useState<UserAddressInfo[]>([]);
   useEffect(() => {
     if(open){
       console.log("모달", userAddressDetails);
@@ -33,6 +34,7 @@ const OrderDeliveryModal: React.FC<ModalProps> = ({open, close, header, userAddr
         setSelectedAddress(defaultAddress);
         console.log('선택된 주소', defaultAddress);
       }
+      setAddressList(userAddressDetails);
     }
   },[open, userAddressDetails]);
 
@@ -52,9 +54,12 @@ const OrderDeliveryModal: React.FC<ModalProps> = ({open, close, header, userAddr
   const openUpdateModal = () => {setUpdateModalOpen(true); };
   // const closeUpdateModal = () => {setUpdateModalOpen(false); };
 
-  const [addressList, setAddressList] = useState<UserAddressInfo[]>(userAddressDetails);
   const handleSubmitAddress = async (addressData: UserAddressFormInfo) => {
     console.log('저장된 주소 데이터', addressData);
+    if (!addressData.address_name || addressData.address_name === "0") {
+      console.error("유효한 주소명을 입력하세요.");
+      return;
+    }
 
     const newAddress: UserAddressInfo = {
       // address_id: Date.now(),  // 고유 ID 생성
@@ -63,18 +68,21 @@ const OrderDeliveryModal: React.FC<ModalProps> = ({open, close, header, userAddr
       recipient_phone: addressData.recipient_phone,
       address: addressData.address,
       detailed_address: addressData.detailed_address,
-      is_default: addressData.is_default,
-      postal_code: addressData.postal_code,
+      is_default: addressData.is_default || false,
+      postal_code: addressData.postal_code || "",
     };
     setAddressList((prev) => [...prev, newAddress])
 
     try{
       console.log('[프론트 newAddress]', newAddress);
       const data = await fetchAddAddress(newAddress);
+      console.log('[프론트 응답 데이터]', data);
       if (data && data.newAddress) {
-        onNewAddress(data.newaddress);
-        setAddressList((prev) => [...prev, data.newAddress]);
-        setSelectedAddress(data.newAddress);
+        const addedAddress = newAddress;
+        onNewAddress(data.newAddress);
+        // setAddressList((prev) => [...prev, addedAddress]);
+        setAddressList((prev) => [newAddress, ...prev]);
+        setSelectedAddress(addedAddress);
         setAddModalOpen(false);
         console.log("addressList 데이터 값", addressList);
       } else {
@@ -83,8 +91,7 @@ const OrderDeliveryModal: React.FC<ModalProps> = ({open, close, header, userAddr
     }catch(err){
       console.error('[프론트]주소 저장 실패',err);
     }
-
-  }
+  };
 
 
   return (
