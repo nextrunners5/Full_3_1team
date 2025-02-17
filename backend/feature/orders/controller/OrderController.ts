@@ -1,7 +1,7 @@
 //컨트롤러는 사용자로부터의 요청을 받아서 처리하고, 적절한 응답을 반환하는 역할을 합니다. 
 //비즈니스 로직을 서비스 계층에 위임하고, 서비스로부터 받은 결과를 클라이언트에 반환합니다.
 import { Request, Response } from 'express';
-import { fetchUserPoints, fetchDeliveryMessage, fetchUserAddress, fetchUserDetailsAddress, fetchOrderProducts, fetchShippingFee, fetchOrderSingleProduct, fetchOrderCartProduct, fetchInsertDeliveryInfo, fetchUpdateOrderStatus } from '../services/OrderService';
+import { fetchUserPoints, fetchDeliveryMessage, fetchUserAddress, fetchUserDetailsAddress, fetchOrderProducts, fetchShippingFee, fetchOrderSingleProduct, fetchOrderCartProduct, fetchInsertDeliveryInfo, fetchUpdateOrderStatus, fetchOrderCartItem } from '../services/OrderService';
 
 const getUserPoints = async (req: Request, res: Response) => {
   const userId = req.params.userId as string;
@@ -105,7 +105,7 @@ const postOrderSingleProduct = async(req: Request, res: Response) => {
         return res.status(400).json({ error: '장바구니에 상품이 없습니다.' });
       }
 
-      // 🟢 1. 하나의 orderId 생성
+      //하나의 orderId 생성
       const orderId = await fetchOrderCartProduct({
         userId,
         totalAmount,
@@ -117,7 +117,7 @@ const postOrderSingleProduct = async(req: Request, res: Response) => {
 
       console.log("Cart Order Created, Order ID:", orderId);
 
-      // 🟢 2. 생성된 orderId를 사용하여 각 상품을 저장
+      //생성된 orderId를 사용하여 각 상품을 저장
       const orderItemResults = [];
       for (const item of items) {
         const { product_id, product_count, option_size, option_color, order_status } = item;

@@ -155,6 +155,37 @@ export const fetchOrderCartProduct = async(orderData:any) => {
   }
 }
 
+export const fetchOrderCartItem = async(orderData: any) => {
+  try{
+    const statusid = 'OS001';
+    const orderType = 'OT001';
+    const {userId, productId, quantity, totalAmount, discountAmount, finalAmount, shippingFee, selectedSize, selectedColor, statusId} = orderData;
+    // const orderId = await insertOrder(userid, totalAmount, discountAmount, finalAmount, shippingFee, statusid, orderType);
+    const orderId = await insertOrderItems(
+      userId, 
+      totalAmount, 
+      discountAmount, 
+      finalAmount, 
+      shippingFee, 
+      orderType, 
+      productId, 
+      statusid,
+      quantity,
+      selectedSize,
+      selectedColor
+    );
+    console.log('orderID', orderId,typeof(orderId));
+    if(!orderId){
+      throw new Error('order_id가 존재하지 않습니다.');
+    }
+    return orderId;
+    // await insertOrderItems(orderId, productId, statusid,quantity,selectedSize,selectedColor);
+  } catch(err){
+    console.error('단일 상품 저장 실패', err);
+    throw err;
+  }
+}
+
 export const fetchInsertDeliveryInfo = async(orderId: string, selectedAddress: any, selectedMessage: string) => {
   try{
     console.log('selectedAddress 데이터', selectedAddress);
