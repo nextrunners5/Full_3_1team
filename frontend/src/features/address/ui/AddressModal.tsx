@@ -42,6 +42,7 @@ const AddressModal: React.FC<AddressModalProps> = ({
   );
 
   const handleAddressComplete = (data: { address: string; zonecode: string }) => {
+    console.log('주소 검색 결과:', data);
     setFormData(prev => ({
       ...prev,
       address: data.address,

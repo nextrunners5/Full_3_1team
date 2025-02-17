@@ -103,7 +103,7 @@ const OrderDeliveryModal: React.FC<ModalProps> = ({
       address: addressData.address,
       detailed_address: addressData.detailed_address || '',
       is_default: addressData.is_default || false,
-      postal_code: addressData.postal_code || '',
+      postal_code: addressData.postal_code,
     };
     setAddressList((prev) => [...prev, newAddress])
 
@@ -194,7 +194,9 @@ const OrderDeliveryModal: React.FC<ModalProps> = ({
                     <div className="selectDeliveryInfo">
                       <div className="deliveryName">{address.recipient_name}</div>
                       <div className="deliveryDetail">
-                        {address.address}{address.detailed_address ? ` ${address.detailed_address}` : ''}
+                        {address.postal_code && <span>[{address.postal_code}] </span>}
+                        {address.address}
+                        {address.detailed_address ? ` ${address.detailed_address}` : ''}
                       </div>
                       <div className="deliveryPhone">{address.recipient_phone}</div>
                     </div>
