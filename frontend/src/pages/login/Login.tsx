@@ -49,10 +49,10 @@ const Login: React.FC = () => {
         console.log('로그인 성공:', response.data);
         localStorage.setItem('token', response.data.token);
         localStorage.setItem('user', JSON.stringify(response.data.user));
-        localStorage.setItem("userId", response.data.user.userId); // 추가
+        localStorage.setItem("userId", response.data.user.userId);
         dispatch(setOrderUserId(response.data.user.userId));
         console.log("로그인 후 설정된 user_id", response.data.user.userId);
-        navigate('/');
+        navigate('/main');
       } else {
         throw new Error('로그인에 실패했습니다.');
       }
