@@ -136,6 +136,13 @@ export const deleteProduct = async (req: Request, res: Response): Promise<void> 
       res.status(404).json({ message: "해당 상품을 찾을 수 없습니다." });
       return;
     }
+    await pool.promise().query("DELETE FROM Answer WHERE product_id = ?", [productId]);
+    await pool.promise().query("DELETE FROM CartDetail WHERE product_id = ?", [productId]);
+    await pool.promise().query("DELETE FROM OrderItems WHERE product_id = ?", [productId]);
+    await pool.promise().query("DELETE FROM ProductOptions WHERE product_id = ?", [productId]);
+    await pool.promise().query("DELETE FROM Question WHERE product_id = ?", [productId]);
+    await pool.promise().query("DELETE FROM Review WHERE product_id = ?", [productId]);
+    await pool.promise().query("DELETE FROM WishList WHERE product_id = ?", [productId]);
 
     await pool.promise().query("DELETE FROM Products WHERE product_id = ?", [productId]);
 
