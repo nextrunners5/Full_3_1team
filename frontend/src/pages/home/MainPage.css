@@ -1,5 +1,11 @@
 @import url('https://fonts.googleapis.com/css2?family=Rubik+Bubbles&display=swap');
 
+html, body {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
 /* 전체 폰트 적용 */
 .mainContentMAIN {
   font-family: sans-serif;
@@ -12,11 +18,11 @@
   min-height: 1000px;
   display: flex;
   flex-direction: column;
-  align-items: flex-start; /* 왼쪽 정렬 */
+  align-items: flex-start;
   justify-content: center;
   color: #fff;
-  text-align: left; /* 텍스트도 왼쪽 정렬 */
-  padding-left: 40px; /* 왼쪽 여백 추가 */
+  text-align: left;
+  padding-left: 40px; 
   margin-top: -100px;
 }
 
@@ -208,7 +214,7 @@
 
 @media (max-width: 1200px) {
   .brandTitleMAIN {
-    font-size: 4rem; /* 제목 크기 확대 */
+    font-size: 4rem;
     margin-bottom: 20px;
     font-family: 'Rubik Bubbles';
     font-weight: lighter;
@@ -216,10 +222,10 @@
   }
   
   .brandDescMAIN {
-    max-width: 600px; /* 텍스트 최대 폭 */
-    font-size: 1.5rem; /* 글자 크기 확대 */
-    line-height: 1.8; /* 줄 간격 조정 */
-    margin-bottom: 80px; /* 텍스트 아래 여백 */
+    max-width: 600px;
+    font-size: 1.5rem; 
+    line-height: 1.8;
+    margin-bottom: 80px; 
     margin-left: 400px;
     margin-top: 0;
   }
@@ -228,13 +234,13 @@
     background-color: #fff;
     color: #000;
     border: none;
-    padding: 15px 30px; /* 버튼 크기 확대 */
-    border-radius: 30px; /* 버튼 둥글게 */
+    padding: 15px 30px; 
+    border-radius: 30px; 
     font-family: 'Rubik Bubbles';
-    font-size: 1.8rem; /* 버튼 글자 크기 */
+    font-size: 1.8rem; 
     cursor: pointer;
     transition: all 0.3s ease;
-    align-self: flex-start; /* 버튼을 오른쪽 정렬 */
+    align-self: flex-start;
     margin-left:  400px;
   }
 
