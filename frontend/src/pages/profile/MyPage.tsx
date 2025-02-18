@@ -1,12 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { AiFillSetting } from "react-icons/ai";
 import {
-  FaHeart,
-  FaRegHeart,
   FaChevronDown,
   FaChevronUp,
-  FaTrash,
-  FaStar,
   FaEdit,
 } from "react-icons/fa";
 import "./MyPage.css";
@@ -41,13 +37,6 @@ const MyPage: React.FC = () => {
 
   const [showOtherAddresses, setShowOtherAddresses] = useState(false);
   const [addresses, setAddresses] = useState<Address[]>([]);
-  const [newAddress, setNewAddress] = useState({
-    recipient_name: "",
-    recipient_phone: "",
-    detailed_address: "",
-    address_name: "",
-    is_default: false,
-  });
   const [showAddressModal, setShowAddressModal] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
@@ -74,27 +63,21 @@ const MyPage: React.FC = () => {
   const fetchAddresses = async () => {
     try {
       const response = await axiosInstance.get("/api/addresses");
-      console.log("서버 응답 원본:", response.data.addresses);
-
+      
       if (response.data.success) {
-        const mappedAddresses = response.data.addresses.map((addr: any) => {
+        const mappedAddresses = response.data.addresses.map((addr: Address) => {
           console.log("매핑 전 주소 데이터:", addr);
           const mappedAddr = {
             ...addr,
             detailed_address: addr.detailed_address || "",
             postal_code: addr.postal_code || "",
           };
-          console.log("매핑 후 주소 데이터:", mappedAddr);
           return mappedAddr;
         });
-
-        console.log("최종 매핑된 주소 목록:", mappedAddresses);
         setAddresses(mappedAddresses);
       }
     } catch (error) {
-      console.error("배송지 조회 실패:", error);
-    } finally {
-      setIsLoading(false);
+      console.error('주소 목록 조회 실패:', error);
     }
   };
 
@@ -125,13 +108,17 @@ const MyPage: React.FC = () => {
   }, []);
 
   // 배송지 추가 핸들러
-  const handleAddAddress = async (addressData: AddressFormData) => {
+  const handleAddAddress = async (data: AddressFormData) => {
     try {
+      const formattedData = {
+        ...data,
+        detailed_address: data.detailed_address || '',
+      };
       if (editAddress) {
         // 수정 모드
         const response = await axiosInstance.put(
           `/api/addresses/${editAddress.address_id}`,
-          addressData
+          formattedData
         );
         if (response.data.success) {
           fetchAddresses(); // 배송지 목록 새로고침
@@ -142,7 +129,7 @@ const MyPage: React.FC = () => {
         // 새로운 주소 추가 모드
         const response = await axiosInstance.post(
           "/api/addresses",
-          addressData
+          formattedData
         );
         if (response.data.success) {
           fetchAddresses(); // 배송지 목록 새로고침
@@ -150,8 +137,7 @@ const MyPage: React.FC = () => {
         }
       }
     } catch (error) {
-      console.error("배송지 저장 실패:", error);
-      // 에러 처리 로직 추가
+      console.error('주소 추가 실패:', error);
     }
   };
 
@@ -179,12 +165,8 @@ const MyPage: React.FC = () => {
   };
 
   // 기본 배송지 설정 핸들러
-  const handleSetDefaultAddress = async (addressId: string | number) => {
-    if (!addressId) {
-      console.error("주소 ID가 없습니다");
-      return;
-    }
-
+  const handleSetDefaultAddress = async (addressId: string | number | undefined) => {
+    if (!addressId) return; // undefined인 경우 early return
     try {
       const response = await axiosInstance.put(
         `/api/addresses/${addressId}/default`
@@ -195,7 +177,7 @@ const MyPage: React.FC = () => {
         fetchAddresses();
       }
     } catch (error) {
-      console.error("기본 배송지 설정 실패:", error);
+      console.error('기본 배송지 설정 실패:', error);
     }
   };
 
@@ -442,9 +424,7 @@ const MyPage: React.FC = () => {
                       <div className="MP-address-actions">
                         <button
                           className="MP-set-default-btn"
-                          onClick={() =>
-                            handleSetDefaultAddress(address.address_id)
-                          }
+                          onClick={() => address.address_id && handleSetDefaultAddress(address.address_id)}
                         >
                           기본 배송지로 설정
                         </button>
