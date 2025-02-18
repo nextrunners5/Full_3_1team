@@ -155,6 +155,7 @@ export const deleteProduct = async (req: Request, res: Response): Promise<void> 
 
 // 재고 확인 API
 export const checkProductStock = async (req: Request, res: Response) => {
+  console.log('재고 확인 API 호출됨:', req.body); // 디버깅용 로그 추가
   try {
     const { items } = req.body;
 

@@ -174,6 +174,7 @@ export const checkStock = async (items: {
   option_size: string;
 }[]) => {
   try {
+    console.log('재고 확인 요청:', items); // 디버깅용 로그 추가
     const response = await axiosInstance.post('/api/products/check-stock', {
       items: items.map(item => ({
         product_id: item.product_id,

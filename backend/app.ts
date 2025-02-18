@@ -22,6 +22,12 @@ app.use('/api/addresses', addressRoutes);
 app.use('/api/products', productRoutes);
 // ... 다른 라우트들
 
+// 라우트 테스트용 로그 추가
+app.use((req, res, next) => {
+  console.log('Request URL:', req.url);
+  next();
+});
+
 // 404 에러 핸들러
 app.use((req, res) => {
   console.log('404 에러 발생. 요청 URL:', req.url);
