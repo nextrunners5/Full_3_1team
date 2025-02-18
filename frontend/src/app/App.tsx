@@ -27,8 +27,8 @@ import OrderComplete from '../pages/order/OrderComplete';
 function App() {
   return (
     <Routes>
-      <Route path="/main" element={<MainPage />} />
-      <Route path="/" element={<TestPage />} />
+      <Route path="/" element={<MainPage />} />
+      {/* <Route path="/" element={<TestPage />} /> */}
       <Route path="/login" element={<Login />} />
       <Route path="/Signup" element={<Signup />} />
       <Route path="/cart" element={<Cart />} />
