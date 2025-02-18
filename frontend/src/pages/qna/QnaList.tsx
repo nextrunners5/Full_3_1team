@@ -2,8 +2,7 @@ import React, { useEffect, useState } from "react";
 import { fetchQnAList } from "../../shared/axios/QnAAxios";
 import "./CSS/QnaList.css";
 
-interface QnaListProps {
-  productId: string;
+interface QnaItem {
   question_id: number;
   user_id: string;
   question_detail: string;
@@ -12,39 +11,29 @@ interface QnaListProps {
 }
 
 const QnaList: React.FC<{ productId: string }> = ({ productId }) => {
-  const [qnaList, setQnaList] = useState<QnaListProps[]>([]);
-  const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
+  const [qnaList, setQnaList] = useState<QnaItem[]>([]);
   const [currentUser, setCurrentUser] = useState<string | null>(null);
 
-  const formatDateToKST = (dateString: string) => {
-    const date = new Date(dateString);
-    date.setHours(date.getHours() + 9);
-    return date.toISOString().slice(0, 16).replace("T", " ");
-  };
-
   useEffect(() => {
-    const userRole = localStorage.getItem("userRole");
-    const userId = localStorage.getItem("userId");
-    setIsAdmin(userRole === "admin");
-    setCurrentUser(userId);
+    const storedUserId = localStorage.getItem("userId");
+    setCurrentUser(storedUserId ? storedUserId : null);
   }, []);
 
   useEffect(() => {
-    if (!productId) return;
+    if (!productId || !currentUser) return;
 
     const getQnA = async () => {
-      const data = await fetchQnAList(productId);
-      setQnaList(data);
+      try {
+        const data = await fetchQnAList(productId, currentUser);
+        console.log("QnA 데이터:", data);
+        setQnaList(data);
+      } catch (error) {
+        console.error("QnA 목록 불러오기 실패:", error);
+      }
     };
 
     getQnA();
-  }, [productId]);
-
-
-  if (!productId) {
-    console.error("QnaList: productId가 제공되지 않았습니다.");
-    return null;
-  }
+  }, [productId, currentUser]);
 
   return (
     <div className="qna-container">
@@ -55,18 +44,13 @@ const QnaList: React.FC<{ productId: string }> = ({ productId }) => {
           <div key={qna.question_id} className="qna-item">
             <div className="question">
               <span className="qna-tag">질문</span>
-
-              {qna.question_private === "Y" && !(isAdmin || qna.user_id === currentUser) ? (
-                <>
-                  <p className="private-tag">
-                    관리자 및 작성자만 볼 수 있는 게시글입니다.
-                  </p>
-                </>
+              {qna.question_private === "Y" && qna.user_id !== currentUser ? (
+                <p className="private-tag">비공개 질문입니다.</p>
               ) : (
                 <>
                   <h3>{qna.question_detail}</h3>
                   <p className="qna-user">
-                    작성자: {qna.user_id} | {formatDateToKST(qna.question_date)}
+                    작성자: {qna.user_id} | {qna.question_date}
                   </p>
                 </>
               )}

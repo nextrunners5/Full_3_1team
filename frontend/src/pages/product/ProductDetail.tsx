@@ -191,7 +191,7 @@ const ProductDetail: React.FC = () => {
               {/* {"★".repeat(Math.floor(product.rating))}
               {"☆".repeat(5 - Math.floor(product.rating))}
               <span> ({product.review_count}개 리뷰)</span> */}
-              <span>??개 리뷰</span>
+              {/* <span>??개 리뷰</span> */}
             </p>
             <p className="price">
               <strong>
