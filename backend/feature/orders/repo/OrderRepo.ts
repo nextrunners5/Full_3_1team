@@ -92,15 +92,19 @@ export const getUserDetailsAddress = async(userId: string) => {
                   JOIN UserAddresses ua ON u.user_id = ua.user_id 
                   WHERE u.user_id = ? 
                   ORDER BY ua.is_default DESC, ua.created_at DESC`;
-  try{
-    const [res] = await pool.promise().query(query,[userId]);
+  try {
+    const [res] = await pool.promise().query(query, [userId]);
     const rows = res as any[];
-    if(rows.length > 0){
-      console.log('rows: ', rows);
+    if (rows.length > 0) {
+      console.log('배송지 상세 데이터:', rows);
       return rows;
     }
-  } catch(err){
-    console.error('배송지 상세 리스트를 가져오지 못했습니다.',err);
+    // 데이터가 없을 경우 빈 배열 반환
+    return [];
+  } catch(err) {
+    console.error('배송지 상세 리스트를 가져오지 못했습니다.', err);
+    // 에러 발생 시에도 빈 배열 반환
+    return [];
   }
 }
 

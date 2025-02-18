@@ -17,24 +17,17 @@ const OrderDeliveryInfo: React.FC<OrderDeliveryInfoProps> = ({userId, addressCha
 
   useEffect(() => {
     const getUserAddress = async() => {
-      try{
+      try {
         console.log('🚀 getUserAddress 실행됨');
         console.log('프론트 주문 배송지 유저', userId);
         const addressDetails = await fetchDetailsAddress(userId);
         console.log('주소 데이터 상세 확인:', JSON.stringify(addressDetails, null, 2));
-        addressDetails?.forEach(addr => {
-          console.log('각 주소의 우편번호:', {
-            address_name: addr.address_name,
-            postal_code: addr.postal_code,
-            full_address: addr.address
-          });
-        });
         
-        if(addressDetails && Array.isArray(addressDetails) && addressDetails.length > 0){
+        if (addressDetails && Array.isArray(addressDetails)) {
           setUserAddressDetails(addressDetails);
 
           const defaultAddress = addressDetails.find(addr => addr.is_default);
-          if(defaultAddress){
+          if (defaultAddress) {
             console.log('origin default address', defaultAddress);
             setSelectedAddress(defaultAddress);
             addressChange(defaultAddress);
@@ -44,7 +37,7 @@ const OrderDeliveryInfo: React.FC<OrderDeliveryInfoProps> = ({userId, addressCha
           setUserAddressDetails([]);
         }
         setIsLoading(false);
-      } catch(err){
+      } catch(err) {
         console.error('에러 상세:', err);
         setUserAddressDetails([]);
         setIsLoading(false);
@@ -54,7 +47,7 @@ const OrderDeliveryInfo: React.FC<OrderDeliveryInfoProps> = ({userId, addressCha
     if (userId) {
       getUserAddress();
     }
-  },[userId]);
+  }, [userId]);
 
   useEffect(() => {
     console.log('Selected address changed:', selectedAddress);
@@ -122,6 +115,14 @@ const OrderDeliveryInfo: React.FC<OrderDeliveryInfoProps> = ({userId, addressCha
     addressChange(updatedAddress);
   };
 
+  if (isLoading) {
+    return <div>배송지 정보를 불러오는 중...</div>;
+  }
+
+  if (!userAddressDetails || userAddressDetails.length === 0) {
+    return <div>등록된 배송지가 없습니다.</div>;
+  }
+
   return (
     <div className="orderDeliveryContainer">
       <div className="orderDeliveryTitle">
@@ -129,32 +130,24 @@ const OrderDeliveryInfo: React.FC<OrderDeliveryInfoProps> = ({userId, addressCha
       </div>
       <div className="orderDeliveryBody">
         <div className="deliveryInfo">
-          {isLoading ? (
-            <div>로딩 중...</div>
-          ) : selectedAddress ? (
-          <div>
-            {/* <div className="recipient">{userAddress[0].recipient_name}</div> */}
-            <div className="recipient">{selectedAddress.recipient_name}</div>
-            <div className="addressBody">
-              {/* <div className="address">{userAddress[0].address}</div> */}
-              <div className="address">{selectedAddress.address}</div>
-              <button className="deliveryChange" onClick={openModal}>배송지 변경</button>
-              <OrderDeliveryModal 
-                open={modalOpen} 
-                close={closeModal} 
-                header="배송지 선택" 
-                userAddressDetails={userAddressDetails || []}
-                onSelect={handleAddressChange}
-                onNewAddress={handleNewAddress}
-                onUpdateAddress={handleUpdateAddress}
-                />
-            </div>
-            {/* <div className="phoneNumber">{userAddress[0].recipient_phone}</div> */}
-            <div className="phoneNumber">{selectedAddress.recipient_phone}</div>
+          {/* <div className="recipient">{userAddress[0].recipient_name}</div> */}
+          <div className="recipient">{selectedAddress?.recipient_name}</div>
+          <div className="addressBody">
+            {/* <div className="address">{userAddress[0].address}</div> */}
+            <div className="address">{selectedAddress?.address}</div>
+            <button className="deliveryChange" onClick={openModal}>배송지 변경</button>
+            <OrderDeliveryModal 
+              open={modalOpen} 
+              close={closeModal} 
+              header="배송지 선택" 
+              userAddressDetails={userAddressDetails || []}
+              onSelect={handleAddressChange}
+              onNewAddress={handleNewAddress}
+              onUpdateAddress={handleUpdateAddress}
+              />
           </div>
-          ) : (
-            <div>주소 정보가 없습니다.</div>
-          )}
+            {/* <div className="phoneNumber">{userAddress[0].recipient_phone}</div> */}
+            <div className="phoneNumber">{selectedAddress?.recipient_phone}</div>
         </div>
         <div className="deliveryRequest">
           <div className="requestTitle">배송 요청사항</div>
