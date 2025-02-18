@@ -4,11 +4,16 @@ import "./OrderPay.css"
 import OrderPrice from "./OrderPrice";
 import { useSelector } from "react-redux";
 import { selectOrderId } from "../../../pages/order/orderRedux/slice";
-import { fetchInsertDelivery, fetchUpdateInfo } from "../api/Order";
-// import { RootState } from "../../../pages/order/orderRedux/store";
-import { OrderPayProps } from "../model/OrderModel";
+import { 
+  fetchInsertDelivery, 
+  fetchUpdateInfo, 
+  updateProductStock,
+  checkStock 
+} from "../api/Order";
+import { OrderPayProps, PaymentResponse, OrderItem } from "../model/OrderModel";
 import { loadTossPayments } from "@tosspayments/payment-sdk";
 import { useNavigate } from "react-router-dom";
+import { RootState } from "../../../pages/order/orderRedux/store";
 
 const OrderPay: React.FC<OrderPayProps> = ({userId, selectedAddress, selectedMessage}) => {
   // const userId = useSelector((state:RootState) => state.order.user_id);
@@ -19,6 +24,9 @@ const OrderPay: React.FC<OrderPayProps> = ({userId, selectedAddress, selectedMes
   const orderId = useSelector(selectOrderId);
   const navigate = useNavigate();
 
+  // 주문 상품 정보 가져오기
+  const orderItems = useSelector((state: RootState) => state.order.orderInfo);
+  const totalAmount = useSelector((state: RootState) => state.order.totalAmount);
 
   const handlePointChange = (newPoint: number) => {
     setPoints(newPoint);
@@ -63,6 +71,12 @@ const OrderPay: React.FC<OrderPayProps> = ({userId, selectedAddress, selectedMes
 
   // 결제 시도 전 재고 확인
   const handlePayment = async () => {
+    if (!selectedAddress) {
+      alert("배송지를 선택해주세요.");
+      return;
+    }
+
+    setIsLoading(true);
     try {
       // 재고 확인
       const hasStock = await checkStock(orderItems);
@@ -71,12 +85,24 @@ const OrderPay: React.FC<OrderPayProps> = ({userId, selectedAddress, selectedMes
         return;
       }
 
-      // 여기서 결제 진행
-      // ...결제 로직...
+      const tossPayments = await loadTossPayments(import.meta.env.VITE_TOSS_CLIENT_KEY);
+      const encodedAddress = encodeURIComponent(JSON.stringify(selectedAddress));
+
+      // 결제 요청
+      await tossPayments.requestPayment("카드", {
+        orderId: `${orderId}`,
+        orderName: "구매 상품",
+        amount: finalPrice,
+        customerName: userId,
+        successUrl: `${window.location.origin}/payments/success?orderId=${orderId}&address=${encodedAddress}&message=${encodeURIComponent(selectedMessage)}`,
+        failUrl: `${window.location.origin}/payments/fail`,
+      });
 
     } catch (error) {
       console.error('결제 처리 실패:', error);
       alert('결제 처리 중 오류가 발생했습니다.');
+    } finally {
+      setIsLoading(false);
     }
   };
 

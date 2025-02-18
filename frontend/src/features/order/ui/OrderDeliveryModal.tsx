@@ -124,49 +124,33 @@ const OrderDeliveryModal: React.FC<ModalProps> = ({
   };
 
   const handleSubmitAddress = async (addressData: UserAddressFormInfo) => {
-    console.log('저장된 주소 데이터', addressData);
-    if (!addressData.address_name || addressData.address_name === "0") {
-      console.error("유효한 주소명을 입력하세요.");
-      return;
-    }
+    try {
+      const response = await fetchAddAddress(addressData);
+      if (response.success) {
+        const newAddress = response.newAddress;
+        
+        // 새 주소가 기본 배송지인 경우 기존 주소들의 기본 배송지 해제
+        const updatedList = addressData.is_default ? 
+          addressList.map(addr => ({
+            ...addr,
+            is_default: false
+          })) : 
+          [...addressList];
 
-    const newAddress: UserAddressInfo = {
-      address_name: addressData.address_name,
-      recipient_name: addressData.recipient_name,
-      recipient_phone: addressData.recipient_phone,
-      address: addressData.address,
-      detailed_address: addressData.detailed_address || '',
-      is_default: addressData.is_default || false,
-      postal_code: addressData.postal_code,
-    };
-    setAddressList((prev) => [...prev, newAddress])
+        // 새 주소 추가
+        setAddressList([newAddress, ...updatedList]);
+        
+        // 새 주소가 기본 배송지면 선택된 주소로 설정
+        if (addressData.is_default) {
+          setSelectedAddress(newAddress);
+        }
 
-    if (addressData.is_default) {
-      // 새 주소가 기본 배송지로 설정되는 경우
-      const updatedAddresses = addressList.map(addr => ({
-        ...addr,
-        is_default: false
-      }));
-      setAddressList(updatedAddresses);
-    }
-
-    try{
-      console.log('[프론트 newAddress]', newAddress);
-      const data = await fetchAddAddress(newAddress);
-      console.log('[프론트 응답 데이터]', data);
-      if (data && data.newAddress) {
-        const addedAddress = newAddress;
-        onNewAddress(data.newAddress);
-        // setAddressList((prev) => [...prev, addedAddress]);
-        setAddressList((prev) => [newAddress, ...prev]);
-        setSelectedAddress(addedAddress);
+        onNewAddress(newAddress);
         setAddModalOpen(false);
-        console.log("addressList 데이터 값", addressList);
-      } else {
-        console.error("새 주소를 가져오는 데 실패했습니다.");
       }
-    }catch(err){
-      console.error('[프론트]주소 저장 실패',err);
+    } catch (error) {
+      console.error('주소 추가 실패:', error);
+      alert('주소 추가에 실패했습니다. 다시 시도해주세요.');
     }
   };
 
@@ -179,14 +163,7 @@ const OrderDeliveryModal: React.FC<ModalProps> = ({
       const response = await updateAddress(selectedAddress.address_id, addressData);
       
       if (response.success) {
-        // 새로운 주소가 기본 배송지로 설정되는 경우, 모든 주소 목록 업데이트
-        const updatedList = userAddressDetails.map(addr => ({
-          ...addr,
-          is_default: addr.address_id === selectedAddress.address_id ? 
-            addressData.is_default : 
-            addressData.is_default ? false : addr.is_default
-        }));
-
+        // 새로운 주소 데이터 생성
         const updatedAddress: UserAddressInfo = {
           address_id: selectedAddress.address_id,
           address_name: addressData.address_name,
@@ -198,25 +175,26 @@ const OrderDeliveryModal: React.FC<ModalProps> = ({
           is_default: addressData.is_default
         };
 
-        // 전체 주소 목록 상태 업데이트
-        setAddressList(updatedList);
+        // 부모 컴포넌트에 업데이트 알림
+        onUpdateAddress(updatedAddress);
         
-        // 부모 컴포넌트에 전체 업데이트된 목록 전달
-        updatedList.forEach(addr => {
-          if (addr.address_id === updatedAddress.address_id) {
-            onUpdateAddress(updatedAddress);
-          } else if (addr.is_default !== addr.is_default) {
-            // 기본 배송지 상태가 변경된 다른 주소들도 업데이트
-            onUpdateAddress(addr);
-          }
-        });
-
-        setSelectedAddress(updatedAddress);
+        // 모달 닫기
         setUpdateModalOpen(false);
 
-        // 모달 내용 갱신
+        // 주소 목록 새로고침
         if (open) {
+          const updatedList = userAddressDetails.map(addr => ({
+            ...addr,
+            is_default: addr.address_id === updatedAddress.address_id ? 
+              addressData.is_default : 
+              addressData.is_default ? false : addr.is_default
+          }));
           setAddressList(updatedList);
+          
+          // 기본 배송지가 변경된 경우 선택된 주소도 업데이트
+          if (addressData.is_default) {
+            setSelectedAddress(updatedAddress);
+          }
         }
       }
     } catch (error) {
