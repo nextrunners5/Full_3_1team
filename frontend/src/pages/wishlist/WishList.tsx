@@ -63,37 +63,48 @@ const WishList: React.FC = () => {
   
     fetchWishlist();
   }, [userId]);
+
+  const handleRemoveWishlist = async (productId: number) => {
+    try {
+      await axiosInstance.delete(`/api/wishlist/${productId}?userId=${userId}`);
+  
+      setWishlist((prev) => prev.filter((id) => id !== productId));
+      setProducts((prevProducts) =>
+        prevProducts.filter((product) => product.product_id !== productId)
+      );
+  
+      console.log(`위시리스트에서 ${productId} 제거 완료`);
+    } catch (error) {
+      console.error("위시리스트 삭제 실패:", error);
+    }
+  };
   
   return (
     <>
-    <Header/>
-    <div className="wishlist-page">
-      <div className="title-togle">
-      <h2>위시리스트</h2>
-      <div className="togle-size">
-      <ProductToggle sortOption={sortOption} setSortOption={setSortOption} />
+    <Header />
+      <div className="wishlist-page">
+        <div className="title-togle">
+          <h2>위시리스트</h2>
+          <div className="togle-size">
+            <ProductToggle sortOption={sortOption} setSortOption={setSortOption} />
+          </div>
+        </div>
+        <div className="products">
+          {products.length === 0 ? (
+            <p>위시리스트에 등록된 상품이 없습니다.</p>
+          ) : (
+            products.map((product) => (
+              <ProductCard
+                key={product.product_id}
+                product={product}
+                isWishlisted={wishlist.includes(product.product_id)}
+                toggleWishlist={() => handleRemoveWishlist(product.product_id)}
+              />
+            ))
+          )}
+        </div>
       </div>
-      </div>
-      <div className="products">
-        {products.length === 0 ? (
-          <p>위시리스트에 등록된 상품이 없습니다.</p>
-        ) : (
-          products.map((product) => (
-            <ProductCard
-              key={product.product_id}
-              product={product}
-              isWishlisted={wishlist.includes(product.product_id)}
-              toggleWishlist={() =>
-                setWishlist((prev) =>
-                  prev.filter((id) => id !== product.product_id)
-                )
-              }
-            />
-          ))
-        )}
-      </div>
-    </div>
-    <Footer/>
+      <Footer />
     </>
   );
 };
