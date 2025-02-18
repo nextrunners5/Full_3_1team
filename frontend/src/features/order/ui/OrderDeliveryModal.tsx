@@ -198,10 +198,29 @@ const OrderDeliveryModal: React.FC<ModalProps> = ({
           is_default: addressData.is_default
         };
 
+        // 주소 목록 업데이트
         setAddressList(updatedList);
+        
+        // 부모 컴포넌트에 업데이트 알림
         onUpdateAddress(updatedAddress);
+        
+        // 선택된 주소 업데이트
         setSelectedAddress(updatedAddress);
+        
+        // 모달 닫기
         setUpdateModalOpen(false);
+        
+        // 부모 컴포넌트로부터 최신 데이터 다시 받아오기 위해 모달 리로드
+        if (open) {
+          const updatedDetails = [...updatedList];
+          setAddressList(updatedDetails);
+          
+          // 기본 배송지가 있다면 선택
+          const defaultAddress = updatedDetails.find(addr => addr.is_default);
+          if (defaultAddress) {
+            setSelectedAddress(defaultAddress);
+          }
+        }
       }
     } catch (error) {
       console.error('배송지 수정 실패:', error);
@@ -250,10 +269,12 @@ const OrderDeliveryModal: React.FC<ModalProps> = ({
                     <div className="selectDeliveryInfo">
                       <div className="deliveryName">
                         {address.recipient_name}
-                        {address.is_default && <span className="defaultMarker">기본배송지</span>}
                       </div>
                       <div className="deliveryDetail">
-                        <div className="addressName">{address.address_name}</div>
+                        <div className="addressName">
+                          {address.address_name}
+                          {address.is_default && <span className="defaultMarker">기본배송지</span>}
+                        </div>
                         <div className="fullAddress">
                           {address.postal_code && <span>[{address.postal_code}] </span>}
                           {address.address}
