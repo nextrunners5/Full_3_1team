@@ -52,7 +52,7 @@ const Login: React.FC = () => {
         localStorage.setItem("userId", response.data.user.userId);
         dispatch(setOrderUserId(response.data.user.userId));
         console.log("로그인 후 설정된 user_id", response.data.user.userId);
-        navigate('/main');
+        navigate('/');
       } else {
         throw new Error('로그인에 실패했습니다.');
       }

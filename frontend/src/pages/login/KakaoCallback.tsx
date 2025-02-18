@@ -32,7 +32,7 @@ const KakaoCallback = () => {
             console.log("로그인 후 설정된 user_id", response.data.user.userId);
           }
           
-          navigate('/main');
+          navigate('/');
         } else {
           console.error('토큰이 없습니다:', response.data);
           navigate('/login');

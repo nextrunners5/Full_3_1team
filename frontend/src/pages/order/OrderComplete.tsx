@@ -36,7 +36,7 @@ const OrderComplete: React.FC = () => {
       try {
         const orderId = location.state?.orderId;
         if (!orderId) {
-          navigate('/main');
+          navigate('/');
           return;
         }
 
@@ -49,7 +49,7 @@ const OrderComplete: React.FC = () => {
         }
       } catch (error) {
         console.error('주문 정보 조회 실패:', error);
-        navigate('/main');
+        navigate('/');
       } finally {
         setIsLoading(false);
       }
@@ -123,7 +123,7 @@ const OrderComplete: React.FC = () => {
           </button>
           <button 
             className="continue-shopping-button"
-            onClick={() => navigate('/main')}
+            onClick={() => navigate('/')}
           >
             쇼핑 계속하기
           </button>
