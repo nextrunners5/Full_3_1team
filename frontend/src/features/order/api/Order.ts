@@ -174,7 +174,7 @@ export const checkStock = async (items: {
   option_size: string;
 }[]) => {
   try {
-    const response = await axiosInstance.post('/api/products/stock/check', {
+    const response = await axiosInstance.post('/api/products/check-stock', {
       items: items.map(item => ({
         product_id: item.product_id,
         product_count: item.product_count,
@@ -198,7 +198,7 @@ export const updateProductStock = async (items: {
   option_size: string;
 }[]) => {
   try {
-    const response = await axiosInstance.put('/api/products/stock/update', {
+    const response = await axiosInstance.put('/api/products/stock', {
       items
     });
     return response.data;
