@@ -176,33 +176,29 @@ const OrderDeliveryModal: React.FC<ModalProps> = ({
         throw new Error("선택된 배송지가 없습니다.");
       }
 
-      console.log('업데이트 시도 전 데이터:', {
-        addressId: selectedAddress.address_id,
-        updateData: addressData
-      });
-
       const response = await updateAddress(selectedAddress.address_id, addressData);
       
       if (response.success) {
-        // 응답 데이터 로깅
-        console.log('주소 업데이트 응답:', response);
-
-        // 새로운 주소 데이터 생성
+        // 완전한 주소 데이터 구조 생성
         const updatedAddress: UserAddressInfo = {
-          ...response.address,
           address_id: selectedAddress.address_id,
+          address_name: addressData.address_name,
+          recipient_name: addressData.recipient_name,
+          recipient_phone: addressData.recipient_phone,
+          address: addressData.address,
+          detailed_address: addressData.detailed_address || '',
           postal_code: addressData.postal_code,
-          is_default: addressData.is_default
+          is_default: addressData.is_default,
+          user_id: selectedAddress.user_id // 기존 user_id 유지
         };
 
-        console.log('최종 업데이트될 주소:', updatedAddress);
+        console.log('완성된 업데이트 주소:', updatedAddress);
 
-        // 부모 컴포넌트에 업데이트 알림
         onUpdateAddress(updatedAddress);
         setSelectedAddress(updatedAddress);
         setUpdateModalOpen(false);
 
-        // 주소 목록 갱신
+        // 주소 목록도 동일한 구조로 업데이트
         const updatedList = addressList.map(addr => 
           addr.address_id === updatedAddress.address_id ? updatedAddress : addr
         );
@@ -253,11 +249,17 @@ const OrderDeliveryModal: React.FC<ModalProps> = ({
                       </div>
                     </div>
                     <div className="selectDeliveryInfo">
-                      <div className="deliveryName">{address.recipient_name}</div>
+                      <div className="deliveryName">
+                        {address.recipient_name}
+                        {address.is_default && <span className="defaultMarker">기본배송지</span>}
+                      </div>
                       <div className="deliveryDetail">
-                        {address.postal_code && <span>[{address.postal_code}] </span>}
-                        {address.address}
-                        {address.detailed_address ? ` ${address.detailed_address}` : ''}
+                        <div className="addressName">{address.address_name}</div>
+                        <div className="fullAddress">
+                          {address.postal_code && <span>[{address.postal_code}] </span>}
+                          {address.address}
+                          {address.detailed_address && ` ${address.detailed_address}`}
+                        </div>
                       </div>
                       <div className="deliveryPhone">{address.recipient_phone}</div>
                     </div>

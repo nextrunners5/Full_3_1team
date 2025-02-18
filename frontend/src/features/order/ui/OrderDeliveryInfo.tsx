@@ -152,24 +152,41 @@ const OrderDeliveryInfo: React.FC<OrderDeliveryInfoProps> = ({userId, addressCha
       </div>
       <div className="orderDeliveryBody">
         <div className="deliveryInfo">
-          {/* <div className="recipient">{userAddress[0].recipient_name}</div> */}
-          <div className="recipient">{selectedAddress?.recipient_name}</div>
-          <div className="addressBody">
-            {/* <div className="address">{userAddress[0].address}</div> */}
-            <div className="address">{selectedAddress?.address}</div>
-            <button className="deliveryChange" onClick={openModal}>배송지 변경</button>
-            <OrderDeliveryModal 
-              open={modalOpen} 
-              close={closeModal} 
-              header="배송지 선택" 
-              userAddressDetails={userAddressDetails || []}
-              onSelect={handleAddressChange}
-              onNewAddress={handleNewAddress}
-              onUpdateAddress={handleUpdateAddress}
-              />
-          </div>
-            {/* <div className="phoneNumber">{userAddress[0].recipient_phone}</div> */}
-            <div className="phoneNumber">{selectedAddress?.recipient_phone}</div>
+          {selectedAddress && (
+            <>
+              <div className="recipient">
+                <span className="recipientName">{selectedAddress.recipient_name}</span>
+                {selectedAddress.is_default && (
+                  <span className="defaultBadge">기본배송지</span>
+                )}
+              </div>
+              <div className="addressBody">
+                <div className="addressName">{selectedAddress.address_name}</div>
+                <div className="address">
+                  {selectedAddress.postal_code && (
+                    <span className="postalCode">[{selectedAddress.postal_code}] </span>
+                  )}
+                  {selectedAddress.address}
+                  {selectedAddress.detailed_address && (
+                    <span className="detailAddress"> {selectedAddress.detailed_address}</span>
+                  )}
+                </div>
+                <button className="deliveryChange" onClick={openModal}>
+                  배송지 변경
+                </button>
+              </div>
+              <div className="phoneNumber">{selectedAddress.recipient_phone}</div>
+            </>
+          )}
+          <OrderDeliveryModal 
+            open={modalOpen} 
+            close={closeModal} 
+            header="배송지 선택" 
+            userAddressDetails={userAddressDetails || []}
+            onSelect={handleAddressChange}
+            onNewAddress={handleNewAddress}
+            onUpdateAddress={handleUpdateAddress}
+            />
         </div>
         <div className="deliveryRequest">
           <div className="requestTitle">배송 요청사항</div>
