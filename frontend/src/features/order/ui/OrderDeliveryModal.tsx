@@ -179,8 +179,8 @@ const OrderDeliveryModal: React.FC<ModalProps> = ({
       const response = await updateAddress(selectedAddress.address_id, addressData);
       
       if (response.success) {
-        // 새로운 주소가 기본 배송지로 설정되는 경우, 다른 주소들의 기본 배송지 해제
-        const updatedList = addressList.map(addr => ({
+        // 새로운 주소가 기본 배송지로 설정되는 경우, 모든 주소 목록 업데이트
+        const updatedList = userAddressDetails.map(addr => ({
           ...addr,
           is_default: addr.address_id === selectedAddress.address_id ? 
             addressData.is_default : 
@@ -198,28 +198,25 @@ const OrderDeliveryModal: React.FC<ModalProps> = ({
           is_default: addressData.is_default
         };
 
-        // 주소 목록 업데이트
+        // 전체 주소 목록 상태 업데이트
         setAddressList(updatedList);
         
-        // 부모 컴포넌트에 업데이트 알림
-        onUpdateAddress(updatedAddress);
-        
-        // 선택된 주소 업데이트
-        setSelectedAddress(updatedAddress);
-        
-        // 모달 닫기
-        setUpdateModalOpen(false);
-        
-        // 부모 컴포넌트로부터 최신 데이터 다시 받아오기 위해 모달 리로드
-        if (open) {
-          const updatedDetails = [...updatedList];
-          setAddressList(updatedDetails);
-          
-          // 기본 배송지가 있다면 선택
-          const defaultAddress = updatedDetails.find(addr => addr.is_default);
-          if (defaultAddress) {
-            setSelectedAddress(defaultAddress);
+        // 부모 컴포넌트에 전체 업데이트된 목록 전달
+        updatedList.forEach(addr => {
+          if (addr.address_id === updatedAddress.address_id) {
+            onUpdateAddress(updatedAddress);
+          } else if (addr.is_default !== addr.is_default) {
+            // 기본 배송지 상태가 변경된 다른 주소들도 업데이트
+            onUpdateAddress(addr);
           }
+        });
+
+        setSelectedAddress(updatedAddress);
+        setUpdateModalOpen(false);
+
+        // 모달 내용 갱신
+        if (open) {
+          setAddressList(updatedList);
         }
       }
     } catch (error) {
@@ -271,10 +268,7 @@ const OrderDeliveryModal: React.FC<ModalProps> = ({
                         {address.recipient_name}
                       </div>
                       <div className="deliveryDetail">
-                        <div className="addressName">
-                          {address.address_name}
-                          {address.is_default && <span className="defaultMarker">기본배송지</span>}
-                        </div>
+                        <div className="addressName">{address.address_name}</div>
                         <div className="fullAddress">
                           {address.postal_code && <span>[{address.postal_code}] </span>}
                           {address.address}
