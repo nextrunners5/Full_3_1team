@@ -79,7 +79,15 @@ export const getUserAddress = async(userId: string) => {
 
 //사용자 배송지 상세 가져오기
 export const getUserDetailsAddress = async(userId: string) => {
-  const query = ` SELECT address_id, address_name, recipient_name, recipient_phone, address, detailed_address, is_default
+  const query = ` SELECT 
+                    address_id, 
+                    address_name, 
+                    recipient_name, 
+                    recipient_phone, 
+                    address, 
+                    detailed_address, 
+                    postal_code,
+                    is_default
                   FROM Users u 
                   JOIN UserAddresses ua ON u.user_id = ua.user_id 
                   WHERE u.user_id = ? 
