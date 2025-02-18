@@ -5,19 +5,13 @@ import Footer from "../../widgets/footer/Footer";
 import "./Order.css"
 import { useSelector } from "react-redux";
 import { RootState } from "./orderRedux/store";
-import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState } from "react";
 import { UserAddressInfo } from "../../features/order/model/OrderModel";
 
 const Order: React.FC = () => {
   const userId = useSelector((state: RootState)=>state.order.user_id);
   const [selectedAddress, setSelectedAddress] = useState<UserAddressInfo | null>(null);
   const [selectedMessage, setSelectedMessage] = useState('');
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    console.log('Order.tsx 아이디 변경 감지: ', userId);
-  },[userId]);
 
   const handleAddressChange = (address: UserAddressInfo) => {
     setSelectedAddress(address);
