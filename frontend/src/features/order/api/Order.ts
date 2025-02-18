@@ -166,7 +166,31 @@ export const setDefaultAddress = async (addressId: number) => {
   }
 };
 
-// 결제 완료 후 재고 감소 API
+// 재고 확인 API
+export const checkStock = async (orderItems: {
+  product_id: number;
+  product_count: number;
+  option_color: string;
+  option_size: string;
+}[]) => {
+  try {
+    const response = await axiosInstance.post('/api/products/check-stock', {
+      items: orderItems.map(item => ({
+        product_id: item.product_id,
+        product_count: item.product_count,
+        option_color: item.option_color,
+        option_size: item.option_size
+      }))
+    });
+    
+    return response.data.success;
+  } catch (error) {
+    console.error('재고 확인 실패:', error);
+    return false;
+  }
+};
+
+// 재고 업데이트 API
 export const updateProductStock = async (orderItems: {
   product_id: number;
   product_count: number;
