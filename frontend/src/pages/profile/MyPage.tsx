@@ -107,11 +107,15 @@ const MyPage: React.FC = () => {
   // 배송지 추가 핸들러
   const handleAddAddress = async (data: AddressFormData) => {
     try {
-      // 입력 데이터가 undefined인 경우 빈 문자열로 변환
+      // 입력 데이터가 undefined인 경우 빈 문자열로 변환하여 새로운 객체 생성
       const formattedData: AddressFormData = {
-        ...data,
+        address_name: data.address_name,
+        recipient_name: data.recipient_name,
+        recipient_phone: data.recipient_phone,
+        address: data.address,
         detailed_address: data.detailed_address || '',
-        postal_code: data.postal_code || ''
+        postal_code: data.postal_code || '',
+        is_default: data.is_default
       };
       
       if (editAddress) {

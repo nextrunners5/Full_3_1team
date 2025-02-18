@@ -1,17 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import AddressSearch from '../../../shared/ui/AddressSearch';
-import { Address } from '../model/Address'
+import { Address, AddressFormData } from '../model/Address'
 import './AddressModal.css';
-
-interface AddressFormData {
-  address_name: string;
-  recipient_name: string;
-  recipient_phone: string;
-  address: string;
-  detailed_address?: string;
-  postal_code: string;
-  is_default: boolean;
-}
 
 interface AddressModalProps {
   onClose: () => void;
