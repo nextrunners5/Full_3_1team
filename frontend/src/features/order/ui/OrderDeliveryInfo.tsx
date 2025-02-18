@@ -154,26 +154,14 @@ const OrderDeliveryInfo: React.FC<OrderDeliveryInfoProps> = ({userId, addressCha
         <div className="deliveryInfo">
           {selectedAddress && (
             <>
-              <div className="recipient">
-                <span className="recipientName">{selectedAddress.recipient_name}</span>
-                {selectedAddress.is_default && (
-                  <span className="defaultBadge">기본배송지</span>
-                )}
-              </div>
+              <div className="recipient">{selectedAddress.recipient_name}</div>
               <div className="addressBody">
-                <div className="addressName">{selectedAddress.address_name}</div>
                 <div className="address">
-                  {selectedAddress.postal_code && (
-                    <span className="postalCode">[{selectedAddress.postal_code}] </span>
-                  )}
+                  {selectedAddress.postal_code && <span>[{selectedAddress.postal_code}] </span>}
                   {selectedAddress.address}
-                  {selectedAddress.detailed_address && (
-                    <span className="detailAddress"> {selectedAddress.detailed_address}</span>
-                  )}
+                  {selectedAddress.detailed_address && ` ${selectedAddress.detailed_address}`}
                 </div>
-                <button className="deliveryChange" onClick={openModal}>
-                  배송지 변경
-                </button>
+                <button className="deliveryChange" onClick={openModal}>배송지 변경</button>
               </div>
               <div className="phoneNumber">{selectedAddress.recipient_phone}</div>
             </>

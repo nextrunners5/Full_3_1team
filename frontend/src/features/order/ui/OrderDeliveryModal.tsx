@@ -179,7 +179,14 @@ const OrderDeliveryModal: React.FC<ModalProps> = ({
       const response = await updateAddress(selectedAddress.address_id, addressData);
       
       if (response.success) {
-        // 완전한 주소 데이터 구조 생성
+        // 새로운 주소가 기본 배송지로 설정되는 경우, 다른 주소들의 기본 배송지 해제
+        const updatedList = addressList.map(addr => ({
+          ...addr,
+          is_default: addr.address_id === selectedAddress.address_id ? 
+            addressData.is_default : 
+            addressData.is_default ? false : addr.is_default
+        }));
+
         const updatedAddress: UserAddressInfo = {
           address_id: selectedAddress.address_id,
           address_name: addressData.address_name,
@@ -188,21 +195,13 @@ const OrderDeliveryModal: React.FC<ModalProps> = ({
           address: addressData.address,
           detailed_address: addressData.detailed_address || '',
           postal_code: addressData.postal_code,
-          is_default: addressData.is_default,
-          user_id: selectedAddress.user_id // 기존 user_id 유지
+          is_default: addressData.is_default
         };
 
-        console.log('완성된 업데이트 주소:', updatedAddress);
-
+        setAddressList(updatedList);
         onUpdateAddress(updatedAddress);
         setSelectedAddress(updatedAddress);
         setUpdateModalOpen(false);
-
-        // 주소 목록도 동일한 구조로 업데이트
-        const updatedList = addressList.map(addr => 
-          addr.address_id === updatedAddress.address_id ? updatedAddress : addr
-        );
-        setAddressList(updatedList);
       }
     } catch (error) {
       console.error('배송지 수정 실패:', error);
