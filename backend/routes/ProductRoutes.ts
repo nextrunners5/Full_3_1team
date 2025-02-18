@@ -112,7 +112,7 @@ router.put("/product-create/:productId", updateProduct);
 router.delete("/products/:productId", deleteProduct);
 
 // 재고 관련 라우트 추가 (RequestHandler 타입 적용)
-router.post("/check-stock", checkProductStock as RequestHandler);
-router.put("/stock", updateProductStock as RequestHandler);
+router.post("/stock/check", checkProductStock as RequestHandler);
+router.put("/stock/update", updateProductStock as RequestHandler);
 
 export default router;

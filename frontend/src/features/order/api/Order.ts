@@ -167,15 +167,15 @@ export const setDefaultAddress = async (addressId: number) => {
 };
 
 // 재고 확인 API
-export const checkStock = async (orderItems: {
+export const checkStock = async (items: {
   product_id: number;
   product_count: number;
   option_color: string;
   option_size: string;
 }[]) => {
   try {
-    const response = await axiosInstance.post('/api/products/check-stock', {
-      items: orderItems.map(item => ({
+    const response = await axiosInstance.post('/api/products/stock/check', {
+      items: items.map(item => ({
         product_id: item.product_id,
         product_count: item.product_count,
         option_color: item.option_color,
@@ -191,15 +191,15 @@ export const checkStock = async (orderItems: {
 };
 
 // 재고 업데이트 API
-export const updateProductStock = async (orderItems: {
+export const updateProductStock = async (items: {
   product_id: number;
   product_count: number;
   option_color: string;
   option_size: string;
 }[]) => {
   try {
-    const response = await axiosInstance.put('/api/products/stock', {
-      items: orderItems
+    const response = await axiosInstance.put('/api/products/stock/update', {
+      items
     });
     return response.data;
   } catch (error) {
