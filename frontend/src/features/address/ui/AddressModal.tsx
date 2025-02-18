@@ -43,10 +43,30 @@ const AddressModal: React.FC<AddressModalProps> = ({
 
   useEffect(() => {
     if (initialData) {
-      console.log('받은 초기 데이터:', initialData);
-      setFormData(initialData);
+      console.log('AddressModal 초기 데이터 수신:', {
+        full: initialData,
+        postal_before_set: initialData.postal_code
+      });
+
+      // formData 설정 직전 데이터 확인
+      const newFormData = {
+        ...initialData,
+        detailed_address: initialData.detailed_address || '',
+        postal_code: initialData.postal_code || ''
+      };
+      console.log('formData 설정 직전:', newFormData);
+      
+      setFormData(newFormData);
     }
   }, [initialData]);
+
+  // formData 변경 감지
+  useEffect(() => {
+    console.log('formData 변경됨:', {
+      postal: formData.postal_code,
+      full: formData
+    });
+  }, [formData]);
 
   const handleAddressComplete = (data: { address: string; zonecode: string }) => {
     console.log('DaumPostcode 결과:', {

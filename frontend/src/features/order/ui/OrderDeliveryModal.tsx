@@ -76,7 +76,30 @@ const OrderDeliveryModal: React.FC<ModalProps> = ({
       alert("수정할 배송지를 선택해주세요.");
       return;
     }
-    console.log('수정할 주소 데이터:', selectedAddress);
+    
+    // 수정 모달 열기 전 선택된 주소의 모든 필드 확인
+    console.log('수정 모달 열기 전 선택된 주소 상세:', {
+      id: selectedAddress.address_id,
+      name: selectedAddress.address_name,
+      recipient: selectedAddress.recipient_name,
+      address: selectedAddress.address,
+      detailed: selectedAddress.detailed_address,
+      postal: selectedAddress.postal_code,  // 우편번호 존재 여부 확인
+      isDefault: selectedAddress.is_default
+    });
+
+    // AddressModal에 전달되는 데이터 확인
+    const modalData = {
+      address_name: selectedAddress.address_name,
+      recipient_name: selectedAddress.recipient_name,
+      recipient_phone: selectedAddress.recipient_phone,
+      address: selectedAddress.address,
+      detailed_address: selectedAddress.detailed_address || '',
+      postal_code: selectedAddress.postal_code,
+      is_default: selectedAddress.is_default
+    };
+    console.log('AddressModal에 전달되는 데이터:', modalData);
+
     setUpdateModalOpen(true);
   };
 
