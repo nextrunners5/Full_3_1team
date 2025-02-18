@@ -8,12 +8,11 @@ import {
 import "./MyPage.css";
 import Header from "../../widgets/header/Header";
 import Footer from "../../widgets/footer/Footer";
-import type { Address } from "../../features/address/model/Address";
+import { Address, AddressFormData } from "../../features/address/model/Address";
 import AddressModal from "../../features/address/ui/AddressModal";
 import { useNavigate } from "react-router-dom";
 import axiosInstance from "../../shared/axios/axios";
 import MyPageWishlist from "../wishlist/MyPageWish";
-import { AddressFormData } from "../../features/order/model/OrderModel";
 
 interface UserProfile {
   name: string;
@@ -108,7 +107,7 @@ const MyPage: React.FC = () => {
   // 배송지 추가 핸들러
   const handleAddAddress = async (data: AddressFormData) => {
     try {
-      // detailed_address가 undefined인 경우 빈 문자열로 처리
+      // 입력 데이터가 undefined인 경우 빈 문자열로 변환
       const formattedData: AddressFormData = {
         ...data,
         detailed_address: data.detailed_address || '',
