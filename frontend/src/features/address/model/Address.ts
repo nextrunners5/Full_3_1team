@@ -1,6 +1,6 @@
 export interface Address {
   address_id?: string | number;
-  user_id: string;
+  user_id?: string;
   address_name: string;
   recipient_name: string;
   recipient_phone: string;

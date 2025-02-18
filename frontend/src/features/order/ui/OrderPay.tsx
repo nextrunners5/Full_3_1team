@@ -6,14 +6,14 @@ import { useSelector } from "react-redux";
 import { selectOrderId } from "../../../pages/order/orderRedux/slice";
 import { OrderPayProps } from "../model/OrderModel";
 import { loadTossPayments } from "@tosspayments/payment-sdk";
-import { useNavigate } from "react-router-dom";
+// import { useNavigate } from "react-router-dom";
 
 const OrderPay: React.FC<OrderPayProps> = ({userId, selectedAddress, selectedMessage}) => {
   const [points, setPoints] = useState<number>(0);
   const [finalPrice, setFinalPrice] = useState<number>(0);
   const [isLoading, setIsLoading] = useState(false);
   const orderId = useSelector(selectOrderId);
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
 
   const handlePointChange = (newPoint: number) => {
     setPoints(newPoint);
