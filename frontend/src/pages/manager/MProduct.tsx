@@ -204,7 +204,7 @@ const MProduct: React.FC = () => {
                         </td>
                         <td>
                           <button
-                            className="edit-button"
+                            className="mproduct-edit-button"
                             onClick={() => handleEdit(product)}
                           >
                             수정

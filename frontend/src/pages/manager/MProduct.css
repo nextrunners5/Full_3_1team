@@ -102,11 +102,20 @@
 }
 
 /* 버튼 스타일 */
-.edit-button {
+.mproduct-edit-button {
   color: #007bff;
   border: none;
+  padding: 8px 24px;
   background: none;
   cursor: pointer;
+}
+.mproduct-edit-button:hover {
+  color:white;
+  background-color: #007bff;
+  border: none;
+  padding: 8px 24px;
+  cursor: pointer;
+  border-radius: 5px;
 }
 
 .delete-button {
