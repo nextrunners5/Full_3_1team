@@ -89,6 +89,22 @@ const AddressModal: React.FC<AddressModalProps> = ({
     }
   };
 
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      console.log('제출할 주소 데이터:', formData);
+      await onSubmit({
+        ...formData,
+        postal_code: formData.postal_code || '',  // 우편번호가 없을 경우 빈 문자열
+        detailed_address: formData.detailed_address || ''  // 상세주소가 없을 경우 빈 문자열
+      });
+      onClose();
+    } catch (error) {
+      console.error('주소 저장 실패:', error);
+      alert('주소 저장에 실패했습니다. 다시 시도해주세요.');
+    }
+  };
+
   return (
     <div className="address-modal-overlay">
       <div className="address-modal">
@@ -97,10 +113,7 @@ const AddressModal: React.FC<AddressModalProps> = ({
           <button onClick={onClose} className="close-button" aria-label="닫기">×</button>
         </div>
 
-        <form onSubmit={(e) => {
-          e.preventDefault();
-          onSubmit(formData);
-        }}>
+        <form onSubmit={handleSubmit}>
           <div className="form-group">
             <label htmlFor="address_name">배송지명</label>
             <input

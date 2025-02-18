@@ -175,11 +175,38 @@ const OrderDeliveryModal: React.FC<ModalProps> = ({
       if (!selectedAddress?.address_id) {
         throw new Error("선택된 배송지가 없습니다.");
       }
+
+      console.log('업데이트 시도 전 데이터:', {
+        addressId: selectedAddress.address_id,
+        updateData: addressData
+      });
+
       const response = await updateAddress(selectedAddress.address_id, addressData);
+      
       if (response.success) {
-        onUpdateAddress(response.address);
-        setSelectedAddress(response.address);
+        // 응답 데이터 로깅
+        console.log('주소 업데이트 응답:', response);
+
+        // 새로운 주소 데이터 생성
+        const updatedAddress: UserAddressInfo = {
+          ...response.address,
+          address_id: selectedAddress.address_id,
+          postal_code: addressData.postal_code,
+          is_default: addressData.is_default
+        };
+
+        console.log('최종 업데이트될 주소:', updatedAddress);
+
+        // 부모 컴포넌트에 업데이트 알림
+        onUpdateAddress(updatedAddress);
+        setSelectedAddress(updatedAddress);
         setUpdateModalOpen(false);
+
+        // 주소 목록 갱신
+        const updatedList = addressList.map(addr => 
+          addr.address_id === updatedAddress.address_id ? updatedAddress : addr
+        );
+        setAddressList(updatedList);
       }
     } catch (error) {
       console.error('배송지 수정 실패:', error);
