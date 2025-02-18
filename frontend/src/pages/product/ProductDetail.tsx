@@ -8,6 +8,7 @@ import axiosInstance from "../../shared/axios/axios";
 import { createOrder, createCart } from "../../features/product/api/Product";
 import { useDispatch } from "react-redux";
 import { setOrderType } from "../order/orderRedux/slice";
+import Header from "../../widgets/header/Header";
 // import Review from "../review/Review";
 
 interface Product {
@@ -175,6 +176,8 @@ const ProductDetail: React.FC = () => {
   if (!product) return <p>상품 정보를 불러오는 중...</p>;
 
   return (
+    <>
+    <Header />
     <div className="product-html">
       <div className="product-page">
         <div className="product-header">
@@ -336,7 +339,7 @@ const ProductDetail: React.FC = () => {
               {isModalOpen && (
                 <QnaModal
                   onClose={() => setIsModalOpen(false)}
-                  userId={null}
+                  // userId={null}
                   productId={product.product_id}
                 />
               )}
@@ -352,6 +355,7 @@ const ProductDetail: React.FC = () => {
       </div>
       <Footer />
     </div>
+    </>
   );
 };
 

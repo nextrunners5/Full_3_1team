@@ -77,7 +77,7 @@ font-size: 18px;
 .price {
   font-size: 14px;
   color: gray;
-  text-decoration: line-through;
+  /* text-decoration: line-through; */
 }
 
 .discount-price {
