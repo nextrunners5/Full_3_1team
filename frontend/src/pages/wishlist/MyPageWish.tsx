@@ -82,8 +82,8 @@ const MyPageWishlist: React.FC = () => {
             <ProductCard
               key={product.product_id}
               product={product}
-              // isWishlisted={wishlist.includes(product.product_id)}
-              // toggleWishlist={() => toggleWishlist(product)}
+              isWishlisted={wishlist.includes(product.product_id)}
+              toggleWishlist={() => toggleWishlist(product)}
             />
           ))
         )}
