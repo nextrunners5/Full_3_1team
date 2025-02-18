@@ -8,6 +8,7 @@ import { fetchInsertDelivery, fetchUpdateInfo } from "../api/Order";
 // import { RootState } from "../../../pages/order/orderRedux/store";
 import { OrderPayProps } from "../model/OrderModel";
 import { loadTossPayments } from "@tosspayments/payment-sdk";
+import { useNavigate } from "react-router-dom";
 
 const OrderPay: React.FC<OrderPayProps> = ({userId, selectedAddress, selectedMessage}) => {
   // const userId = useSelector((state:RootState) => state.order.user_id);
@@ -16,6 +17,7 @@ const OrderPay: React.FC<OrderPayProps> = ({userId, selectedAddress, selectedMes
   const [isLoading, setIsLoading] = useState(false);
   // const totalPrice = useSelector(selectTotalPrice);
   const orderId = useSelector(selectOrderId);
+  const navigate = useNavigate();
 
 
   const handlePointChange = (newPoint: number) => {
@@ -31,45 +33,50 @@ const OrderPay: React.FC<OrderPayProps> = ({userId, selectedAddress, selectedMes
     console.log('setFinalPrice', finalPrice);
   };
 
-
-
-  const handlePayment = async () => {
-    if (!selectedAddress) {
-      alert("주소를 선택해주세요.");
-      return;
-    }
-    
-    setIsLoading(true);
+  // 결제 성공 처리 함수
+  const handlePaymentSuccess = async (response: PaymentResponse) => {
     try {
-      const tossPayments = await loadTossPayments(import.meta.env.VITE_TOSS_CLIENT_KEY);
+      // 결제 성공 후 재고 감소 처리
+      await updateProductStock(orderItems.map(item => ({
+        product_id: item.product_id,
+        product_count: item.product_count,
+        option_color: item.option_color,
+        option_size: item.option_size
+      })));
 
-      // const finalPrice = totalPrice - points ;
-      const final_price = finalPrice;
-
-      const encodedAddress = encodeURIComponent(JSON.stringify(selectedAddress));
-
-      // 결제 요청
-      await tossPayments.requestPayment("카드", {
-        orderId: `${orderId}`,
-        orderName: "구매 상품",
-        amount: final_price,
-        customerName: `${userId}`, // 실제 환경에서는 사용자 이름을 받아야 함
-        // successUrl: `${window.location.origin}/payments/success`,
-        successUrl: `${window.location.origin}/payments/success?orderId=${orderId}&address=${encodedAddress}&message=${encodeURIComponent(selectedMessage)}`,
-        failUrl: `${window.location.origin}/payments/fail`,
-        
+      // 결제 완료 페이지로 이동
+      navigate('/order/complete', {
+        state: { 
+          orderId: response.orderId,
+          orderInfo: {
+            items: orderItems,
+            delivery_info: selectedAddress,
+            total_amount: totalAmount
+          }
+        } 
       });
+    } catch (error) {
+      console.error('결제 처리 실패:', error);
+      alert('결제 처리 중 오류가 발생했습니다.');
+    }
+  };
 
-      await fetchUpdateInfo(orderId);
-      console.log('fetchUpdateInfo 실행됨');
-      await fetchInsertDelivery(orderId, selectedAddress, selectedMessage);
-      console.log('fetchInsertDelivery 실행됨');
+  // 결제 시도 전 재고 확인
+  const handlePayment = async () => {
+    try {
+      // 재고 확인
+      const hasStock = await checkStock(orderItems);
+      if (!hasStock) {
+        alert('일부 상품의 재고가 부족합니다.');
+        return;
+      }
+
+      // 여기서 결제 진행
+      // ...결제 로직...
 
     } catch (error) {
-      console.error("결제 요청 실패:", error);
-      alert("결제 요청 실패");
-    } finally {
-      setIsLoading(false);
+      console.error('결제 처리 실패:', error);
+      alert('결제 처리 중 오류가 발생했습니다.');
     }
   };
 
