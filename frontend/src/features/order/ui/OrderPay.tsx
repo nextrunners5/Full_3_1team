@@ -1,14 +1,12 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import OrderCouponPoint from "./OrderCouponPoint";
 import "./OrderPay.css"
 import OrderPrice from "./OrderPrice";
 import { useSelector } from "react-redux";
 import { selectOrderId } from "../../../pages/order/orderRedux/slice";
-import { updateProductStock, checkStock } from "../api/Order";
-import { OrderPayProps, PaymentResponse } from "../model/OrderModel";
+import { OrderPayProps } from "../model/OrderModel";
 import { loadTossPayments } from "@tosspayments/payment-sdk";
 import { useNavigate } from "react-router-dom";
-import { RootState } from "../../../pages/order/orderRedux/store";
 
 const OrderPay: React.FC<OrderPayProps> = ({userId, selectedAddress, selectedMessage}) => {
   const [points, setPoints] = useState<number>(0);
@@ -16,9 +14,6 @@ const OrderPay: React.FC<OrderPayProps> = ({userId, selectedAddress, selectedMes
   const [isLoading, setIsLoading] = useState(false);
   const orderId = useSelector(selectOrderId);
   const navigate = useNavigate();
-
-  // 주문 상품 정보 가져오기
-  const orderItems = useSelector((state: RootState) => state.order.orderInfo);
 
   const handlePointChange = (newPoint: number) => {
     setPoints(newPoint);
@@ -28,7 +23,6 @@ const OrderPay: React.FC<OrderPayProps> = ({userId, selectedAddress, selectedMes
     setFinalPrice(newFinalPrice);
   };
 
-  // 결제 시도 전 재고 확인
   const handlePayment = async () => {
     if (!selectedAddress) {
       alert("배송지를 선택해주세요.");
@@ -37,13 +31,6 @@ const OrderPay: React.FC<OrderPayProps> = ({userId, selectedAddress, selectedMes
 
     setIsLoading(true);
     try {
-      // 재고 확인
-      const hasStock = await checkStock(orderItems);
-      if (!hasStock) {
-        alert('일부 상품의 재고가 부족합니다.');
-        return;
-      }
-
       const tossPayments = await loadTossPayments(import.meta.env.VITE_TOSS_CLIENT_KEY);
       const encodedAddress = encodeURIComponent(JSON.stringify(selectedAddress));
 
