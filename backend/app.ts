@@ -24,7 +24,9 @@ app.use('/api/products', productRoutes);
 
 // 라우트 테스트용 로그 추가
 app.use((req, res, next) => {
+  console.log('Request Method:', req.method);
   console.log('Request URL:', req.url);
+  console.log('Request Body:', req.body);
   next();
 });
 

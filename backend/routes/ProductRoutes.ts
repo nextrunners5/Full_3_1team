@@ -111,8 +111,8 @@ router.put("/product-create/:productId", updateProduct);
 // 상품 삭제
 router.delete("/products/:productId", deleteProduct);
 
-// 재고 관련 라우트 수정 - 경로에서 /products 제거
-router.post("check-stock", checkProductStock as RequestHandler);  // 슬래시(/) 제거
-router.put("stock", updateProductStock as RequestHandler);        // 슬래시(/) 제거
+// 재고 관련 라우트 수정
+router.post("/check-stock", checkProductStock as RequestHandler);  // 슬래시 추가
+router.put("/stock", updateProductStock as RequestHandler);        // 슬래시 추가
 
 export default router;
