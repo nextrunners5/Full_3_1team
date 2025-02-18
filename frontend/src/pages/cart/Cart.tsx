@@ -13,6 +13,19 @@ import {
   setSelectedItems
 } from "../order/orderRedux/slice";
 
+// 장바구니 API에서 받아오는 원본 데이터 타입
+interface RawCartItem {
+  cart_item_id: number;
+  product_id: number;
+  name: string;
+  final_price: number;
+  origin_price: number;
+  quantity: number;
+  selected_size: string;
+  selected_color: string;
+  main_image?: string;
+}
+
 type CartItem = {
   cartItemId: number;
   productId: string;
@@ -58,7 +71,7 @@ const CartPage = () => {
 
         // 장바구니 조회
         const response = await axiosInstance.get(`api/carts/${userId}`);
-        const rawItems = response.data as any[];
+        const rawItems = response.data as RawCartItem[];
 
         const baseURL =
           import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
@@ -96,15 +109,17 @@ const CartPage = () => {
       try {
         const response = await axiosInstance.get("/api/products/best");
         // 데이터 형식에 따라 아래와 같이 변환합니다.
-        const formattedProducts = (response.data as any[]).map((product) => ({
-          product_id: product.product_id,
-          product_name: product.product_name,
-          origin_price: product.origin_price,
-          discount_price: product.discount_price,
-          final_price: product.final_price,
-          main_image: product.main_image || "https://placehold.co/300x300",
-          small_image: product.small_image || "https://placehold.co/150x150"
-        }));
+        const formattedProducts = (response.data as Product[]).map(
+          (product) => ({
+            product_id: product.product_id,
+            product_name: product.product_name,
+            origin_price: product.origin_price,
+            discount_price: product.discount_price,
+            final_price: product.final_price,
+            main_image: product.main_image || "https://placehold.co/300x300",
+            small_image: product.small_image || "https://placehold.co/150x150"
+          })
+        );
         setProductsToShow(formattedProducts);
       } catch (error) {
         console.error("추천 상품 불러오기 실패:", error);
@@ -113,7 +128,7 @@ const CartPage = () => {
 
     fetchCartItems();
     fetchRecommendedProducts();
-  }, []);
+  }, [dispatch, navigate]);
 
   // const productsToShow = selectedCategory === "best" ? bestProducts : newProducts;
 
@@ -335,6 +350,7 @@ const CartPage = () => {
                   <div key={item.cartItemId || index} className="cart-item">
                     <input
                       type="checkbox"
+                      aria-label={`장바구니 항목 ${item.name} 선택`}
                       checked={item.selected || false}
                       onChange={() => handleSelectItem(item.cartItemId)}
                     />
@@ -363,7 +379,12 @@ const CartPage = () => {
                         onClick={() => handleDecrease(item.cartItemId)}
                         className="quantity-button"
                       />
-                      <input type="number" value={item.quantity} readOnly />
+                      <input
+                        type="number"
+                        value={item.quantity}
+                        readOnly
+                        aria-label="상품 수량"
+                      />
                       <Button
                         text="+"
                         onClick={() => handleIncrease(item.cartItemId)}
@@ -426,10 +447,10 @@ const CartPage = () => {
           <div className="productCardContainer">
             {productsToShow.length > 0 ? (
               productsToShow
-              .slice(0, 3)
-              .map((product) => (
-                <ProductCard key={product.product_id} product={product} />
-              ))
+                .slice(0, 3)
+                .map((product) => (
+                  <ProductCard key={product.product_id} product={product} />
+                ))
             ) : (
               <p className="empty-cart">추천 상품이 없습니다.</p>
             )}
