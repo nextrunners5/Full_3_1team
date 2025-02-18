@@ -1,6 +1,6 @@
 import axiosInstance from "../../../shared/axios/axios";
 
-const API_URL = "http://localhost:3000/api/carts";
+const API_URL = `${import.meta.env.VITE_API_BASE_URL}/api/carts`;
 
 // 장바구니에 아이템 추가
 export const addToCart = async (

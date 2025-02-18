@@ -89,8 +89,8 @@ router.get(
 
       const productWithImages = {
         ...product,
-        main_image: productImage ? `http://localhost:3000/${productImage.main_image}` : null,
-        detail_images: productImage ? productImage.detail_images.map(img => `http://localhost:3000/${img}`) : [],
+        main_image: productImage ? `VITE_API_BASE_URL/${productImage.main_image}` : null,
+        detail_images: productImage ? productImage.detail_images.map(img => `VITE_API_BASE_URL/${img}`) : [],
       };
 
       console.log("최종 응답 데이터:", productWithImages);
