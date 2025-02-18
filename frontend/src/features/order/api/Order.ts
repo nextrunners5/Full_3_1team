@@ -166,3 +166,21 @@ export const setDefaultAddress = async (addressId: number) => {
   }
 };
 
+// 결제 완료 후 재고 감소 API
+export const updateProductStock = async (orderItems: {
+  product_id: number;
+  product_count: number;
+  option_color: string;
+  option_size: string;
+}[]) => {
+  try {
+    const response = await axiosInstance.put('/api/products/stock', {
+      items: orderItems
+    });
+    return response.data;
+  } catch (error) {
+    console.error('재고 업데이트 실패:', error);
+    throw error;
+  }
+};
+

@@ -8,6 +8,8 @@ import { RootState } from "./orderRedux/store";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { UserAddressInfo, PaymentResponse } from "../../features/order/model/OrderModel";
+import { updateProductStock } from "../../features/order/api/Order";
+import axiosInstance from "../../utils/axiosInstance";
 
 
 const Order: React.FC = () => {
@@ -28,14 +30,52 @@ const Order: React.FC = () => {
     setSelectedMessage(message);
   }
 
+  // 결제 전 재고 확인
+  const checkStock = async (orderItems: OrderProducts[]) => {
+    try {
+      const response = await axiosInstance.post('/api/products/check-stock', {
+        items: orderItems
+      });
+      return response.data.success;
+    } catch (error) {
+      console.error('재고 확인 실패:', error);
+      return false;
+    }
+  };
+
+  // 결제 시도 전 재고 확인
+  const handlePayment = async () => {
+    const orderItems = useSelector((state: RootState) => state.order.orderInfo);
+    const hasStock = await checkStock(orderItems);
+    
+    if (!hasStock) {
+      alert('일부 상품의 재고가 부족합니다.');
+      return;
+    }
+    
+    // 결제 진행
+    // ...
+  };
+
   // 결제 성공 처리
   const handlePaymentSuccess = async (response: PaymentResponse) => {
     try {
+      // 기존 주문 정보 저장
       const orderData = {
         orderId: response.orderId,
         // ... 나머지 주문 정보
       };
-      
+
+      // 재고 감소 처리
+      const orderItems = useSelector((state: RootState) => state.order.orderInfo);
+      await updateProductStock(orderItems.map(item => ({
+        product_id: item.product_id,
+        product_count: item.product_count,
+        option_color: item.option_color,
+        option_size: item.option_size
+      })));
+
+      // 결제 완료 페이지로 이동
       navigate('/order/complete', {
         state: { 
           orderId: response.orderId,
@@ -44,6 +84,7 @@ const Order: React.FC = () => {
       });
     } catch (error) {
       console.error('결제 처리 실패:', error);
+      // 에러 처리
     }
   };
 
