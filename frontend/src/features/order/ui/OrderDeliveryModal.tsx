@@ -76,6 +76,7 @@ const OrderDeliveryModal: React.FC<ModalProps> = ({
       alert("수정할 배송지를 선택해주세요.");
       return;
     }
+    console.log('수정할 주소 데이터:', selectedAddress);
     setUpdateModalOpen(true);
   };
 
@@ -232,9 +233,13 @@ const OrderDeliveryModal: React.FC<ModalProps> = ({
                     onClose={closeUpdateModal}
                     onSubmit={handleUpdateAddress}
                     initialData={{
-                      ...selectedAddress,
+                      address_name: selectedAddress.address_name,
+                      recipient_name: selectedAddress.recipient_name,
+                      recipient_phone: selectedAddress.recipient_phone,
+                      address: selectedAddress.address,
                       detailed_address: selectedAddress.detailed_address || '',
-                      postal_code: selectedAddress.postal_code || ''
+                      postal_code: selectedAddress.postal_code,
+                      is_default: selectedAddress.is_default
                     }}
                     isEditing={true}
                   />

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import AddressSearch from '../../../shared/ui/AddressSearch';
 import { Address } from '../model/Address'
 import './AddressModal.css';
@@ -40,6 +40,13 @@ const AddressModal: React.FC<AddressModalProps> = ({
       is_default: false
     }
   );
+
+  useEffect(() => {
+    if (initialData) {
+      console.log('받은 초기 데이터:', initialData);
+      setFormData(initialData);
+    }
+  }, [initialData]);
 
   const handleAddressComplete = (data: { address: string; zonecode: string }) => {
     console.log('DaumPostcode 결과:', {
