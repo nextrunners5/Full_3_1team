@@ -13,14 +13,6 @@ interface SignupForm {
   phone: string;
 }
 
-interface ApiError {
-  response?: {
-    data?: {
-      message?: string;
-    };
-  };
-}
-
 const Signup: React.FC = () => {
   const navigate = useNavigate();
   const [form, setForm] = useState<SignupForm>({
@@ -159,19 +151,6 @@ const Signup: React.FC = () => {
       setFailMessage(error.response?.data?.message || '이미 사용 중인 아이디입니다.');
       setShowFailModal(true);
       setIsIdChecked(false);
-    }
-  };
-
-  const checkEmailDuplicate = async () => {
-    try {
-      const response = await axiosInstance.get(`/api/auth/check-email/${form.email}`);
-      if (response.data.success) {
-        setModalMessage('사용 가능한 이메일입니다.');
-        setShowModal(true);
-      }
-    } catch (error: any) {
-      setFailMessage(error.response?.data?.message || '이메일 중복 확인에 실패했습니다.');
-      setShowFailModal(true);
     }
   };
 

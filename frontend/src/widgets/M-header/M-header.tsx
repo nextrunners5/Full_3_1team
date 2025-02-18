@@ -1,7 +1,11 @@
 import { FiLogOut } from 'react-icons/fi';
 import './M-header.css';
 
-const MHeader = ({ title }) => {
+interface MHeaderProps {
+  title: string;
+}
+
+const MHeader: React.FC<MHeaderProps> = ({ title }) => {
   return (
     <header className="header-M-h">
       <h2 className="title-M-h">{title}</h2>

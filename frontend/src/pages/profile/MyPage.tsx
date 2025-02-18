@@ -34,13 +34,11 @@ interface OrderHistoryItem {
 const MyPage: React.FC = () => {
   const [period, setPeriod] = useState("1month");
   const [orderType, setOrderType] = useState("all");
-
   const [showOtherAddresses, setShowOtherAddresses] = useState(false);
   const [addresses, setAddresses] = useState<Address[]>([]);
   const [showAddressModal, setShowAddressModal] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
-  const [showAllAddresses, setShowAllAddresses] = useState(false);
   const [editAddress, setEditAddress] = useState<Address | null>(null);
   const [orderHistory, setOrderHistory] = useState<OrderHistoryItem[]>([]);
   const [isOrderLoading, setIsOrderLoading] = useState(true);
@@ -110,10 +108,13 @@ const MyPage: React.FC = () => {
   // 배송지 추가 핸들러
   const handleAddAddress = async (data: AddressFormData) => {
     try {
-      const formattedData = {
+      // detailed_address가 undefined인 경우 빈 문자열로 처리
+      const formattedData: AddressFormData = {
         ...data,
         detailed_address: data.detailed_address || '',
+        postal_code: data.postal_code || ''
       };
+      
       if (editAddress) {
         // 수정 모드
         const response = await axiosInstance.put(
