@@ -152,3 +152,66 @@ export const deleteProduct = async (req: Request, res: Response): Promise<void> 
     res.status(500).json({ message: "서버 오류 발생" });
   }
 };
+
+// 재고 확인 API
+export const checkProductStock = async (req: Request, res: Response) => {
+  try {
+    const { items } = req.body;
+
+    // 각 상품의 재고 확인
+    for (const item of items) {
+      const query = `
+        SELECT stock_quantity 
+        FROM ProductOptions 
+        WHERE product_id = ? 
+        AND color = ? 
+        AND size = ?
+      `;
+      
+      const [result] = await pool.promise().query(query, [
+        item.product_id,
+        item.option_color,
+        item.option_size
+      ]);
+
+      const rows = result as any[];
+      if (rows.length === 0 || rows[0].stock_quantity < item.product_count) {
+        return res.json({ success: false });
+      }
+    }
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error('재고 확인 실패:', error);
+    res.status(500).json({ success: false, error: '재고 확인 중 오류가 발생했습니다.' });
+  }
+};
+
+// 재고 업데이트 API
+export const updateProductStock = async (req: Request, res: Response) => {
+  try {
+    const { items } = req.body;
+
+    for (const item of items) {
+      const query = `
+        UPDATE ProductOptions 
+        SET stock_quantity = stock_quantity - ? 
+        WHERE product_id = ? 
+        AND color = ? 
+        AND size = ?
+      `;
+      
+      await pool.promise().query(query, [
+        item.product_count,
+        item.product_id,
+        item.option_color,
+        item.option_size
+      ]);
+    }
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error('재고 업데이트 실패:', error);
+    res.status(500).json({ success: false, error: '재고 업데이트 중 오류가 발생했습니다.' });
+  }
+};

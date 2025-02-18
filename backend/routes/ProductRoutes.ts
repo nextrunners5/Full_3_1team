@@ -5,7 +5,7 @@ import express, { Router, Request, Response } from "express";
 import pool from "../../backend/config/dbConfig";
 import ProductService from "../../backend/feature/product/services/ProductService";
 import { RowDataPacket } from "mysql2";
-import { getProductById, getCategories, getProducts, deleteProduct, updateProduct } from "../feature/product/controller/ProductController"
+import { getProductById, getCategories, getProducts, deleteProduct, updateProduct, checkProductStock, updateProductStock } from "../feature/product/controller/ProductController"
 import ProductImage from "../feature/product/img/ProductImage";
 import { getBestProducts, getRecentProducts } from "../feature/product/controller/MainProductController";
 
@@ -111,6 +111,8 @@ router.put("/product-create/:productId", updateProduct);
 // 상품 삭제
 router.delete("/products/:productId", deleteProduct);
 
-
+// 재고 관련 라우트 추가
+router.post("/check-stock", checkProductStock);
+router.put("/stock", updateProductStock);
 
 export default router;

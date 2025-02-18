@@ -1,8 +1,9 @@
 import express from 'express';
 import cors from 'cors';
-import authRoutes from './routes/authRoutes';
-import addressRoutes from './routes/addressRoutes';
+import authRoutes from './routes/AuthRoutes';
+import addressRoutes from './routes/AddressRoutes';
 import userRoutes from './routes/UserRoutes';
+import productRoutes from './routes/ProductRoutes';
 // ... 다른 import들
 
 const app = express();
@@ -18,6 +19,7 @@ app.use(express.json());
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/addresses', addressRoutes);
+app.use('/api/products', productRoutes);
 // ... 다른 라우트들
 
 // 404 에러 핸들러
