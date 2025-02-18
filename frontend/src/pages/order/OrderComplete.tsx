@@ -76,7 +76,7 @@ const OrderComplete: React.FC = () => {
         </div>
 
         <div className="order-info-section">
-          <h2>주문 상품 정보</h2>
+          <h2 className='order-info-title'>주문 상품 정보</h2>
           <div className="order-items">
             {orderData.orderInfo.items.map((item, index) => (
               <div key={index} className="order-item">
@@ -97,7 +97,7 @@ const OrderComplete: React.FC = () => {
         </div>
 
         <div className="delivery-info-section">
-          <h2>배송 정보</h2>
+          <h2 className='delivery-info-title'>배송 정보</h2>
           <div className="delivery-details">
             <p>받는 분: {orderData.orderInfo.delivery_info.recipient_name}</p>
             <p>주소: {orderData.orderInfo.delivery_info.address} {orderData.orderInfo.delivery_info.detailed_address}</p>
@@ -106,7 +106,7 @@ const OrderComplete: React.FC = () => {
         </div>
 
         <div className="payment-info-section">
-          <h2>결제 정보</h2>
+          <h2 className='payment-info-title'>결제 정보</h2>
           <div className="payment-details">
             <p className="total-amount">
               총 결제금액: {orderData.orderInfo.total_amount.toLocaleString()}원
