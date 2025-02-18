@@ -1,4 +1,4 @@
-import React from 'react';
+// import React from 'react';
 import "../../shared/style/PayCompleteModal.css";
 import completeIcon from "../../assets/complete.png";
 
