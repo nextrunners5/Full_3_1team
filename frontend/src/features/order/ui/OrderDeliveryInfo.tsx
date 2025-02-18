@@ -106,11 +106,33 @@ const OrderDeliveryInfo: React.FC<OrderDeliveryInfoProps> = ({userId, addressCha
   }
 
   const handleUpdateAddress = (updatedAddress: UserAddressInfo) => {
-    setUserAddressDetails(prev => 
-      prev.map(addr => 
-        addr.address_id === updatedAddress.address_id ? updatedAddress : addr
-      )
-    );
+    console.log('주소 업데이트 전:', {
+      current: userAddressDetails,
+      updated: updatedAddress
+    });
+
+    if (!updatedAddress || !updatedAddress.address_id) {
+      console.error('유효하지 않은 주소 데이터:', updatedAddress);
+      return;
+    }
+
+    const updatedList = userAddressDetails.map(addr => {
+      if (addr.address_id === updatedAddress.address_id) {
+        return {
+          ...updatedAddress,
+          address_id: addr.address_id,
+          postal_code: updatedAddress.postal_code || addr.postal_code,
+        };
+      }
+      return addr;
+    });
+
+    console.log('주소 업데이트 후:', {
+      updatedList,
+      selectedAddress: updatedAddress
+    });
+
+    setUserAddressDetails(updatedList);
     setSelectedAddress(updatedAddress);
     addressChange(updatedAddress);
   };
