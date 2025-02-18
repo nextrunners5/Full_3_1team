@@ -7,6 +7,7 @@ import { useSelector } from "react-redux";
 import { RootState } from "./orderRedux/store";
 import { useState } from "react";
 import { UserAddressInfo } from "../../features/order/model/OrderModel";
+import Header from "../../widgets/header/Header";
 
 const Order: React.FC = () => {
   const userId = useSelector((state: RootState)=>state.order.user_id);
@@ -23,7 +24,9 @@ const Order: React.FC = () => {
 
   return (
     <div className="mainContainer">
-      <header></header>
+      <header>
+        <Header />
+      </header>
       <body className="bodyContainer">
         <div className="orderContainer">
           <div className="orderLeft">
