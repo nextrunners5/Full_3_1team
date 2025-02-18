@@ -3,13 +3,13 @@ import OrderDeliveryInfo from "../../features/order/ui/OrderDeliveryInfo";
 import OrderPay from "../../features/order/ui/OrderPay";
 import Footer from "../../widgets/footer/Footer";
 import "./Order.css"
-import { useSelector} from "react-redux";
+import { useSelector } from "react-redux";
 import { RootState } from "./orderRedux/store";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { UserAddressInfo, PaymentResponse } from "../../features/order/model/OrderModel";
+import { UserAddressInfo, PaymentResponse, OrderProducts } from "../../features/order/model/OrderModel";
 import { updateProductStock } from "../../features/order/api/Order";
-import axiosInstance from "../../utils/axiosInstance";
+import axiosInstance from "../../shared/axios/axios";
 
 
 const Order: React.FC = () => {
@@ -17,6 +17,9 @@ const Order: React.FC = () => {
   const [selectedAddress, setSelectedAddress] = useState<UserAddressInfo | null>(null);
   const [selectedMessage, setSelectedMessage] = useState('');
   const navigate = useNavigate();
+
+  // useSelector를 컴포넌트 최상위 레벨로 이동
+  const orderItems = useSelector((state: RootState) => state.order.orderInfo);
 
   useEffect(() => {
     console.log('Order.tsx 아이디 변경 감지: ', userId);
@@ -31,10 +34,10 @@ const Order: React.FC = () => {
   }
 
   // 결제 전 재고 확인
-  const checkStock = async (orderItems: OrderProducts[]) => {
+  const checkStock = async (items: OrderProducts[]) => {
     try {
       const response = await axiosInstance.post('/api/products/check-stock', {
-        items: orderItems
+        items
       });
       return response.data.success;
     } catch (error) {
@@ -45,7 +48,6 @@ const Order: React.FC = () => {
 
   // 결제 시도 전 재고 확인
   const handlePayment = async () => {
-    const orderItems = useSelector((state: RootState) => state.order.orderInfo);
     const hasStock = await checkStock(orderItems);
     
     if (!hasStock) {
@@ -60,14 +62,12 @@ const Order: React.FC = () => {
   // 결제 성공 처리
   const handlePaymentSuccess = async (response: PaymentResponse) => {
     try {
-      // 기존 주문 정보 저장
       const orderData = {
         orderId: response.orderId,
         // ... 나머지 주문 정보
       };
 
       // 재고 감소 처리
-      const orderItems = useSelector((state: RootState) => state.order.orderInfo);
       await updateProductStock(orderItems.map(item => ({
         product_id: item.product_id,
         product_count: item.product_count,
@@ -75,7 +75,6 @@ const Order: React.FC = () => {
         option_size: item.option_size
       })));
 
-      // 결제 완료 페이지로 이동
       navigate('/order/complete', {
         state: { 
           orderId: response.orderId,
@@ -84,7 +83,6 @@ const Order: React.FC = () => {
       });
     } catch (error) {
       console.error('결제 처리 실패:', error);
-      // 에러 처리
     }
   };
 
