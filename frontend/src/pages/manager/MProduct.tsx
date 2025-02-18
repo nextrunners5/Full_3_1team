@@ -175,7 +175,7 @@ const MProduct: React.FC = () => {
                         <td className="M-titleName">
                           <img
                             className="M-img"
-                            src={`http://localhost:3000/${product.small_image}`}
+                            src={`VITE_API_BASE_URL/${product.small_image}`}
                             alt={product.product_name}
                           />
                           {product.product_name}

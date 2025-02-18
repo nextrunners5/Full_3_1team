@@ -48,7 +48,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
 
       <Link to={`/products/${product.product_id}`} className="product-link">
         <img
-          src={`http://localhost:3000/${product.small_image}`}
+          src={`${import.meta.env.VITE_API_BASE_URL}/${product.small_image}`}
           alt={product.product_name}
         />
         <div className="product-info">
