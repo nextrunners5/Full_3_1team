@@ -18,15 +18,17 @@ export const postQuestion = async (data: {
 };
 
 // 특정 상품의 QnA 리스트 가져오기
-export const fetchQnAList = async (productId: string) => {
+export const fetchQnAList = async (productId: string, userId: string | null) => {
   try {
-    console.log(` QnA 요청: /api/qna/questions/${productId}`);
-    
-    const response = await axiosInstance.get(`/api/qna/questions/${productId}`);
-    
+    console.log("QnA 요청: productId:", productId, "userId:", userId);
+
+    const response = await axiosInstance.get(`/api/qna/questions/${productId}`, {
+      params: { userId: userId ?? "" },
+    });
+
     return response.data.questions;
   } catch (error) {
-    console.error("QnA 목록 불러오기 오류:", error);
+    console.error("QnA 목록 불러오기 실패:", error);
     return [];
   }
 };
