@@ -16,19 +16,23 @@ Deployment : <URL 추가 예정>
 ### 🏁Getting Started
 Frontend
 
-```cd frontend
+```
+cd frontend
 
 npm install (의존성 설치)
 
-npm run dev```
+npm run dev
+```
 
 Backend
 
-```cd backend
+```
+cd backend
 
 npm install (의존성 설치)
 
-npx ts-node server.ts```
+npx ts-node server.ts
+```
 
 ## ✏️Main Feature
 
