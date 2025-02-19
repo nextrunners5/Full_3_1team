@@ -2,29 +2,36 @@
 
 <대표 이미지 삽입 예정>
 ## 📖Description
-**
+
 반려동물과 반려인을 위한 이커머스를 구현하였습니다.
+
 조금 더 쉽게 반려용품에 다가갈 수 있습니다.
 
 ## 💻Demo & Deployment
-**
+
 <Demo 화면녹화본 추가 예정>
 
 Deployment : <URL 추가 예정>
 
 ### 🏁Getting Started
 Frontend
+
 ```cd frontend```
+
 ```npm install (의존성 설치)```
+
 ```npm run dev```
 
 Backend
+
 ```cd backend```
+
 ```npm install (의존성 설치)```
+
 ```npx ts-node server.ts```
 
 ## ✏️Main Feature
-**
+
 ### 회원가입 및 로그인, SNS 로그인
 * JWT, KAKAO API 이용
 ### 상품관리
@@ -36,7 +43,7 @@ Backend
 * 배송지 주소 - KAKAO ADDRESS API 이용
 
 ## 🛠️Stack
-**
+
 * Language: TypeScript
 * Library & Framework : Node.js
 * Database : MySQL(MySQL2), MongoDB(Mongoose)
@@ -44,7 +51,7 @@ Backend
 * Deploy: AWS EC2
 
 ## 📁Project Structure
-**
+
 ### Frontend
 ```
 📦frontend
@@ -462,18 +469,19 @@ Backend
  ┗ 📜tsconfig.json
 ```
 ## 👨‍💻 Role & Contribution
-**
+
 ##### Frontend (Web)
 * 관리자 페이지 (Vue.js) 개발
 * 전체 아키텍처 구성
+
 ##### Devops
 * CI/CD 구축 (Docker, Github Action)
 * 서버 모니터링
+
 ##### etc
 전체 개발 일정 및 이슈 관리
 
 ## 🧑‍🧑‍🧒‍🧒Developers
-**
 * 민은빈 ([gitID or 블로그ID]여기에 개인 git/ 블로그 url 넣으시면 될거같아요!!)
 * 김수현 ([gitID or 블로그ID]여기에 개인 git/ 블로그 url 넣으시면 될거같아요!!)
 * 박영빈 ([gitID or 블로그ID]여기에 개인 git/ 블로그 url 넣으시면 될거같아요!!)
