@@ -1,12 +1,15 @@
 import { Request } from 'express';
 
 // JWT 토큰에서 추출되는 최소한의 사용자 정보 타입
-interface TokenUser extends Express.User {
+interface TokenUser {
   user_id: string;
   email: string;
   nickname?: string;
   signup_type?: string;
 }
+
+// Express의 Request.user를 위한 타입
+interface RequestUser extends Express.User, TokenUser {}
 
 // 전체 사용자 정보 타입
 export interface User extends TokenUser {
@@ -28,7 +31,7 @@ interface AuthenticatedRequest extends Request {
 declare global {
   namespace Express {
     interface Request {
-      user?: TokenUser;
+      user?: RequestUser;
     }
   }
 }
