@@ -14,15 +14,13 @@ Deployment : <URL 추가 예정>
 
 ### 🏁Getting Started
 Frontend
-```cd frontend
-
-npm install (의존성 설치)```
+```cd frontend```
+```npm install (의존성 설치)```
 ```npm run dev```
 
 Backend
-```cd backend
-
-npm install (의존성 설치)```
+```cd backend```
+```npm install (의존성 설치)```
 ```npx ts-node server.ts```
 
 ## ✏️Main Feature
