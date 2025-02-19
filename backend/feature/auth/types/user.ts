@@ -7,6 +7,9 @@ interface TokenUser {
   signup_type?: string;
 }
 
+// Express의 Request.user를 위한 타입
+interface RequestUser extends Express.User, TokenUser {}
+
 // 전체 사용자 정보 타입
 export interface User extends TokenUser {
   kakao_id?: number;
