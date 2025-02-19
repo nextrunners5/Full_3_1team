@@ -5,6 +5,7 @@ interface TokenUser {
   email: string;
   nickname?: string;
   signup_type?: string;
+
 }
 
 // Express의 Request.user를 위한 타입
