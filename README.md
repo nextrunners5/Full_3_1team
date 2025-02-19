@@ -14,6 +14,13 @@
 Deployment : <URL 추가 예정>
 
 ### 🏁Getting Started
+
+git clone
+```
+git clone https://github.com/nextrunners5/Full_3_1team
+cd Full_3_1team
+```
+
 Frontend
 
 ```
