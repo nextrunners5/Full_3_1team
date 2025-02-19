@@ -316,8 +316,7 @@ const MyPage: React.FC = () => {
             </button>
             <div className="MP-profile-info">
               <img
-                // src="https://via.placeholder.com/80"
-                src="https://play-lh.googleusercontent.com/38AGKCqmbjZ9OuWx4YjssAz3Y0DTWbiM5HB0ove1pNBq_o9mtWfGszjZNxZdwt_vgHo=w240-h480-rw"
+                src="https://via.placeholder.com/80"
                 alt="Profile"
                 className="MP-profile-picture"
               />
